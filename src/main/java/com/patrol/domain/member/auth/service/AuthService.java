@@ -10,7 +10,7 @@ import com.patrol.domain.member.member.enums.MemberRole;
 import com.patrol.domain.member.member.enums.MemberStatus;
 import com.patrol.domain.member.member.enums.ProviderType;
 import com.patrol.domain.member.member.repository.MemberRepository;
-import com.patrol.global.exceptions.ErrorCode;
+import com.patrol.global.exceptions.ErrorCodes;
 import com.patrol.global.exceptions.ServiceException;
 import com.patrol.standard.util.Ut;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +43,7 @@ public class AuthService {
 
         Optional<Member> existingMember = memberRepository.findByEmail(email);
         if (existingMember.isPresent()) {
-            throw new ServiceException(ErrorCode.DUPLICATE_EMAIL);
+            throw new ServiceException(ErrorCodes.DUPLICATE_EMAIL);
         }
 
         Member member = Member.builder()
@@ -101,7 +101,7 @@ public class AuthService {
     public FindEmailsResponse findEmailsByPhoneNumber(String phoneNumber) {
         List<Member> members = memberRepository.findAllByPhoneNumber(phoneNumber);
         if (members.isEmpty()) {
-            throw new ServiceException(ErrorCode.INVALID_PHONE_NUMBER);
+            throw new ServiceException(ErrorCodes.INVALID_PHONE_NUMBER);
         }
 
         List<EmailResponse> emailResponses = members.stream()
@@ -143,7 +143,7 @@ public class AuthService {
     ) {
         Member connectedMember = oAuthService.findByProviderId(loginType, providerId);
         if (connectedMember != null) {
-            throw new ServiceException(ErrorCode.SOCIAL_ACCOUNT_ALREADY_IN_USE);
+            throw new ServiceException(ErrorCodes.SOCIAL_ACCOUNT_ALREADY_IN_USE);
         }
         oAuthService.connectProvider(loginUser, loginType, providerId, providerEmail);
     }
@@ -151,11 +151,11 @@ public class AuthService {
 
     private void _validateEmailAndPassword(String email, String password, ProviderType loginType) {
         if (email == null || email.trim().isEmpty()) {
-            throw new ServiceException(ErrorCode.EMAIL_REQUIRED);
+            throw new ServiceException(ErrorCodes.EMAIL_REQUIRED);
         }
 
         if (ProviderType.SELF.equals(loginType) && (password == null || password.trim().isEmpty())) {
-            throw new ServiceException(ErrorCode.PASSWORD_REQUIRED);
+            throw new ServiceException(ErrorCodes.PASSWORD_REQUIRED);
         }
     }
 

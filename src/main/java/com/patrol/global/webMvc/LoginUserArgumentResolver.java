@@ -4,7 +4,7 @@ package com.patrol.global.webMvc;
 
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.service.MemberService;
-import com.patrol.global.exceptions.ErrorCode;
+import com.patrol.global.exceptions.ErrorCodes;
 import com.patrol.global.exceptions.ServiceException;
 import com.patrol.global.security.SecurityUser;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +37,7 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
 
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (authentication == null || !authentication.isAuthenticated()) {
-      throw new ServiceException(ErrorCode.UNAUTHORIZED);
+      throw new ServiceException(ErrorCodes.UNAUTHORIZED);
     }
 
     SecurityUser securityUser = (SecurityUser) authentication.getPrincipal();

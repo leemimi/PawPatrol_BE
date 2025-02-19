@@ -9,14 +9,14 @@ import lombok.Getter;
 @Getter
 public class ServiceException extends RuntimeException {
 
-  private final ErrorCode errorCode;
+  private final ErrorCodes errorCodes;
 
-  public ServiceException(ErrorCode errorCode) {
-    super(errorCode.getCode() + " : " + errorCode.getMessage());
-    this.errorCode = errorCode;
+  public ServiceException(ErrorCodes errorCodes) {
+    super(errorCodes.getCode() + " : " + errorCodes.getMessage());
+    this.errorCodes = errorCodes;
   }
 
   public RsData<Empty> getRsData() {
-    return new RsData<>(errorCode.getCode(), errorCode.getMessage());
+    return new RsData<>(errorCodes.getCode(), errorCodes.getMessage());
   }
 }

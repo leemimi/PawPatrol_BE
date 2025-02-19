@@ -12,7 +12,7 @@ import com.patrol.domain.member.auth.service.EmailService;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.enums.ProviderType;
 import com.patrol.domain.member.member.service.PasswordService;
-import com.patrol.global.exceptions.ErrorCode;
+import com.patrol.global.exceptions.ErrorCodes;
 import com.patrol.global.exceptions.ServiceException;
 import com.patrol.global.rq.Rq;
 import com.patrol.global.rsData.RsData;
@@ -63,14 +63,14 @@ public class ApiV1AuthController {
     public RsData<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         Member member = authService
             .findByEmail(request.email)
-            .orElseThrow(() -> new ServiceException(ErrorCode.INVALID_EMAIL));
+            .orElseThrow(() -> new ServiceException(ErrorCodes.INVALID_EMAIL));
 
         if (!member.hasPassword()) {
-            throw new ServiceException(ErrorCode.SOCIAL_ONLY_ACCOUNT);
+            throw new ServiceException(ErrorCodes.SOCIAL_ONLY_ACCOUNT);
         }
 
         if (!passwordEncoder.matches(request.password, member.getPassword())) {
-            throw new ServiceException(ErrorCode.INVALID_PASSWORD);
+            throw new ServiceException(ErrorCodes.INVALID_PASSWORD);
         }
 
         String accessToken = rq.makeAuthCookies(member);
@@ -92,7 +92,7 @@ public class ApiV1AuthController {
     public RsData<LoginUserDto> me(@LoginUser Member loginUser) {
         Member member = authService
             .findByEmail(loginUser.getEmail())
-            .orElseThrow(() -> new ServiceException(ErrorCode.INVALID_EMAIL));
+            .orElseThrow(() -> new ServiceException(ErrorCodes.INVALID_EMAIL));
 
         return new RsData("200", "회원정보 조회 성공", LoginUserDto.of(member));
     }
@@ -116,7 +116,7 @@ public class ApiV1AuthController {
     public RsData<SignupResponse> signup(@Valid @RequestBody SignupRequest request) {
         String verified = redisTemplate.opsForValue().get("email:verify:" + request.email());
         if (verified == null) {
-            throw new ServiceException(ErrorCode.EMAIL_NOT_VERIFIED);
+            throw new ServiceException(ErrorCodes.EMAIL_NOT_VERIFIED);
         }
 
         Member member = authService.signup(
@@ -145,7 +145,7 @@ public class ApiV1AuthController {
     public RsData<Void> verifyEmail(@Valid @RequestBody EmailVerifyRequest request) {
         boolean isValid = emailService.verifyCode(request.email(), request.code());
         if (!isValid) {
-            throw new ServiceException(ErrorCode.EMAIL_VERIFICATION_NOT_MATCH);
+            throw new ServiceException(ErrorCodes.EMAIL_VERIFICATION_NOT_MATCH);
         }
 
         redisTemplate.opsForValue()
@@ -174,7 +174,7 @@ public class ApiV1AuthController {
     @PostMapping("/password/reset")
     public RsData<Void> requestPasswordReset(@Valid @RequestBody PasswordResetRequest request) {
         Member member = authService.findByEmail(request.email())
-            .orElseThrow(() -> new ServiceException(ErrorCode.INVALID_EMAIL));
+            .orElseThrow(() -> new ServiceException(ErrorCodes.INVALID_EMAIL));
 
         emailService.sendVerificationEmail(member.getEmail());
         return new RsData<>("200-1", "인증 코드가 이메일로 발송되었습니다.");
@@ -186,7 +186,7 @@ public class ApiV1AuthController {
     public RsData<Void> verifyResetCode(@Valid @RequestBody PasswordResetVerifyRequest request) {
         boolean isValid = emailService.verifyCode(request.email(), request.code());
         if (!isValid) {
-            throw new ServiceException(ErrorCode.EMAIL_VERIFICATION_NOT_MATCH);
+            throw new ServiceException(ErrorCodes.EMAIL_VERIFICATION_NOT_MATCH);
         }
 
         redisTemplate.opsForValue()
@@ -200,7 +200,7 @@ public class ApiV1AuthController {
     public RsData<Void> setNewPassword(@Valid @RequestBody SetNewPasswordRequest request) {
         String verified = redisTemplate.opsForValue().get("pwd:reset:" + request.email());
         if (verified == null) {
-            throw new ServiceException(ErrorCode.PASSWORD_RESET_NOT_VERIFIED);
+            throw new ServiceException(ErrorCodes.PASSWORD_RESET_NOT_VERIFIED);
         }
 
         passwordService.resetPassword(request.email(), request.newPassword());

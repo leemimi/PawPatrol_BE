@@ -3,7 +3,7 @@ package com.patrol.global.exceptions;
 import lombok.Getter;
 
 @Getter
-public enum ErrorCode {
+public enum ErrorCodes {
 
   // Auth 관련 에러 (400번대)
   INVALID_AUTH_TOKEN(401, "AUTH_001", "유효하지 않은 토큰입니다."),
@@ -60,8 +60,7 @@ public enum ErrorCode {
   private final String code;
   private final String message;
 
-
-  ErrorCode(int status, String code, String message) {
+  ErrorCodes (int status, String code, String message) {
     this.status = status;
     this.code = code;
     this.message = message;

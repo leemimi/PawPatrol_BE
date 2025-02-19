@@ -2,7 +2,7 @@ package com.patrol.domain.member.auth.service;
 
 
 
-import com.patrol.global.exceptions.ErrorCode;
+import com.patrol.global.exceptions.ErrorCodes;
 import com.patrol.global.exceptions.ServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,11 +57,11 @@ public class EmailService {
     log.debug("Verification attempt - Email: {}, Input Code: {}, Saved Code: {}", email, code, savedCode);
 
     if (savedCode == null) {
-      throw new ServiceException(ErrorCode.EMAIL_VERIFICATION_NOT_FOUND);
+      throw new ServiceException(ErrorCodes.EMAIL_VERIFICATION_NOT_FOUND);
     }
 
     if (!savedCode.equals(code)) {
-      throw new ServiceException(ErrorCode.EMAIL_VERIFICATION_NOT_MATCH);
+      throw new ServiceException(ErrorCodes.EMAIL_VERIFICATION_NOT_MATCH);
     }
 
     redisTemplate.delete(key);
@@ -75,7 +75,7 @@ public class EmailService {
       emailSender.send(emailForm);
 
     } catch (RuntimeException e) {
-      throw new ServiceException(ErrorCode.EMAIL_SEND_FAIL);
+      throw new ServiceException(ErrorCodes.EMAIL_SEND_FAIL);
     }
   }
 

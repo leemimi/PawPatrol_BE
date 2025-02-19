@@ -15,12 +15,12 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(ServiceException.class)
   public ResponseEntity<RsData<Empty>> handleServiceException(ServiceException e) {
 
-    ErrorCode errorCode = e.getErrorCode();
+    ErrorCodes errorCodes = e.getErrorCodes();
     RsData<Empty> rsData = e.getRsData();
 
     return new ResponseEntity<>(
         rsData,
-        HttpStatus.valueOf(errorCode.getStatus())
+        HttpStatus.valueOf(errorCodes.getStatus())
     );
   }
 }

@@ -7,7 +7,7 @@ import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.enums.ProviderType;
 import com.patrol.domain.member.member.service.MemberService;
 import com.patrol.domain.member.member.service.SocialConnectService;
-import com.patrol.global.exceptions.ErrorCode;
+import com.patrol.global.exceptions.ErrorCodes;
 import com.patrol.global.exceptions.ServiceException;
 import com.patrol.global.security.SecurityUser;
 import lombok.RequiredArgsConstructor;
@@ -90,7 +90,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         profileImageUrl = oAuth2User.getAttribute("avatar_url");
       }
 
-      default -> throw new ServiceException(ErrorCode.INVALID_LOGIN_TYPE);
+      default -> throw new ServiceException(ErrorCodes.INVALID_LOGIN_TYPE);
     }
 
     String providerId = loginType + "__" + oauthId;   // ex) KAKAO__1234567890
@@ -100,7 +100,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     if (isConnection) {
       Member loginUser = memberService.findById(originMemberId)
-          .orElseThrow(() -> new ServiceException(ErrorCode.MEMBER_NOT_FOUND));
+          .orElseThrow(() -> new ServiceException(ErrorCodes.MEMBER_NOT_FOUND));
 
       authService.connectOAuthProvider(loginUser, loginType, providerId, email);
       socialConnectService.removeOrigin();

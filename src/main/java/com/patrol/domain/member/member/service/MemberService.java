@@ -7,7 +7,7 @@ import com.patrol.api.member.member.dto.request.MemberUpdateRequest;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.enums.MemberStatus;
 import com.patrol.domain.member.member.repository.MemberRepository;
-import com.patrol.global.exceptions.ErrorCode;
+import com.patrol.global.exceptions.ErrorCodes;
 import com.patrol.global.exceptions.ServiceException;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
@@ -44,14 +44,14 @@ public class MemberService {
 
     public Member findByEmail(String email) {
         return memberRepository.findByEmail(email)
-            .orElseThrow(() -> new ServiceException(ErrorCode.MEMBER_NOT_FOUND));
+            .orElseThrow(() -> new ServiceException(ErrorCodes.MEMBER_NOT_FOUND));
     }
 
 
     @Transactional
     public Member updateInfo(Member member, MemberUpdateRequest memberUpdateRequest) {
         Member modifiedMember = memberRepository.findById(member.getId())
-            .orElseThrow(() -> new ServiceException(ErrorCode.MEMBER_NOT_FOUND));
+            .orElseThrow(() -> new ServiceException(ErrorCodes.MEMBER_NOT_FOUND));
 
         modifiedMember.updateInfo(memberUpdateRequest);
         return modifiedMember;
@@ -60,7 +60,7 @@ public class MemberService {
     @Transactional
     public void banMember(Long memberId) {
         Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new ServiceException(ErrorCode.MEMBER_NOT_FOUND));
+            .orElseThrow(() -> new ServiceException(ErrorCodes.MEMBER_NOT_FOUND));
 
         member.setStatus(MemberStatus.BANNED);
     }
@@ -69,7 +69,7 @@ public class MemberService {
     @Transactional
     public void deactivateMember(Long memberId) {
         memberRepository.findById(memberId)
-            .orElseThrow(() -> new ServiceException(ErrorCode.MEMBER_NOT_FOUND))
+            .orElseThrow(() -> new ServiceException(ErrorCodes.MEMBER_NOT_FOUND))
             .deactivate();
     }
 
@@ -77,14 +77,14 @@ public class MemberService {
     @Transactional
     public void restoreMember(Long memberId) {
         memberRepository.findById(memberId)
-            .orElseThrow(() -> new ServiceException(ErrorCode.MEMBER_NOT_FOUND))
+            .orElseThrow(() -> new ServiceException(ErrorCodes.MEMBER_NOT_FOUND))
             .restore();
     }
 
     @Transactional
     public void addPassword(Long memberId, @NotBlank String password) {
         memberRepository.findById(memberId)
-            .orElseThrow(() -> new ServiceException(ErrorCode.MEMBER_NOT_FOUND))
+            .orElseThrow(() -> new ServiceException(ErrorCodes.MEMBER_NOT_FOUND))
             .setPassword(passwordEncoder.encode(password));
     }
 }

@@ -2,7 +2,7 @@ package com.patrol.domain.member.auth.service;
 
 
 
-import com.patrol.global.exceptions.ErrorCode;
+import com.patrol.global.exceptions.ErrorCodes;
 import com.patrol.global.exceptions.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -35,7 +35,7 @@ public class PhoneVerificationService {
     if (lastSentTime != null) {
       long timeDiff = System.currentTimeMillis() - Long.parseLong(lastSentTime);
       if (timeDiff < RESEND_WAIT_TIME * 60 * 1000) {
-        throw new ServiceException(ErrorCode.SMS_RESEND_TOO_EARLY);
+        throw new ServiceException(ErrorCodes.SMS_RESEND_TOO_EARLY);
       }
     }
 
@@ -44,7 +44,7 @@ public class PhoneVerificationService {
     String countStr = redisTemplate.opsForValue().get(dailyCountKey);
     int count = countStr == null ? 0 : Integer.parseInt(countStr);
     if (count >= MAX_DAILY_SENDS) {
-      throw new ServiceException(ErrorCode.SMS_DAILY_LIMIT_EXCEEDED);
+      throw new ServiceException(ErrorCodes.SMS_DAILY_LIMIT_EXCEEDED);
     }
 
 
@@ -73,7 +73,7 @@ public class PhoneVerificationService {
   public boolean verifyCode(String phoneNumber, String code) {
     String storedCode = redisTemplate.opsForValue().get(VERIFICATION_PREFIX + phoneNumber);
     if (storedCode == null) {
-      throw new ServiceException(ErrorCode.SMS_CODE_EXPIRED);
+      throw new ServiceException(ErrorCodes.SMS_CODE_EXPIRED);
     }
 
     boolean isValid = storedCode.equals(code);

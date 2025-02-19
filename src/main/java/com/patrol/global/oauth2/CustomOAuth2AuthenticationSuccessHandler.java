@@ -5,7 +5,7 @@ package com.patrol.global.oauth2;
 
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.service.MemberService;
-import com.patrol.global.exceptions.ErrorCode;
+import com.patrol.global.exceptions.ErrorCodes;
 import com.patrol.global.exceptions.ServiceException;
 import com.patrol.global.rq.Rq;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,10 +35,9 @@ public class CustomOAuth2AuthenticationSuccessHandler extends SavedRequestAwareA
     if (redirectUrl != null && !redirectUrl.isEmpty()) {
       System.out.println("Redirecting to: " + redirectUrl);
     } else {
-      throw new ServiceException(ErrorCode.REDIRECT_URL_NOT_FOUND);
+      throw new ServiceException(ErrorCodes.REDIRECT_URL_NOT_FOUND);
     }
 
     response.sendRedirect(redirectUrl);
   }
 }
-

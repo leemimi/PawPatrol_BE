@@ -2,7 +2,7 @@ package com.patrol.domain.member.auth.service;
 
 
 
-import com.patrol.global.exceptions.ErrorCode;
+import com.patrol.global.exceptions.ErrorCodes;
 import com.patrol.global.exceptions.ServiceException;
 import lombok.RequiredArgsConstructor;
 import net.nurigo.sdk.message.model.Message;
@@ -27,7 +27,7 @@ public class SmsService {
 
     } catch (Exception e) {
       System.out.printf("발생 에러 : " + e);
-      throw new ServiceException(ErrorCode.SMS_SEND_FAILED);
+      throw new ServiceException(ErrorCodes.SMS_SEND_FAILED);
     }
   }
 }

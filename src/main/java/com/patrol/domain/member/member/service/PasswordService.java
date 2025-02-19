@@ -4,7 +4,7 @@ package com.patrol.domain.member.member.service;
 
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.repository.MemberRepository;
-import com.patrol.global.exceptions.ErrorCode;
+import com.patrol.global.exceptions.ErrorCodes;
 import com.patrol.global.exceptions.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,10 +22,10 @@ public class PasswordService {
   @Transactional
   public void changePassword(String email, String currentPassword, String newPassword) {
     Member member = memberRepository.findByEmail(email)
-        .orElseThrow(() -> new ServiceException(ErrorCode.INVALID_EMAIL));
+        .orElseThrow(() -> new ServiceException(ErrorCodes.INVALID_EMAIL));
 
     if (!passwordEncoder.matches(currentPassword, member.getPassword())) {
-      throw new ServiceException(ErrorCode.INVALID_PASSWORD);
+      throw new ServiceException(ErrorCodes.INVALID_PASSWORD);
     }
     member.setPassword(passwordEncoder.encode(newPassword));
   }
@@ -34,7 +34,7 @@ public class PasswordService {
   @Transactional
   public void resetPassword(String email, String newPassword) {
     Member member = memberRepository.findByEmail(email)
-        .orElseThrow(() -> new ServiceException(ErrorCode.INVALID_EMAIL));
+        .orElseThrow(() -> new ServiceException(ErrorCodes.INVALID_EMAIL));
 
     member.setPassword(passwordEncoder.encode(newPassword));
   }

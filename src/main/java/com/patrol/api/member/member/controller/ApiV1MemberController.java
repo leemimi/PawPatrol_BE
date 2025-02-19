@@ -16,7 +16,7 @@ import com.patrol.domain.member.member.enums.ProviderType;
 import com.patrol.domain.member.member.service.MemberService;
 import com.patrol.domain.member.member.service.PasswordService;
 import com.patrol.domain.member.member.service.SocialConnectService;
-import com.patrol.global.exceptions.ErrorCode;
+import com.patrol.global.exceptions.ErrorCodes;
 import com.patrol.global.exceptions.ServiceException;
 import com.patrol.global.rsData.RsData;
 import com.patrol.global.webMvc.LoginUser;
@@ -59,7 +59,7 @@ public class ApiV1MemberController {
         @LoginUser Member loginUser
     ) {
         if (!passwordEncoder.matches(request.password(), loginUser.getPassword())) {
-            throw new ServiceException(ErrorCode.INVALID_PASSWORD);
+            throw new ServiceException(ErrorCodes.INVALID_PASSWORD);
         }
 
         String token = UUID.randomUUID().toString();
@@ -83,7 +83,7 @@ public class ApiV1MemberController {
         String storedToken = redisTemplate.opsForValue() .get("password-verify:" + loginUser.getEmail());
 
         if (storedToken == null || !storedToken.equals(request.token())) {
-            throw new ServiceException(ErrorCode.PASSWORD_VERIFICATION_REQUIRED);
+            throw new ServiceException(ErrorCodes.PASSWORD_VERIFICATION_REQUIRED);
         }
 
         redisTemplate.expire("password-verify:" + loginUser.getEmail(), 30, TimeUnit.MINUTES);
@@ -120,7 +120,7 @@ public class ApiV1MemberController {
             String normalizedPhoneNumber = phoneNumber.replaceAll("-", "");
             String verified = redisTemplate.opsForValue().get(PHONE_VERIFICATION_STATUS_PREFIX + normalizedPhoneNumber);
             if (verified == null) {
-                throw new ServiceException(ErrorCode.PHONE_NUMBER_NOT_VERIFIED);
+                throw new ServiceException(ErrorCodes.PHONE_NUMBER_NOT_VERIFIED);
             }
         }
 
@@ -139,7 +139,7 @@ public class ApiV1MemberController {
         String verificationKey = PHONE_VERIFICATION_STATUS_PREFIX + request.phoneNumber();
         String verified = redisTemplate.opsForValue().get(verificationKey);
         if (verified != null) {
-            throw new ServiceException(ErrorCode.ALREADY_VERIFIED_PHONE_NUMBER);
+            throw new ServiceException(ErrorCodes.ALREADY_VERIFIED_PHONE_NUMBER);
         }
 
         phoneVerificationService.sendVerificationCode(request.phoneNumber());
@@ -150,7 +150,7 @@ public class ApiV1MemberController {
     @PostMapping("/me/phone/verify")
     public RsData<Void> verifyPhoneNumber(@Valid @RequestBody PhoneVerificationRequest request) {
         if (!phoneVerificationService.verifyCode(request.phoneNumber(), request.code())) {
-            throw new ServiceException(ErrorCode.INVALID_SNS_VERIFICATION_CODE);
+            throw new ServiceException(ErrorCodes.INVALID_SNS_VERIFICATION_CODE);
         }
 
         redisTemplate.opsForValue().set(
@@ -171,7 +171,7 @@ public class ApiV1MemberController {
         @LoginUser Member loginUser
     ) {
         if (loginUser.getPassword() != null) {
-            throw new ServiceException(ErrorCode.ALREADY_HAS_PASSWORD);
+            throw new ServiceException(ErrorCodes.ALREADY_HAS_PASSWORD);
         }
 
         memberService.addPassword(loginUser.getId(), request.password());
@@ -186,7 +186,7 @@ public class ApiV1MemberController {
     ) {
         ProviderType type = ProviderType.of(provider);
         if (loginUser.hasOAuthProvider(type)) {   // 이미 해당 소셜 계정으로 연동된 경우
-            throw new ServiceException(ErrorCode.ALREADY_CONNECTED_SOCIAL_ACCOUNT);
+            throw new ServiceException(ErrorCodes.ALREADY_CONNECTED_SOCIAL_ACCOUNT);
         }
 
         socialConnectService.storeOrigin(loginUser.getId());
@@ -201,11 +201,11 @@ public class ApiV1MemberController {
     ) {
         ProviderType type = ProviderType.of(provider);
         if (!loginUser.hasOAuthProvider(type)) {   // 연동되지 않은 소셜 계정인 경우
-            throw new ServiceException(ErrorCode.NOT_CONNECTED_SOCIAL_ACCOUNT);
+            throw new ServiceException(ErrorCodes.NOT_CONNECTED_SOCIAL_ACCOUNT);
         }
 
         if (loginUser.getPassword() == null && loginUser.getConnectedOAuthCount() == 1) {  // 마지막 로그인 수단인 경우
-            throw new ServiceException(ErrorCode.CANNOT_DISCONNECT_LAST_LOGIN_METHOD);
+            throw new ServiceException(ErrorCodes.CANNOT_DISCONNECT_LAST_LOGIN_METHOD);
         }
 
         oAuthService.disconnectProvider(loginUser, type);

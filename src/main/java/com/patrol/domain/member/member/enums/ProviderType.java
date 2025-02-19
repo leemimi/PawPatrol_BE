@@ -1,7 +1,7 @@
 package com.patrol.domain.member.member.enums;
 
 
-import com.patrol.global.exceptions.ErrorCode;
+import com.patrol.global.exceptions.ErrorCodes;
 import com.patrol.global.exceptions.ServiceException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ public enum ProviderType {
     try {
       return ProviderType.valueOf(type.toUpperCase());
     } catch (IllegalArgumentException e) {
-      throw new ServiceException(ErrorCode.TYPE_TRANSFER_FAILED);
+      throw new ServiceException(ErrorCodes.TYPE_TRANSFER_FAILED);
     }
   }
 }
