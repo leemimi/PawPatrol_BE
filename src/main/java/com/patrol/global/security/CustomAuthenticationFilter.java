@@ -28,6 +28,8 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
   private AuthTokens _getAuthTokensFromRequest() {
     String authorization = rq.getHeader("Authorization");
+
+    // 헤더로 토큰 정보 받았을 경우
     if (authorization != null && authorization.startsWith("Bearer ")) {
       String token = authorization.substring("Bearer ".length());
       String[] tokenBits = token.split(" ", 2);
@@ -36,6 +38,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
       }
     }
 
+    // 쿠키로 토큰 정보 받았을 경우
     String apiKey = rq.getCookieValue("apiKey");
     String accessToken = rq.getCookieValue("accessToken");
     if (apiKey != null && accessToken != null) {
@@ -45,9 +48,11 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
   }
 
 
+  // 쿠키 시간 만료 되었을 때 재발급
   private void _refreshAccessToken(Member member) {
     String newAccessToken = authService.genAccessToken(member);
-    rq.setHeader("Authorization", "Bearer " + member.getApiKey() + " " + newAccessToken);
+    // 클라이언트에서 Header에 담에 서버로 보냄, 서버에서는 getHeader만 필요 setHeaderX
+//    rq.setHeader("Authorization", "Bearer " + member.getApiKey() + " " + newAccessToken);
     rq.setCookie("accessToken", newAccessToken);
   }
 
@@ -96,9 +101,9 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
     String accessToken = authTokens.accessToken;
 
     Member member = authService.getMemberFromAccessToken(accessToken);
-    if (member == null)
+    if (member == null) // 토큰이 만료되었을 때, 당연히 멤버 정보 못가져옴
       member = _refreshAccessTokenByApiKey(apiKey);
-    if (member != null)
+    if (member != null) // 토큰이 만료되지 않았을 때
       rq.setLogin(member);
     filterChain.doFilter(request, response);
   }

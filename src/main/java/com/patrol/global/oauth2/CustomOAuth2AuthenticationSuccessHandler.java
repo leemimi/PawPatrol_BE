@@ -26,10 +26,12 @@ public class CustomOAuth2AuthenticationSuccessHandler extends SavedRequestAwareA
 
   @SneakyThrows
   @Override
-  public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+  public void onAuthenticationSuccess(HttpServletRequest request,
+                                      HttpServletResponse response,
+                                      Authentication authentication) {
     Member actor = memberService.findById(rq.getActor().getId()).get();
 
-    rq.makeAuthCookies(actor);
+    rq.makeAuthCookies(actor);  // 사용자 정보를 쿠키에 담는다, 권한 정보 또한 포함되어 있음
 
     String redirectUrl = request.getParameter("state");
     if (redirectUrl != null && !redirectUrl.isEmpty()) {
