@@ -1,6 +1,7 @@
 package com.patrol.domain.protection.facility.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.patrol.api.protection.facility.dto.FacilitiesResponse;
 import com.patrol.api.protection.facility.dto.ShelterApiResponse;
 import com.patrol.domain.protection.facility.entity.OperatingHours;
 import com.patrol.domain.protection.facility.entity.Shelter;
@@ -17,7 +18,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class ShelterService {
+public class ShelterService implements FacilityService  {
 
   private final ShelterRepository shelterRepository;
   private final ObjectMapper objectMapper;
@@ -47,6 +48,12 @@ public class ShelterService {
     }
   }
 
+
+  public List<FacilitiesResponse> findAll() {
+    return shelterRepository.findAll().stream()
+        .map(FacilitiesResponse::of)
+        .collect(Collectors.toList());
+  }
 
 
   private Shelter _convertToEntity(ShelterApiResponse.Item item) {
