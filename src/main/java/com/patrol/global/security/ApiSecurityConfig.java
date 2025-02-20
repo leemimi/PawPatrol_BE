@@ -70,6 +70,8 @@ public class ApiSecurityConfig {
                 .requestMatchers("/oauth2/**").permitAll()
                 .requestMatchers("/login/oauth2/**").permitAll()
                 .requestMatchers("/login/**").permitAll()
+                    // v2 회원가입
+                .requestMatchers(HttpMethod.POST, "/api/*/auth/sign-up").permitAll()
                 .anyRequest().authenticated()
         )
         .headers(headers ->
