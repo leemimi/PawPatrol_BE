@@ -17,7 +17,7 @@ public class SecurityConfig {
     http
         .csrf(AbstractHttpConfigurer::disable) // CSRF 비활성화
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/h2-console/**").permitAll()
+            .requestMatchers("/h2-console/**" ,"/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
             .anyRequest().permitAll() // 모든 요청 허용
         );
     return http.build();
