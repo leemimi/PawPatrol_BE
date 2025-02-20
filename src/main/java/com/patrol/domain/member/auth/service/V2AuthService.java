@@ -3,14 +3,15 @@ package com.patrol.domain.member.auth.service;
 import com.patrol.api.member.auth.dto.request.SignupRequest;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.repository.V2MemberRepository;
-import com.patrol.global.exceptions.ErrorCodes;
-import com.patrol.global.exceptions.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * packageName    : com.patrol.domain.member.auth.service
@@ -30,7 +31,7 @@ public class V2AuthService {
     private final Logger logger = LoggerFactory.getLogger(V2AuthService.class.getName());
     private final V2MemberRepository v2MemberRepository;
     private final PasswordEncoder passwordEncoder;
-    
+
     // 회원가입
     public Member signUp(SignupRequest request) {
         logger.info("회원가입");
@@ -39,12 +40,12 @@ public class V2AuthService {
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
                 .nickname(request.nickname())
+                .apiKey(UUID.randomUUID().toString())
+                .createdAt(LocalDateTime.now())
                 .build();
 
         v2MemberRepository.save(member);
 
         return member;
     }
-
-    // 로그인
 }
