@@ -27,8 +27,6 @@ public class QOAuthProvider extends EntityPathBase<OAuthProvider> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
-    public final QGithubProvider github;
-
     public final QGoogleProvider google;
 
     //inherited
@@ -61,7 +59,6 @@ public class QOAuthProvider extends EntityPathBase<OAuthProvider> {
 
     public QOAuthProvider(Class<? extends OAuthProvider> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.github = inits.isInitialized("github") ? new QGithubProvider(forProperty("github")) : null;
         this.google = inits.isInitialized("google") ? new QGoogleProvider(forProperty("google")) : null;
         this.kakao = inits.isInitialized("kakao") ? new QKakaoProvider(forProperty("kakao")) : null;
         this.member = inits.isInitialized("member") ? new com.patrol.domain.member.member.entity.QMember(forProperty("member"), inits.get("member")) : null;
