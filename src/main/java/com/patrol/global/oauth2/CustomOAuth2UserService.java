@@ -78,19 +78,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         oauthId = (String) response.get("id");
       }
 
-      case GITHUB -> {
-        email = oAuth2User.getAttribute("email");
-        if (email == null || email.isEmpty()) {
-          email = _getGithubPrivateEmail(userRequest.getAccessToken());
-          if (email == null) {
-            email = oAuth2User.getAttribute("login") + "@github.com";
-          }
-        }
-
-        nickname = oAuth2User.getAttribute("login");
-        profileImageUrl = oAuth2User.getAttribute("avatar_url");
-      }
-
       default -> throw new ServiceException(ErrorCodes.INVALID_LOGIN_TYPE);
     }
 
@@ -136,28 +123,28 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
   }
 
 
-  private String _getGithubPrivateEmail(OAuth2AccessToken accessToken) {
-    try {
-      RestTemplate restTemplate = new RestTemplate();
-      HttpHeaders headers = new HttpHeaders();
-      headers.setBearerAuth(accessToken.getTokenValue());
-
-      HttpEntity<?> entity = new HttpEntity<>(headers);
-      ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
-          "https://api.github.com/user/emails",
-          HttpMethod.GET,
-          entity,
-          new ParameterizedTypeReference<List<Map<String, Object>>>() {}
-      );
-
-      return response.getBody().stream()
-          .filter(emailObj -> (Boolean) emailObj.get("primary") && (Boolean) emailObj.get("verified"))
-          .map(emailObj -> (String) emailObj.get("email"))
-          .findFirst()
-          .orElse(null);
-
-    } catch (Exception e) {
-      return null;
-    }
-  }
+//  private String _getGithubPrivateEmail(OAuth2AccessToken accessToken) {
+//    try {
+//      RestTemplate restTemplate = new RestTemplate();
+//      HttpHeaders headers = new HttpHeaders();
+//      headers.setBearerAuth(accessToken.getTokenValue());
+//
+//      HttpEntity<?> entity = new HttpEntity<>(headers);
+//      ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
+//          "https://api.github.com/user/emails",
+//          HttpMethod.GET,
+//          entity,
+//          new ParameterizedTypeReference<List<Map<String, Object>>>() {}
+//      );
+//
+//      return response.getBody().stream()
+//          .filter(emailObj -> (Boolean) emailObj.get("primary") && (Boolean) emailObj.get("verified"))
+//          .map(emailObj -> (String) emailObj.get("email"))
+//          .findFirst()
+//          .orElse(null);
+//
+//    } catch (Exception e) {
+//      return null;
+//    }
+//  }
 }

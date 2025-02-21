@@ -125,7 +125,6 @@ public class Member extends BaseEntity {
         if (oAuthProvider.isConnected(ProviderType.KAKAO)) count++;
         if (oAuthProvider.isConnected(ProviderType.GOOGLE)) count++;
         if (oAuthProvider.isConnected(ProviderType.NAVER)) count++;
-        if (oAuthProvider.isConnected(ProviderType.GITHUB)) count++;
         return count;
     }
 

@@ -73,7 +73,8 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
       HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
 
-    if (!request.getRequestURI().startsWith("/api/")) {
+    if (!request.getRequestURI().startsWith("/api/") ||
+            request.getRequestURI().startsWith("/api/placeholder/")) {  // 소셜 로그인 플레이스홀더 이미지 경로 추가
       filterChain.doFilter(request, response);
       return;
     }
@@ -84,7 +85,9 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
         "/api/v1/auth/email/verification-code", "/api/v1/auth/email/verify",
         "/api/v1/auth/find-account",
         "/api/v1/auth/password/reset", "/api/v1/auth/password/reset/verify",
-        "/api/v1/auth/password/reset/new"
+        "/api/v1/auth/password/reset/new",
+            "/api/v2/auth/login", "/api/v2/auth/logout",
+            "/api/v2/auth/signup"
         ).contains(request.getRequestURI())
     ) {
       filterChain.doFilter(request, response);

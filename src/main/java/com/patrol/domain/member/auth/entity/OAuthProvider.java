@@ -23,7 +23,6 @@ import java.util.Map;
     @UniqueConstraint(columnNames = "kakao_provider_id"),
     @UniqueConstraint(columnNames = "google_provider_id"),
     @UniqueConstraint(columnNames = "naver_provider_id"),
-    @UniqueConstraint(columnNames = "github_provider_id")
 })
 public class OAuthProvider extends BaseEntity {
 
@@ -94,28 +93,6 @@ public class OAuthProvider extends BaseEntity {
     }
   }
 
-
-  @Embedded
-  private GithubProvider github;
-
-  public void addGithubProvider(String providerId, String email) {
-    GithubProvider githubProvider = GithubProvider.builder()
-        .providerId(providerId)
-        .email(email)
-        .build();
-    githubProvider.connect();
-    github = githubProvider;
-  }
-
-  public void removeGithubProvider() {
-    if (github != null) {
-      github.disconnect();
-      github = null;
-    }
-  }
-
-
-
   @Builder
   private OAuthProvider(Member member) {
     this.member = member;
@@ -126,7 +103,6 @@ public class OAuthProvider extends BaseEntity {
       case KAKAO -> kakao != null && kakao.isConnected();
       case GOOGLE -> google != null && google.isConnected();
       case NAVER -> naver != null && naver.isConnected();
-      case GITHUB -> github != null && github.isConnected();
       case SELF -> false;
     };
   }
@@ -146,13 +122,6 @@ public class OAuthProvider extends BaseEntity {
         .createDate(google != null ? google.getConnectedAt() : null)
         .email(google != null ? google.getEmail() : null)
         .active(google != null && google.isConnected())
-        .build());
-
-    // github 정보 추가
-    statuses.put(ProviderType.GITHUB, OAuthProviderStatus.builder()
-        .createDate(github != null ? github.getConnectedAt() : null)
-        .email(github != null ? github.getEmail() : null)
-        .active(github != null && github.isConnected())
         .build());
 
     // naver 정보 추가

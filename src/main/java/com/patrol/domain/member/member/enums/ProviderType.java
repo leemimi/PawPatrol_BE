@@ -13,8 +13,7 @@ public enum ProviderType {
   SELF("일반"),
   KAKAO("카카오"),
   GOOGLE("구글"),
-  NAVER("네이버"),
-  GITHUB("깃허브");
+  NAVER("네이버");
 
   private final String displayName;
 

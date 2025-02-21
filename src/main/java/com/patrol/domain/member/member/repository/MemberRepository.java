@@ -23,9 +23,6 @@ public interface MemberRepository extends JpaRepository<Member, Long>  {
     @Query("SELECT m FROM Member m JOIN m.oAuthProvider o WHERE o.google.providerId = :providerId")
     Optional<Member> findByGoogleProviderId(@Param("providerId") String providerId);
 
-    @Query("SELECT m FROM Member m JOIN m.oAuthProvider o WHERE o.github.providerId = :providerId")
-    Optional<Member> findByGithubProviderId(@Param("providerId") String providerId);
-
     @Query("SELECT m FROM Member m JOIN m.oAuthProvider o WHERE o.naver.providerId = :providerId")
     Optional<Member> findByNaverProviderId(@Param("providerId") String providerId);
 }
