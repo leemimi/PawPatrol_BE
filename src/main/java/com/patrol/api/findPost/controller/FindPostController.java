@@ -1,10 +1,17 @@
-package com.patrol.api.LostFound.controller;
+package com.patrol.api.findPost.controller;
 
-import com.patrol.api.LostFound.dto.FindPostRequestDto;
-import com.patrol.api.LostFound.dto.FindPostResponseDto;
-import com.patrol.domain.LostFound.service.FindPostService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.patrol.api.findPost.dto.FindPostRequestDto;
+import com.patrol.api.findPost.dto.FindPostResponseDto;
+import com.patrol.domain.findPost.service.FindPostService;
+import com.patrol.domain.member.member.entity.Member;
 import com.patrol.global.rsData.RsData;
+import com.patrol.global.webMvc.LoginUser;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,23 +20,37 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/lost-found")
 @RequiredArgsConstructor
-public class LostFoundController {
+@Tag(name = "제보 게시글 API", description = "제보글")
+public class FindPostController {
 
     private final FindPostService findPostService;
+    private final ObjectMapper objectMapper;
 
     // 제보 게시글 등록
     @PostMapping
     @Operation(summary = "제보 게시글 등록")
     public RsData<FindPostResponseDto> createFindPost(
-            @RequestBody FindPostRequestDto requestDto,
-            @RequestParam(value = "lostPostId") Long lostPostId,  // 실종 게시글의 postId를 받음
-            @RequestParam(value = "image", required = false) MultipartFile image) {
+            @RequestParam("metadata") String metadataJson,
+            @RequestParam(value = "lostPostId", required = false) Long lostPostId,
+            @RequestParam(value = "images", required = false) List<MultipartFile> images,
+            @LoginUser Member loginUser) {
 
-        FindPostResponseDto responseDto = findPostService.createFindPost(requestDto, lostPostId, image);
-        return new RsData<>("200", "제보 게시글을 성공적으로 등록했습니다.", responseDto);
+        ObjectMapper objectMapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .registerModule(new JavaTimeModule());
+
+        try {
+            FindPostRequestDto requestDto = objectMapper.readValue(metadataJson, FindPostRequestDto.class);
+            FindPostResponseDto responseDto = findPostService.createFindPost(requestDto, lostPostId,loginUser.getId(), images);
+            return new RsData<>("200", "제보 게시글을 성공적으로 등록했습니다.", responseDto);
+        } catch (JsonProcessingException e) {
+            return new RsData<>("400", "잘못된 JSON 형식입니다.", null);
+        }
     }
 
     // 신고글 연계 제보 게시글 수정
@@ -37,11 +58,17 @@ public class LostFoundController {
     @Operation(summary = "신고글 연계 제보 게시글 수정")
     public RsData<FindPostResponseDto> updateFindPost(
             @PathVariable(name = "postId") Long postId,
-            @RequestParam(value = "lostPostId") Long lostPostId, // 실종 게시글의 postId를 받음
-            @RequestBody FindPostRequestDto requestDto) {
-
-        FindPostResponseDto responseDto = findPostService.updateFindPost(postId, lostPostId, requestDto);
-        return new RsData<>("200", "제보 게시글을 성공적으로 수정했습니다.", responseDto);
+            @RequestParam("metadata") String metadataJson,
+            @RequestParam(value = "lostPostId", required = false) Long lostPostId,
+            @RequestParam(value = "images", required = false) List<MultipartFile> images,
+            @LoginUser Member loginUser) {
+        try {
+            FindPostRequestDto requestDto = objectMapper.readValue(metadataJson, FindPostRequestDto.class);
+            FindPostResponseDto responseDto = findPostService.updateFindPost(postId, lostPostId, requestDto, images);
+            return new RsData<>("200", "제보 게시글을 성공적으로 수정했습니다.", responseDto);
+        } catch (JsonProcessingException e) {
+            return new RsData<>("400", "잘못된 JSON 형식입니다.", null);
+        }
     }
 
     // 신고글 연계 제보 게시글 삭제
@@ -67,10 +94,16 @@ public class LostFoundController {
     @PostMapping("/find-standalone")
     @Operation(summary = "독립적인 제보 게시글 등록")
     public RsData<FindPostResponseDto> createStandaloneFindPost(
-            @RequestBody FindPostRequestDto requestDto,
-            @RequestPart(value = "image", required = false) MultipartFile image) {
-        FindPostResponseDto responseDto = findPostService.createStandaloneFindPost(requestDto, image);
-        return new RsData<>("200", "독립적인 제보 게시글을 성공적으로 등록했습니다.", responseDto);
+            @RequestParam("metadata") String metadataJson,
+            @RequestParam(value = "images", required = false) List<MultipartFile> images,
+            @LoginUser Member loginUser) {
+        try {
+            FindPostRequestDto requestDto = objectMapper.readValue(metadataJson, FindPostRequestDto.class);
+            FindPostResponseDto responseDto = findPostService.createStandaloneFindPost(requestDto, images, loginUser.getId());
+            return new RsData<>("200", "독립적인 제보 게시글을 성공적으로 등록했습니다.", responseDto);
+        } catch (JsonProcessingException e) {
+            return new RsData<>("400", "잘못된 JSON 형식입니다.", null);
+        }
     }
 
     // 독립적인 제보 게시글 수정
@@ -78,10 +111,18 @@ public class LostFoundController {
     @Operation(summary = "독립적인 제보 게시글 수정")
     public RsData<FindPostResponseDto> updateStandaloneFindPost(
             @PathVariable(name = "postId") Long postId,
-            @RequestBody FindPostRequestDto requestDto) {
-        FindPostResponseDto responseDto = findPostService.updateStandaloneFindPost(postId, requestDto);
-        return new RsData<>("200", "독립적인 제보 게시글을 성공적으로 수정했습니다.", responseDto);
+            @RequestParam("metadata") String metadataJson,
+            @RequestParam(value = "images", required = false) List<MultipartFile> images,
+            @LoginUser Member loginUser) {
+        try {
+            FindPostRequestDto requestDto = objectMapper.readValue(metadataJson, FindPostRequestDto.class);
+            FindPostResponseDto responseDto = findPostService.updateStandaloneFindPost(postId, requestDto, images);
+            return new RsData<>("200", "독립적인 제보 게시글을 성공적으로 수정했습니다.", responseDto);
+        } catch (JsonProcessingException e) {
+            return new RsData<>("400", "잘못된 JSON 형식입니다.", null);
+        }
     }
+
 
     // 독립적인 제보 게시글 삭제
     @DeleteMapping("/find-standalone/{postId}")

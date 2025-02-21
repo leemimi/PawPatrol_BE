@@ -1,10 +1,10 @@
 package com.patrol.domain.LostPost.service;
 
-import com.patrol.api.LostFound.dto.FindPostResponseDto;
+import com.patrol.api.findPost.dto.FindPostResponseDto;
 import com.patrol.api.LostPost.dto.LostPostRequestDto;
 import com.patrol.api.LostPost.dto.LostPostResponseDto;
-import com.patrol.domain.LostFound.entity.FindPost;
-import com.patrol.domain.LostFound.repository.FindPostRepository;
+import com.patrol.domain.findPost.entity.FindPost;
+import com.patrol.domain.findPost.repository.FindPostRepository;
 import com.patrol.domain.LostPost.entity.LostPost;
 import com.patrol.domain.LostPost.repository.LostPostRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,10 +13,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -60,23 +56,6 @@ public class LostPostService {
     @Transactional(readOnly = true)
     public Page<FindPostResponseDto> getFindPostsByLostId(Long lostId, Pageable pageable) {
         Page<FindPost> findPosts = findPostRepository.findByLostPost_LostId(lostId, pageable);
-        return findPosts.map(post -> new FindPostResponseDto(
-                post.getFoundId(),
-                post.getMemberId(),
-                post.getTitle(),
-                post.getContent(),
-                post.getLatitude(),
-                post.getLongitude(),
-                post.getFindTime(),
-                post.getTags(),
-                post.getCreatedAt(),
-                post.getModifiedAt(),
-                post.getBirthDate(),
-                post.getBreed(),
-                post.getName(),
-                post.getCharacteristics(),
-                post.getSize(),
-                post.getGender()
-        ));
+        return findPosts.map(post -> new FindPostResponseDto(post));
     }
 }

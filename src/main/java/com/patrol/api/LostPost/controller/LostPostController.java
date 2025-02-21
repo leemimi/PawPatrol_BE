@@ -1,6 +1,6 @@
 package com.patrol.api.LostPost.controller;
 
-import com.patrol.api.LostFound.dto.FindPostResponseDto;
+import com.patrol.api.findPost.dto.FindPostResponseDto;
 import com.patrol.api.LostPost.dto.LostPostRequestDto;
 import com.patrol.api.LostPost.dto.LostPostResponseDto;
 import com.patrol.domain.LostPost.service.LostPostService;
@@ -11,11 +11,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 @RestController
 @RequestMapping("/api/lost-found/lost")
 @RequiredArgsConstructor
