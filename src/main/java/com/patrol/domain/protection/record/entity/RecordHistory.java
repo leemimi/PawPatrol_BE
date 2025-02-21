@@ -1,5 +1,6 @@
-package com.patrol.domain.protection.facility.entity;
+package com.patrol.domain.protection.record.entity;
 
+import com.patrol.global.jpa.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -12,9 +13,6 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@Table(name = "shelters")
-public class Shelter extends Facility {
-
-  private Integer vetPersonCount;  // 수의사 수
-  private String saveTargetAnimal; // 구조대상동물
+@Table(name = "record_histories")
+public class RecordHistory extends BaseEntity {
 }

@@ -56,6 +56,19 @@ public class ApiSecurityConfig {
         .securityMatcher("/api/**", "/oauth2/**", "/login/oauth2/**", "/login/**")
         .authorizeHttpRequests(
             authorizeRequests -> authorizeRequests
+                    .requestMatchers(HttpMethod.POST, "/api/lost-found/lost").permitAll()  // 실종 신고 게시글 등록
+                    .requestMatchers(HttpMethod.PUT, "/api/lost-found/lost/{postId}").permitAll()  // 실종 신고 게시글 수정
+                    .requestMatchers(HttpMethod.DELETE, "/api/lost-found/lost/{postId}").permitAll()  // 실종 신고 게시글 삭제
+                    .requestMatchers(HttpMethod.GET, "/api/lost-found/lost").permitAll()  // 모든 실종 신고 게시글 조회
+                    .requestMatchers(HttpMethod.GET, "/api/lost-found/lost/{postId}").permitAll()  // 실종 신고 게시글 상세 조회
+                    .requestMatchers(HttpMethod.POST, "/api/lost-found").permitAll()  // 제보 게시글 등록
+                    .requestMatchers(HttpMethod.PUT, "/api/lost-found/{postId}").permitAll()  // 신고글 연계 제보 게시글 수정
+                    .requestMatchers(HttpMethod.DELETE, "/api/lost-found/{postId}").permitAll()  // 신고글 연계 제보 게시글 삭제
+                    .requestMatchers(HttpMethod.GET, "/api/lost-found/find").permitAll()  // 모든 신고글 연계 제보 게시글 조회
+                    .requestMatchers(HttpMethod.GET, "/api/lost-found/find-standalone").permitAll()  // 모든 독립적인 제보 게시글 목록 조회
+                    .requestMatchers(HttpMethod.GET, "/api/lost-found/find-standalone/{postId}").permitAll()  // 독립적인 제보 게시글 상세 조회
+                    .requestMatchers(HttpMethod.POST, "/api/lost-found/find-standalone").permitAll()  // 독립적인 제보 게시글 등록
+                    .requestMatchers(HttpMethod.PUT, "/api/lost-found/find-standalone/{postId}").permitAll()  // 독립적인 제보 게시글 수정.requestMatchers(HttpMethod.DELETE, "/api/lost-found/find-standalone/{postId}").permitAll()  // 독립적인 제보 게시글 삭제
                 .requestMatchers(HttpMethod.POST, "/api/*/auth/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/*/auth/logout").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/*/auth/signup").permitAll()
