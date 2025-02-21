@@ -21,13 +21,14 @@ public class NotProd {
       @Override
       public void run(ApplicationArguments args) throws Exception {
         // Member1,2,3 생성
+        /*
         Member member1 =
             authService.signup("test1@test.com", "1234", "강남", ProviderType.SELF, null, null, null);
         Member member2 =
             authService.signup("test2@test.com", "1234", "홍길동", ProviderType.SELF, null, null, null);
         Member member3 =
             authService.signup("test3@test.com", "1234", "제펫토", ProviderType.SELF, null, null, null);
-
+        */
       }
     };
   }

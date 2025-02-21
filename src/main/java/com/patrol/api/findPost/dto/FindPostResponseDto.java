@@ -1,6 +1,8 @@
 package com.patrol.api.findPost.dto;
 
 import com.patrol.domain.findPost.entity.FindPost;
+import com.patrol.domain.findPost.entity.Gender;
+import com.patrol.domain.findPost.entity.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +17,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class FindPostResponseDto {
     private Long foundId;
-    private Long memberId;
+    private String nickname;  // ✅ 추가된 필드
     //private Long lostId;  // lostPost가 없을 경우 null 가능
     //private Long petId;
     private String title;
@@ -32,13 +34,13 @@ public class FindPostResponseDto {
     private String breed;                // 품종
     private String name;                 // 이름
     private String characteristics;      // 특징
-    private FindPost.Size size;                   // 크기
-    private FindPost.Gender gender;               // 성별
+    private Size size;                   // 크기
+    private Gender gender;               // 성별
 
     // 엔티티에서 DTO 변환 생성자
     public FindPostResponseDto(FindPost findPost) {
         this.foundId = findPost.getId();
-        this.memberId = findPost.getMemberId();
+        this.nickname = findPost.getAuthor().getNickname();  // ✅ Member에서 nickname 가져오기
         //this.lostId = (findPost.getLostPost() != null) ? findPost.getLostPost().getLostId() : null; // 수정된 부분
         //this.lostId = findPost.getLostId();
         //this.petId = findPost.getPetId();
