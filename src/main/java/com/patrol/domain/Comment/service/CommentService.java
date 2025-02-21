@@ -1,5 +1,5 @@
 package com.patrol.domain.Comment.service;
-
+/*
 import com.patrol.api.Comment.dto.CommentRequestDto;
 import com.patrol.api.Comment.dto.CommentResponseDto;
 import com.patrol.domain.Comment.entity.Comment;
@@ -11,7 +11,7 @@ import com.patrol.domain.member.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-/*
+
 import java.util.List;
 import java.util.stream.Collectors;
 
