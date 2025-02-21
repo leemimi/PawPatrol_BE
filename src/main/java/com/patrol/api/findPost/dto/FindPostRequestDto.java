@@ -1,4 +1,4 @@
-package com.patrol.api.LostFound.dto;
+package com.patrol.api.findPost.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

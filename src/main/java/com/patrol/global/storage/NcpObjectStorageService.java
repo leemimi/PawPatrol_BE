@@ -55,7 +55,7 @@ public class NcpObjectStorageService implements StorageService {
 
 
     @Override
-    public void delete(String filePath) throws Exception {
+    public void delete(String filePath){
         try {
             boolean exists = s3.doesObjectExist(bucketName, filePath);
 

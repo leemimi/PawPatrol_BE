@@ -1,9 +1,9 @@
 package com.patrol.global.exception;
 
+import com.patrol.global.error.ErrorCode;
+import com.patrol.global.error.ErrorResponse;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
-import org.com.stocknote.global.error.ErrorCode;
-import org.com.stocknote.global.error.ErrorResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;

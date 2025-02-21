@@ -1,17 +1,16 @@
 package com.patrol.domain.Comment.service;
-
+/*
 import com.patrol.api.Comment.dto.CommentRequestDto;
 import com.patrol.api.Comment.dto.CommentResponseDto;
 import com.patrol.domain.Comment.entity.Comment;
 import com.patrol.domain.Comment.repository.CommentRepository;
-import com.patrol.domain.LostFound.entity.FindPost;
 import com.patrol.domain.LostPost.entity.LostPost;
+import com.patrol.domain.findPost.entity.FindPost;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-/*
+
 import java.util.List;
 import java.util.stream.Collectors;
 

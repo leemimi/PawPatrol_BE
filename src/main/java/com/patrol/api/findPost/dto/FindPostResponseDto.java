@@ -1,6 +1,6 @@
-package com.patrol.api.LostFound.dto;
+package com.patrol.api.findPost.dto;
 
-import com.patrol.domain.LostFound.entity.FindPost;
+import com.patrol.domain.findPost.entity.FindPost;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,7 +37,7 @@ public class FindPostResponseDto {
 
     // 엔티티에서 DTO 변환 생성자
     public FindPostResponseDto(FindPost findPost) {
-        this.foundId = findPost.getFoundId();
+        this.foundId = findPost.getId();
         this.memberId = findPost.getMemberId();
         //this.lostId = (findPost.getLostPost() != null) ? findPost.getLostPost().getLostId() : null; // 수정된 부분
         //this.lostId = findPost.getLostId();
@@ -58,6 +58,10 @@ public class FindPostResponseDto {
         this.characteristics = findPost.getCharacteristics();  // 특징
         this.size = findPost.getSize();                 // 크기
         this.gender = findPost.getGender();             // 성별
+    }
+
+    public static FindPostResponseDto from(FindPost findPost) {
+        return new FindPostResponseDto(findPost);
     }
 }
 

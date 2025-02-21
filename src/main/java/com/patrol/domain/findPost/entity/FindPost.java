@@ -1,30 +1,32 @@
-package com.patrol.domain.LostFound.entity;
+package com.patrol.domain.findPost.entity;
 
-import com.patrol.api.LostFound.dto.FindPostRequestDto;
+import com.patrol.api.findPost.dto.FindPostRequestDto;
 import com.patrol.domain.LostPost.entity.LostPost;
-import com.patrol.domain.member.member.enums.Gender;
+import com.patrol.domain.image.entity.Image;
+import com.patrol.global.jpa.BaseEntity;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name = "Lost_found")
-public class FindPost {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long foundId;
+public class FindPost extends BaseEntity {
+
     private Long memberId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lostId", nullable = true) // 연관된 실종 게시글 (null 허용)
     private LostPost lostPost; // FindPost와 LostPost 간의 관계 (Long에서 LostPost로 변경)
+
+    @OneToMany(mappedBy = "foundId", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Image> images = new ArrayList<>();
 
     private Long petId;
     private String title;
@@ -34,8 +36,6 @@ public class FindPost {
     private String location;
     private String findTime;
     private String tags;
-    private LocalDateTime createdAt = LocalDateTime.now();
-    private LocalDateTime modifiedAt;
 
     @Enumerated(EnumType.STRING)
     private Status status;
@@ -52,6 +52,12 @@ public class FindPost {
     private Size size;  // 크기 (소형, 중형, 대형)
     @Enumerated(EnumType.STRING)
     private Gender gender;  // 성별 (남자, 여자)
+
+    public FindPost(FindPostRequestDto requestDto, LostPost lostPost, Long memberId) {
+        this(requestDto);
+        this.lostPost = lostPost;
+        this.memberId = memberId;
+    }
 
     // Enum 정의
     public enum Status {
@@ -146,8 +152,10 @@ public class FindPost {
         this.lostPost = lostPost;  // 연계된 실종 게시글 객체를 추가 설정
     }
 
-    // ID만을 이용한 생성자 추가
-    public FindPost(Long foundId) {
-        this.foundId = foundId;
+    public void addImage(Image image) {
+        if (this.images == null) {
+            this.images = new ArrayList<>();
+        }
+        this.images.add(image);
     }
 }

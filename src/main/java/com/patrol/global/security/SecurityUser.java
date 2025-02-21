@@ -1,8 +1,10 @@
 package com.patrol.global.security;
 
+import com.patrol.domain.member.member.entity.Member;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.Collection;
@@ -41,3 +43,4 @@ public class SecurityUser extends User implements OAuth2User {
     return getUsername();
   }
 }
+
