@@ -6,10 +6,7 @@ import com.patrol.domain.protection.animalCase.enums.CaseStatus;
 import com.patrol.domain.protection.animalCase.enums.TargetType;
 import com.patrol.global.jpa.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
@@ -37,7 +34,8 @@ public class AnimalCase extends BaseEntity {
   private Long targetId;  // 대상의 ID : animalId or myPetId
 
   @JsonIgnore
-  @OneToMany(mappedBy = "animalCase")
+  @OneToMany(mappedBy = "animalCase", cascade = CascadeType.ALL, orphanRemoval = true)
+  @Builder.Default
   private List<CaseHistory> histories = new ArrayList<>();
 
 

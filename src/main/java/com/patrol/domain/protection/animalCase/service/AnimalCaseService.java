@@ -1,5 +1,7 @@
 package com.patrol.domain.protection.animalCase.service;
 
+import com.patrol.api.protection.animalCase.dto.AnimalCaseListResponse;
+import com.patrol.api.protection.animalCase.dto.AnimalCaseDetailResponse;
 import com.patrol.domain.findPost.entity.FindPost;
 import com.patrol.domain.findPost.repository.FindPostRepository;
 import com.patrol.domain.protection.animal.repository.AnimalRepository;
@@ -11,12 +13,14 @@ import com.patrol.domain.protection.animalCase.events.PostCreatedEvent;
 import com.patrol.domain.protection.animalCase.repository.AnimalCaseRepository;
 import com.patrol.global.error.ErrorCode;
 import com.patrol.global.exception.CustomException;
-import com.patrol.global.exceptions.ServiceException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.function.Consumer;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -59,7 +63,7 @@ public class AnimalCaseService {
     AnimalCase animalCase = findByTarget(targetType, targetId);
     if (animalCase == null) {
       animalCase = createNewCase(CaseStatus.MISSING, targetType, targetId);
-      validateLostCase(animalCase);
+      //validateLostCase(animalCase);
       animalCaseRepository.save(animalCase);
       caseHistoryService.addInitialLostPost(animalCase, contentType, contentId);
 
@@ -111,6 +115,18 @@ public class AnimalCaseService {
   public AnimalCase findByTarget(TargetType targetType, Long targetId) {
     return animalCaseRepository.findByTargetTypeAndTargetId(targetType, targetId);
   }
+
+  public AnimalCaseDetailResponse findById(Long caseId) {
+    AnimalCase animalCase = animalCaseRepository.findByIdWithHistories(caseId)
+        .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
+    return AnimalCaseDetailResponse.of(animalCase);
+  }
+
+  public Page<AnimalCaseListResponse> findAll(Pageable pageable) {
+    return animalCaseRepository.findAll(pageable)
+        .map(AnimalCaseListResponse::of);
+  }
+
 
   private void validateLostCase(AnimalCase animalCase) {
     if (animalCase.getTargetType() == TargetType.MY_PET) {

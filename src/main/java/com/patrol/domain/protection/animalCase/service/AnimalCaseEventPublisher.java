@@ -22,23 +22,39 @@ public class AnimalCaseEventPublisher {
   public void lostPost(LostPost lostPost) {
     eventPublisher.publishEvent(new PostCreatedEvent(
         ContentType.LOSTPOST, lostPost.getLostId(),
-        TargetType.MY_PET, lostPost.getPetId()
+        TargetType.MY_PET, (long) 1  // 임시 MyPet 로직 없음,
     ));
+
+//    eventPublisher.publishEvent(new PostCreatedEvent(
+//        ContentType.LOSTPOST, lostPost.getLostId(),
+//        TargetType.MY_PET, lostPost.getPetId()
+//    ));
   }
 
   // MyPet 제보글
   public void findPost(FindPost findPost) {
     eventPublisher.publishEvent(new PostCreatedEvent(
         ContentType.FINDPOST, findPost.getId(),
-        TargetType.MY_PET, findPost.getPetId()
+        TargetType.MY_PET, (long) 1
     ));
+
+//    eventPublisher.publishEvent(new PostCreatedEvent(
+//        ContentType.FINDPOST, findPost.getId(),
+//        TargetType.MY_PET, findPost.getPetId()
+//    ));
   }
 
   // 제보글 중 MyPet이 아닌 Animal인 경우
   public void unknownFindPost(FindPost findPost) {
+
     eventPublisher.publishEvent(new PostCreatedEvent(
         ContentType.FINDPOST, findPost.getId(),
-        TargetType.ANIMAL, findPost.getPetId()
+        TargetType.ANIMAL, (long) 1
     ));
+
+//    eventPublisher.publishEvent(new PostCreatedEvent(
+//        ContentType.FINDPOST, findPost.getId(),
+//        TargetType.ANIMAL, findPost.getPetId()
+//    ));
   }
 }
