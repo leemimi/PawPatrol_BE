@@ -1,11 +1,8 @@
 package com.patrol.domain.protection.facility.service;
 
 import com.patrol.api.protection.facility.dto.FacilitiesResponse;
-import com.patrol.domain.protection.facility.entity.Facility;
 import com.patrol.domain.protection.facility.entity.Hospital;
 import com.patrol.domain.protection.facility.repository.HospitalRepository;
-import com.patrol.domain.protection.facility.repository.ShelterRepository;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
@@ -13,7 +10,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,10 +22,7 @@ public class HospitalService implements FacilityService  {
 
   private final HospitalRepository hospitalRepository;
   private final CsvParser csvParser;
-  private final ShelterService shelterService;
-  private final ShelterRepository shelterRepository;
 
-  @PostConstruct
   @Transactional
   public void loadData() {
     try {
@@ -37,7 +31,7 @@ public class HospitalService implements FacilityService  {
           csvParser.parseHospitals(resource.getInputStream());
 
       List<Hospital> hospitals = hospitalDataList.stream()
-          .map(this::_convertToEntity)
+          .map(this::convertToEntity)
           .collect(Collectors.toList());
 
       hospitalRepository.saveAll(hospitals);
@@ -55,7 +49,7 @@ public class HospitalService implements FacilityService  {
   }
 
 
-  private Hospital _convertToEntity(CsvParser.HospitalData data) {
+  private Hospital convertToEntity(CsvParser.HospitalData data) {
     log.info(data.getTel());
 
     return Hospital.builder()

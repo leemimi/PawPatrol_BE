@@ -36,7 +36,7 @@ public class ShelterService implements FacilityService  {
 
         List<Shelter> shelters = response.getResponse().getBody().getItems().getItem()
             .stream()
-            .map(this::_convertToEntity)
+            .map(this::convertToEntity)
             .collect(Collectors.toList());
 
         shelterRepository.saveAll(shelters);
@@ -56,7 +56,7 @@ public class ShelterService implements FacilityService  {
   }
 
 
-  private Shelter _convertToEntity(ShelterApiResponse.Item item) {
+  private Shelter convertToEntity(ShelterApiResponse.Item item) {
     OperatingHours operatingHours = OperatingHours.builder()
         .weekdayTime(formatOperatingHours(item.getWeekOprStime(), item.getWeekOprEtime()))
         .weekendTime(formatOperatingHours(item.getWeekendOprStime(), item.getWeekendOprEtime()))

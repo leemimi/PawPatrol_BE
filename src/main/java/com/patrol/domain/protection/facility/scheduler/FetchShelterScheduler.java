@@ -38,7 +38,7 @@ public class FetchShelterScheduler {
     if(useSchedule) {
       try {
         log.info("동물보호센터 API 스케줄러 실행");
-        String jsonResponse = _fetchShelterData();
+        String jsonResponse = fetchShelterData();
         shelterService.saveApiResponse(jsonResponse);
 
       } catch (Exception e) {
@@ -52,7 +52,7 @@ public class FetchShelterScheduler {
 
 
 
-  private String _fetchShelterData() {
+  private String fetchShelterData() {
     try {
       String url = String.format("%s?serviceKey=%s&numOfRows=1000&pageNo=1&_type=json",
           apiUrl, serviceKeyForShelter

@@ -52,10 +52,10 @@ public class CsvParser {
               .name(record.get("FRNM_NM"))
               .address(record.get("RN_ADDR"))
               .tel(record.get("RPRS_TELNO"))
-              .latitude(_parseDouble(record.get("LA_VLUE")))
-              .longitude(_parseDouble(record.get("LO_VLUE")))
+              .latitude(parseDouble(record.get("LA_VLUE")))
+              .longitude(parseDouble(record.get("LO_VLUE")))
               .homepage(record.get("HMPG_URL"))
-              .operatingHours(_parseOperatingHours(record.get("OPR_TIME_INFO")))
+              .operatingHours(parseOperatingHours(record.get("OPR_TIME_INFO")))
               .build();
 
           hospitalDataList.add(hospitalData);
@@ -76,7 +76,7 @@ public class CsvParser {
   }
 
 
-  private Double _parseDouble(String value) {
+  private Double parseDouble(String value) {
     try {
       return Double.parseDouble(value.trim());
     } catch (Exception e) {
@@ -85,7 +85,7 @@ public class CsvParser {
   }
 
 
-  private OperatingHours _parseOperatingHours(String rawData) {
+  private OperatingHours parseOperatingHours(String rawData) {
     if (rawData == null || rawData.trim().isEmpty()) {
       return null;
     }
@@ -103,7 +103,7 @@ public class CsvParser {
       // 평일 시간 추출 (월요일 기준)
       String weekdayTime = null;
       if (parts.length > 0) {
-        weekdayTime = _extractDayTime(parts[0]);
+        weekdayTime = extractDayTime(parts[0]);
       }
 
       // 주말 시간 추출 (토요일 기준)
@@ -111,7 +111,7 @@ public class CsvParser {
       for (String part : parts) {
         part = part.trim();
         if (part.startsWith("토")) {
-          weekendTime = _extractDayTime(part);
+          weekendTime = extractDayTime(part);
           break;
         }
       }
@@ -121,7 +121,7 @@ public class CsvParser {
       for (String part : parts) {
         part = part.trim();
         if (part.contains("휴무")) {
-          closedDays = _extractClosedDays(part);
+          closedDays = extractClosedDays(part);
           break;
         }
       }
@@ -139,7 +139,7 @@ public class CsvParser {
   }
 
 
-  private String _extractDayTime(String dayData) {
+  private String extractDayTime(String dayData) {
     try {
       String[] parts = dayData.trim().split(" ", 2);
       return parts.length > 1 ? parts[1].trim() : null;
@@ -149,7 +149,7 @@ public class CsvParser {
   }
 
 
-  private String _extractClosedDays(String closedData) {
+  private String extractClosedDays(String closedData) {
     try {
       if (closedData.contains("(") && closedData.contains(")")) {
         int start = closedData.indexOf("(") + 1;

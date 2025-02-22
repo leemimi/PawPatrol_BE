@@ -36,6 +36,7 @@ public class FindPost extends BaseEntity {
     private String location;
     private String findTime;
     private String tags;
+    private boolean isRescue;
 
     @Enumerated(EnumType.STRING)
     private Status status;
