@@ -1,4 +1,4 @@
-package com.patrol.api.member.auth.dto.requestV2;
+package com.patrol.api.member.auth.dto;
 
 import com.patrol.domain.member.member.entity.Member;
 import jakarta.validation.constraints.NotNull;
