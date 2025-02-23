@@ -47,7 +47,7 @@ public class Member extends BaseEntity {
         return password != null && !password.isEmpty();
     }
 
-    @Column(nullable = false)
+//    @Column(nullable = false)
     private String nickname;  // 닉네임
 
     private LocalDate birthDate;
