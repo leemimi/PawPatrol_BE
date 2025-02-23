@@ -1,5 +1,6 @@
 package com.patrol.api.member.auth.dto;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,6 +19,7 @@ import java.io.InputStream;
  */
 @Getter
 @Setter
+@Builder
 public class EmailDto {
     private String from;
     private String receiver;
