@@ -3,7 +3,11 @@ package com.patrol.domain.member.auth.service;
 
 
 
+import com.patrol.api.member.auth.dto.SocialTokenInfo;
 import com.patrol.domain.member.member.entity.Member;
+import com.patrol.domain.member.member.enums.ProviderType;
+import com.patrol.global.exceptions.ErrorCodes;
+import com.patrol.global.exceptions.ServiceException;
 import com.patrol.standard.util.Ut;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,6 +23,9 @@ public class AuthTokenService {
 
   @Value("${custom.accessToken.expirationSeconds}")
   private long accessTokenExpirationSeconds;
+
+  @Value("${custom.socialToken.expirationSeconds}")
+  private long socialTokenExpirationSeconds;
 
 
   String genAccessToken(Member member) {
@@ -42,7 +49,7 @@ public class AuthTokenService {
     );
   }
 
-
+  // 엑세스 토큰 파싱
   Map<String, Object> payload(String accessToken) {
     Map<String, Object> parsedPayload = Ut.jwt.payload(jwtSecretKey, accessToken);
     if (parsedPayload == null) {
@@ -59,4 +66,39 @@ public class AuthTokenService {
         "profileImageUrl", profileImageUrl, "role", role
     );
   }
+
+  // 소셜 로그인 정보 토큰 발행
+  public String generateTempSocialToken(String email, ProviderType providerType, String providerId) {
+    try {
+      return Ut.jwt.toSocialString(
+              jwtSecretKey,
+              socialTokenExpirationSeconds,
+              providerId,
+              providerType.toString(),
+              email
+      );
+    } catch (Exception e) {
+      throw new ServiceException(ErrorCodes.TYPE_TRANSFER_FAILED);
+    }
+  }
+
+  // 소셜 로그인 정보 토큰 파싱
+  public SocialTokenInfo parseSocialToken(String token) {
+    try {
+      Map<String, Object> parsedPayload = Ut.jwt.payload(jwtSecretKey, token);
+
+      if (parsedPayload == null || !"SOCIAL_TEMP".equals(parsedPayload.get("type"))) {
+        return null;
+      }
+
+      return SocialTokenInfo.builder()
+              .providerType(ProviderType.of((String) parsedPayload.get("loginType")))
+              .providerId((String) parsedPayload.get("providerId"))
+              .email((String) parsedPayload.get("email"))
+              .build();
+    } catch (Exception e) {
+      throw new ServiceException(ErrorCodes.TYPE_TRANSFER_FAILED);
+    }
+  }
+
 }
