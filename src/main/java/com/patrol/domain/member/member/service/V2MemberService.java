@@ -33,4 +33,10 @@ public class V2MemberService {
                 .orElseThrow(() -> new ServiceException(ErrorCodes.INVALID_EMAIL));
     }
 
+    @Transactional
+    public boolean validateNewEmail(String email) {
+        // 가입된 회원이 있으면 true 반환, 없으면 false 반환
+        return v2MemberRepository.findByEmail(email).isPresent();
+    }
+
 }
