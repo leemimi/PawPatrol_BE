@@ -4,6 +4,8 @@ package com.patrol.global.security;
 import com.patrol.global.app.AppConfig;
 import com.patrol.global.oauth2.CustomAuthorizationRequestResolver;
 import com.patrol.global.oauth2.CustomOAuth2AuthenticationSuccessHandler;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,11 +15,18 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
@@ -85,6 +94,7 @@ public class ApiSecurityConfig {
                 .requestMatchers("/login/**").permitAll()
                     // v2 회원가입
                 .requestMatchers(HttpMethod.POST, "/api/*/auth/sign-up").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/*/auth/**").permitAll()
                 .anyRequest().authenticated()
         )
         .headers(headers ->
@@ -108,7 +118,27 @@ public class ApiSecurityConfig {
                 .authorizationEndpoint(
                     authorizationEndpoint -> authorizationEndpoint
                         .authorizationRequestResolver(customAuthorizationRequestResolver)
-                )
+                ).failureHandler(new AuthenticationFailureHandler() {
+                    @Override
+                    public void onAuthenticationFailure(HttpServletRequest request,
+                                                            HttpServletResponse response,
+                                                            AuthenticationException exception) throws IOException {
+                        if (exception instanceof OAuth2AuthenticationException) {
+                            OAuth2Error error = ((OAuth2AuthenticationException) exception).getError();
+                            if ("temp_token".equals(error.getErrorCode())) {
+                                String tempToken = error.getDescription();  // tempToken 값 추출
+                                String redirectUrl = UriComponentsBuilder
+                                        .fromUriString("http://localhost:5173/connect")
+                                        .queryParam("temp_token", tempToken)
+                                        .toUriString();
+                                response.sendRedirect(redirectUrl);
+                                return;
+                            }
+                        }
+                        // 다른 인증 에러의 경우 기본 에러 페이지로 리다이렉트
+                        response.sendRedirect("/login?error=true");
+                    }
+                })
         )
         .addFilterBefore(
             customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class
