@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -91,6 +92,8 @@ public class CommentService {
         List<Comment> comments = commentRepository.findByLostPost_Id(lostPostId);
         if (comments.isEmpty()) {
             throw new RuntimeException("해당 신고글에 대한 댓글이 없습니다.");
+            //return new ArrayList<>();  // Return empty list when no comments
+
         }
         return comments.stream().map(CommentResponseDto::new).collect(Collectors.toList());
     }

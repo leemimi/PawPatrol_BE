@@ -13,6 +13,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class LostPostResponseDto {
     //private Long lostId;
+    private Long id;  // Add id field
     private String status;
     private String title;       // 제목
     private String content;     // 내용
@@ -23,6 +24,7 @@ public class LostPostResponseDto {
     private String nickname;  // ✅ 추가된 필드 (작성자 닉네임)
 
     public LostPostResponseDto(LostPost lostPost) {
+        this.id = lostPost.getId();  // Ensure the id is set
         //this.lostId = lostPost.getLostId();
         // status가 Enum일 때 getDescription()을 사용하여 String 값을 가져옴
         this.nickname = lostPost.getAuthor().getNickname();  // ✅ Member에서 nickname 가져오기

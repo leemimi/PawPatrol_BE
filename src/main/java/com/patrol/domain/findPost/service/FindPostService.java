@@ -294,7 +294,8 @@ public class FindPostService {
     // 신고글과 엮이지 않은 제보글 조회
     @Transactional(readOnly = true)
     public Page<FindPostResponseDto> getAllStandaloneFindPosts(Pageable pageable) {
-        return findPostRepository.findAll(pageable).map(post -> FindPostResponseDto.from(post));
+        return findPostRepository.findByLostPostIsNull(pageable) // ✅ 수정된 부분
+                .map(FindPostResponseDto::from);
     }
 
     // 신고글과 엮이지 않은 게시글 하나만 조회
