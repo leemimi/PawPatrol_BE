@@ -1,9 +1,12 @@
 package com.patrol.api.member.auth.controller;
 
+import com.patrol.api.member.auth.dto.request.EmailRequest;
+import com.patrol.api.member.auth.dto.request.EmailVerifyRequest;
 import com.patrol.api.member.auth.dto.request.SignupRequest;
 import com.patrol.api.member.auth.dto.requestV2.LoginRequest;
 import com.patrol.api.member.auth.dto.LoginUserInfoResponse;
 import com.patrol.api.member.auth.dto.requestV2.SocialConnectRequest;
+import com.patrol.domain.member.auth.service.EmailService;
 import com.patrol.domain.member.auth.service.V2AuthService;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.service.V2MemberService;
@@ -12,13 +15,17 @@ import com.patrol.global.exceptions.ErrorCodes;
 import com.patrol.global.exceptions.ServiceException;
 import com.patrol.global.globalDto.GlobalResponse;
 import com.patrol.global.rq.Rq;
+import com.patrol.global.rsData.RsData;
 import com.patrol.global.webMvc.LoginUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * packageName    : com.patrol.api.member.auth.controller
@@ -38,6 +45,7 @@ public class ApiV2AuthController {
     private final Logger logger = LoggerFactory.getLogger(ApiV2AuthController.class.getName());
     private final V2AuthService v2AuthService;
     private final V2MemberService v2MemberService;
+    private final EmailService emailService;
     private final Rq rq;
     private final PasswordEncoder passwordEncoder;
 
@@ -46,6 +54,22 @@ public class ApiV2AuthController {
     public GlobalResponse<String> signUp(@Valid @RequestBody SignupRequest request) {
         Member member = v2AuthService.signUp(request);
         return GlobalResponse.success(member.getNickname());
+    }
+
+    // 회원가입 - 이메일 인증 코드 발송
+    @PostMapping("/email/verification-code")
+    public GlobalResponse<Void> sendVerificationEmail(@Valid @RequestBody EmailRequest request) {
+        emailService.sendVerificationEmail(request.email());
+        return GlobalResponse.success();
+    }
+
+    // 회원가입 - 이메일 인증 코드 확인
+    @PostMapping("/email/verify")
+    public GlobalResponse<Void> verifyEmail(@Valid @RequestBody EmailVerifyRequest request) {
+
+        emailService.verifyCode(request.email(), request.code());
+
+        return GlobalResponse.success();
     }
 
     // 로그인
@@ -74,7 +98,7 @@ public class ApiV2AuthController {
         return GlobalResponse.success();
     }
 
-    // 현재 로그인 사용자 정보 조회
+    // 현재 로그인 사용자 정보 조회, 로그인 상태로 바꾸는데 씀
     @GetMapping("/me")
     public GlobalResponse<LoginUserInfoResponse> loginUserInfo(@LoginUser Member member) {
 
@@ -98,11 +122,9 @@ public class ApiV2AuthController {
             }
 
             String accessToken = rq.makeAuthCookies(member);
-        System.out.println("++++++++++++++++++++");
 
             // 로그인 성공 시 소셜 계정 연동
             if (accessToken != null) {
-                System.out.println("==============================");
                 v2AuthService.socialConnect(socialConnectRequest, accessToken);
                 return GlobalResponse.success();
             }
