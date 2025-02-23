@@ -36,18 +36,18 @@ spring:
       client:
         registration:
           kakao:
-            scope: profile_nickname, profile_image, account_email
+            scope: account_email
             authorization-grant-type: authorization_code
             client-name: Kakao    # 클라이언트 이름
           google:
             scope:
               - email
-              - profile
+#              - profile
           naver:
             scope:
-              - nickname
+#              - nickname
               - email
-              - profile_image
+#              - profile_image
             client-name: Naver
             authorization-grant-type: authorization_code
         provider:
