@@ -26,6 +26,7 @@ public class V2MemberService {
     private final V2MemberRepository v2MemberRepository;
 
     // 회원 정보 가져오기
+    @Transactional
     public Member getMember(String email) {
         return v2MemberRepository.findByEmail(email)
                 // 이거 어떻게 바꿔야 하는지
