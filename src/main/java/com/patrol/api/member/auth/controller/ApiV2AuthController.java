@@ -59,8 +59,13 @@ public class ApiV2AuthController {
     // 회원가입 - 이메일 인증 코드 발송
     @PostMapping("/email/verification-code")
     public GlobalResponse<Void> sendVerificationEmail(@Valid @RequestBody EmailRequest request) {
-        emailService.sendVerificationEmail(request.email());
-        return GlobalResponse.success();
+
+        // 이미 가입된 회원이 없을 때 가입 가능
+        if (!v2MemberService.validateNewEmail(request.email())) {
+            emailService.sendVerificationEmail(request.email());
+            return GlobalResponse.success();
+        }
+        return GlobalResponse.error(ErrorCode.DUPLICATE_EMAIL);
     }
 
     // 회원가입 - 이메일 인증 코드 확인
