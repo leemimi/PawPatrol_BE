@@ -63,7 +63,7 @@ spring:
             user-name-attribute: response
 
   mail:
-    host: smtp.gmail.com
+    host: smtp.naver.com
     port: 587
     properties:
       mail:
