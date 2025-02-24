@@ -114,11 +114,11 @@ public class AuthService {
         return new FindEmailsResponse(emailResponses);
     }
 
-
+    
     @Transactional
-    public Member handleSocialLogin(
-        String email, String nickname,
-        ProviderType loginType, String profilePath, String providerId
+    public Member handleSocialLogin(    // 소셜 로그인 시, 사이트 자체 계정의 유무에 따른 처리
+        String email,
+        ProviderType loginType, String providerId
     ) {
         Member connectedMember = oAuthService.findByProviderId(loginType, providerId);
         if (connectedMember != null) {
@@ -133,7 +133,7 @@ public class AuthService {
             return member;
         }
 
-        return signup(email, null, nickname, loginType, providerId, email, profilePath);
+        return signup(email, null, null, loginType, providerId, email, null);
     }
 
 

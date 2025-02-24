@@ -35,6 +35,8 @@ public class Rq {
   private String domain;
 
 
+  // JWT 필터(doFilterInternal) 에서 사용,
+  // 토큰 검증이 성공했을 때 해당 사용자를 로그인 상태로 만드는 역할
   public void setLogin(Member member) {
     UserDetails user = new SecurityUser(
         member.getId(),
@@ -54,7 +56,8 @@ public class Rq {
     SecurityContextHolder.getContext().setAuthentication(authentication);
   }
 
-
+  // SecurityContext에서 인증된 사용자 정보를 가져옴
+  // 지금은 소셜 로그인 시 유저 정보를 쿠키에 담기 위해서만 사용중임
   public Member getActor() {
     return Optional.ofNullable(
             SecurityContextHolder
@@ -83,7 +86,7 @@ public class Rq {
         .orElse(null);
   }
 
-
+  // accessToken 쿠키 재발급
   public void setCookie(String name, String value) {
     ResponseCookie cookie = ResponseCookie.from(name, value)
         .path("/")
@@ -95,7 +98,7 @@ public class Rq {
     resp.addHeader("Set-Cookie", cookie.toString());
   }
 
-
+  // 키에서 지정된 이름(name)의 값을 조회, accessToken || apiKey
   public String getCookieValue(String name) {
     return Optional
         .ofNullable(req.getCookies())
@@ -121,16 +124,19 @@ public class Rq {
   }
 
 
-  public void setHeader(String name, String value) {
-    resp.setHeader(name, value);
-  }
+  // 서버에서 Header 만들 필요X
+//  public void setHeader(String name, String value) {
+//    resp.setHeader(name, value);
+//  }
 
 
+  // 클라이언트에서 보낸 헤더 정보 받는 메서드
   public String getHeader(String name) {
     return req.getHeader(name);
   }
 
 
+  // 사용자 인증 정보(apiKey, accessToken)를 쿠키에 저장하고 accessToken 반환
   public String makeAuthCookies(Member member) {
     String accessToken = authService.genAccessToken(member);
     setCookie("apiKey", member.getApiKey());

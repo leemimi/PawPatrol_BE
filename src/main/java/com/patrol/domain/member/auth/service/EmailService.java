@@ -2,19 +2,24 @@ package com.patrol.domain.member.auth.service;
 
 
 
+import com.patrol.api.member.auth.dto.EmailDto;
 import com.patrol.global.exceptions.ErrorCodes;
 import com.patrol.global.exceptions.ServiceException;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 
 @Slf4j
@@ -34,18 +39,25 @@ public class EmailService {
   // 인증 메일 발송
   @Async
   public void sendVerificationEmail(String email) {
+    // 인증 코드 생성, Redis에 저장
     String verificationCode = _generateVerificationCode();
     _saveVerificationCode(email, verificationCode);
-
+    
     String title = "이메일 인증 코드";
     String text = String.format("""
-        안녕하세요. 숨은친구찾기입니다.
+        안녕하세요. 퍼피구조대 입니다.
         인증 코드: %s
         
         해당 인증 코드는 30분간 유효합니다.
         """, verificationCode);
 
-    _sendEmail(email, title, text);
+    EmailDto emailDto = EmailDto.builder()
+            .receiver(email)
+            .title(title)
+            .text(text)
+            .build();
+
+    _sendEmail(emailDto);
   }
 
 
@@ -65,12 +77,17 @@ public class EmailService {
     }
 
     redisTemplate.delete(key);
+
+    // 인증 완료 상태 저장
+    redisTemplate.opsForValue()
+            .set("email:verify:" + email, "verified", 3, TimeUnit.MINUTES);
+
     return true;
   }
 
 
-  private void _sendEmail(String toEmail, String title, String text) {
-    SimpleMailMessage emailForm = _createEmailForm(toEmail, title, text);
+  private void _sendEmail(EmailDto emailDto) {
+    MimeMessage emailForm = _createEmailForm(emailDto);
     try {
       emailSender.send(emailForm);
 
@@ -80,14 +97,22 @@ public class EmailService {
   }
 
 
-  // 이메일 폼 새성
-  private SimpleMailMessage _createEmailForm(String toEmail, String title, String text) {
-    SimpleMailMessage message = new SimpleMailMessage();
-    message.setTo(toEmail);
-    message.setSubject(title);
-    message.setText(text);
+  // 이메일 폼 생성
+  private MimeMessage _createEmailForm(EmailDto emailDto) {
+    try {
+      MimeMessage message = emailSender.createMimeMessage();
+      MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
+      messageHelper.setTo(emailDto.getReceiver());
+      messageHelper.setFrom(EmailDto.SENDER_EMAIL, EmailDto.SENDER_NAME);
+      messageHelper.setSubject(emailDto.getTitle()); // 메일제목은 생략 가능
+      messageHelper.setText(emailDto.getText());
 
-    return message;
+      emailSender.send(message);
+
+      return message;
+    } catch (MessagingException | UnsupportedEncodingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 
@@ -100,6 +125,7 @@ public class EmailService {
   // 인증 코드 저장 (Redis : 30분 유효)
   public void _saveVerificationCode(String email, String code) {
     String key = KEY_PREFIX + email;
+
     redisTemplate.opsForValue()
         .set(key, code, Duration.ofMinutes(30));  // TTL 설정 추가
   }

@@ -20,6 +20,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 @Component
 @RequiredArgsConstructor
 public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver {
+  // @LoginUser 어노테이션의 실제 동작을 처리하는 클래스
 
   private final MemberService memberService;
 
@@ -35,14 +36,17 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
       NativeWebRequest webRequest, WebDataBinderFactory binderFactory
   ) {
 
+    // 1. 현재 인증 정보 확인
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (authentication == null || !authentication.isAuthenticated()) {
       throw new ServiceException(ErrorCodes.UNAUTHORIZED);
     }
 
+    // 2. SecurityUser에서 이메일 추출
     SecurityUser securityUser = (SecurityUser) authentication.getPrincipal();
     String email = securityUser.getName();
 
+    // 3. 이메일로 회원 정보 조회
     return memberService.findByEmail(email);
   }
 }
