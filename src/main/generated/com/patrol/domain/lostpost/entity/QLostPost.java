@@ -16,7 +16,7 @@ import com.querydsl.core.types.dsl.PathInits;
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
 public class QLostPost extends EntityPathBase<LostPost> {
 
-    private static final long serialVersionUID = 1548912346L;
+    private static final long serialVersionUID = 1746385658L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
@@ -34,28 +34,18 @@ public class QLostPost extends EntityPathBase<LostPost> {
     //inherited
     public final NumberPath<Long> id = _super.id;
 
-    public final ListPath<com.patrol.domain.image.entity.Image, com.patrol.domain.image.entity.QImage> images = this.<com.patrol.domain.image.entity.Image, com.patrol.domain.image.entity.QImage>createList("images", com.patrol.domain.image.entity.Image.class, com.patrol.domain.image.entity.QImage.class, PathInits.DIRECT2);
-
     public final NumberPath<Double> latitude = createNumber("latitude", Double.class);
 
     public final StringPath location = createString("location");
 
     public final NumberPath<Double> longitude = createNumber("longitude", Double.class);
 
-    public final StringPath lostTime = createString("lostTime");
+    public final DateTimePath<java.time.LocalDateTime> lostTime = createDateTime("lostTime", java.time.LocalDateTime.class);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;
 
-    public final StringPath ownerPhone = createString("ownerPhone");
-
     public final NumberPath<Long> petId = createNumber("petId", Long.class);
-
-    public final EnumPath<LostPost.Status> status = createEnum("status", LostPost.Status.class);
-
-    public final StringPath tags = createString("tags");
-
-    public final StringPath title = createString("title");
 
     public QLostPost(String variable) {
         this(LostPost.class, forVariable(variable), INITS);

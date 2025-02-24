@@ -34,11 +34,6 @@ public class V2MemberService {
     private final AnimalRepository animalRepository;
     private final FileStorageHandler fileStorageHandler;
 
-    @Value("${ncp.storage.bucketname}")
-    private static String BUCKET_NAME;
-    @Value("${ncp.storage.regionname}")
-    private static String REGION;
-
     // 회원 정보 가져오기
     @Transactional
     public Member getMember(String email) {
@@ -74,7 +69,4 @@ public class V2MemberService {
 
     }
 
-    public static String getFileUrl(String fileName) {
-        return "https://" + BUCKET_NAME + ".s3." + REGION + ".amazonaws.com/" + fileName;
-    }
 }
