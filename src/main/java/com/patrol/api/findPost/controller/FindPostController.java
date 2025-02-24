@@ -46,7 +46,7 @@ public class FindPostController {
 
         try {
             FindPostRequestDto requestDto = objectMapper.readValue(metadataJson, FindPostRequestDto.class);
-            FindPostResponseDto responseDto = findPostService.createFindPost(requestDto, lostPostId, loginUser, images);
+            FindPostResponseDto responseDto = findPostService.createFindPost(requestDto, loginUser, images);
             return new RsData<>("200", "제보 게시글을 성공적으로 등록했습니다.", responseDto);
         } catch (JsonProcessingException e) {
             return new RsData<>("400", "잘못된 JSON 형식입니다.", null);

@@ -1,4 +1,4 @@
-package com.patrol.domain.lostpost.entity;
+package com.patrol.domain.lostPost.entity;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
