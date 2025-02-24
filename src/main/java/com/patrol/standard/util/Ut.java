@@ -54,6 +54,7 @@ public class Ut {
 
 
   public static class jwt {
+    // 엑세스 토큰 용도
     public static String toString(String secret, long expireSeconds, Map<String, Object> body) {
       Date issuedAt = new Date();
       Date expiration = new Date(issuedAt.getTime() + 1000L * expireSeconds);
@@ -65,6 +66,24 @@ public class Ut {
           .signWith(secretKey)
           .compact();
       return jwt;
+    }
+
+    // 소셜 로그인 연동 용도
+    public static String toSocialString(String secret, long expireSeconds, String providerId, String loginType, String email) {
+      Date issuedAt = new Date();
+      Date expiration = new Date(issuedAt.getTime() + 1000L * expireSeconds);
+      SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes());
+
+      return Jwts.builder()
+              .subject(providerId)
+              .issuedAt(issuedAt)
+              .expiration(expiration)
+              .claim("providerId", providerId)
+              .claim("loginType", loginType)
+              .claim("email", email)
+              .claim("type", "SOCIAL_TEMP")
+              .signWith(secretKey)
+              .compact();
     }
 
     public static boolean isValid(String secret, String jwtStr) {

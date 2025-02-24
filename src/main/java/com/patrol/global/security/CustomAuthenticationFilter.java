@@ -28,6 +28,8 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
   private AuthTokens _getAuthTokensFromRequest() {
     String authorization = rq.getHeader("Authorization");
+
+    // 헤더로 토큰 정보 받았을 경우
     if (authorization != null && authorization.startsWith("Bearer ")) {
       String token = authorization.substring("Bearer ".length());
       String[] tokenBits = token.split(" ", 2);
@@ -36,6 +38,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
       }
     }
 
+    // 쿠키로 토큰 정보 받았을 경우
     String apiKey = rq.getCookieValue("apiKey");
     String accessToken = rq.getCookieValue("accessToken");
     if (apiKey != null && accessToken != null) {
@@ -45,9 +48,11 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
   }
 
 
+  // 쿠키 시간 만료 되었을 때 재발급
   private void _refreshAccessToken(Member member) {
     String newAccessToken = authService.genAccessToken(member);
-    rq.setHeader("Authorization", "Bearer " + member.getApiKey() + " " + newAccessToken);
+    // 클라이언트에서 Header에 담에 서버로 보냄, 서버에서는 getHeader만 필요 setHeaderX
+//    rq.setHeader("Authorization", "Bearer " + member.getApiKey() + " " + newAccessToken);
     rq.setCookie("accessToken", newAccessToken);
   }
 
@@ -68,7 +73,8 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
       HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
 
-    if (!request.getRequestURI().startsWith("/api/")) {
+    if (!request.getRequestURI().startsWith("/api/") ||
+            request.getRequestURI().startsWith("/api/placeholder/")) {  // 소셜 로그인 플레이스홀더 이미지 경로 추가
       filterChain.doFilter(request, response);
       return;
     }
@@ -79,7 +85,9 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
         "/api/v1/auth/email/verification-code", "/api/v1/auth/email/verify",
         "/api/v1/auth/find-account",
         "/api/v1/auth/password/reset", "/api/v1/auth/password/reset/verify",
-        "/api/v1/auth/password/reset/new"
+        "/api/v1/auth/password/reset/new",
+            "/api/v2/auth/login", "/api/v2/auth/logout",
+            "/api/v2/auth/signup"
         ).contains(request.getRequestURI())
     ) {
       filterChain.doFilter(request, response);
@@ -96,9 +104,9 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
     String accessToken = authTokens.accessToken;
 
     Member member = authService.getMemberFromAccessToken(accessToken);
-    if (member == null)
+    if (member == null) // 토큰이 만료되었을 때, 당연히 멤버 정보 못가져옴
       member = _refreshAccessTokenByApiKey(apiKey);
-    if (member != null)
+    if (member != null) // 토큰이 만료되지 않았을 때
       rq.setLogin(member);
     filterChain.doFilter(request, response);
   }
