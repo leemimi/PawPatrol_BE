@@ -16,7 +16,7 @@ public class Image {
 
     private String path;
 
-    @Column(name = "lost_id", nullable = true)
+    @Column(name = "lost_post_id", nullable = true)
     private Long lostId;
 
     @Column(name = "created_at")

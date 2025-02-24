@@ -26,6 +26,7 @@ public class FindPostResponseDto {
     private String tags;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
+    private String status;
 
     // 추가된 필드들
     private LocalDate birthDate;         // 출생일
@@ -48,6 +49,7 @@ public class FindPostResponseDto {
         this.longitude = findPost.getLongitude();
         this.findTime = findPost.getFindTime();
         this.tags = findPost.getTags();
+        this.status= String.valueOf(findPost.getStatus());
         this.createdAt = findPost.getCreatedAt();
         this.modifiedAt = findPost.getModifiedAt();
 

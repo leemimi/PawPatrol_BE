@@ -80,6 +80,18 @@ public class FindPostController {
     }
 
     // 모든 신고글 연계 제보 게시글 조회 (페이징 지원)
+    @GetMapping("/find/map")
+    @Operation(summary = "반경 내의 모든 신고글 연계 제보 게시글 조회 (페이징 지원)")
+    public RsData<List<FindPostResponseDto>> getAllFindPosts(
+            @RequestParam(name = "latitude") double latitude,
+            @RequestParam(name = "longitude") double longitude,
+            @RequestParam(name = "radius") double radius) {
+
+        List<FindPostResponseDto> posts = findPostService.getFindPostsWithinRadius(latitude, longitude, radius);
+        return new RsData<>("200", "반경 내의 제보 게시글을 성공적으로 호출했습니다.", posts);
+    }
+
+    // 모든 신고글 연계 제보 게시글 조회 (페이징 지원)
     @GetMapping("/find")
     @Operation(summary = "모든 신고글 연계 제보 게시글 조회 (페이징 지원)")
     public RsData<Page<FindPostResponseDto>> getAllFindPosts(

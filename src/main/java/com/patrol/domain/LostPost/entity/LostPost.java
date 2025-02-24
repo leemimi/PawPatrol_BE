@@ -1,6 +1,7 @@
 package com.patrol.domain.LostPost.entity;
 
 import com.patrol.api.LostPost.dto.LostPostRequestDto;
+import com.patrol.global.jpa.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,10 +14,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class LostPost {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long lostId;
+public class LostPost extends BaseEntity {
     private Long memberId;
     private Long petId;
     private Double latitude;
@@ -31,9 +29,6 @@ public class LostPost {
 
     private String tags;
     private LocalDateTime lostTime;
-    private LocalDateTime createdAt;
-    private LocalDateTime modifiedAt;
-
     // Enum 정의
     public enum Status {
         FINDING("찾는 중"),
@@ -54,6 +49,8 @@ public class LostPost {
     public LostPost(LostPostRequestDto requestDto) {
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
+        this.longitude = requestDto.getLongitude();
+        this.latitude = requestDto.getLatitude();
         this.location = requestDto.getLocation();
         this.ownerPhone = requestDto.getOwnerPhone();
         this.tags = String.join("#", requestDto.getTags());
@@ -71,6 +68,8 @@ public class LostPost {
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
         this.location = requestDto.getLocation();
+        this.longitude = requestDto.getLongitude();
+        this.latitude = requestDto.getLatitude();
         this.ownerPhone = requestDto.getOwnerPhone();
         this.tags = String.join("#", requestDto.getTags());
         this.lostTime = LocalDateTime.parse(requestDto.getLostTime());
@@ -81,8 +80,4 @@ public class LostPost {
         }
     }
 
-    // ID만을 이용한 생성자 추가
-    public LostPost(Long lostId) {
-        this.lostId = lostId;
-    }
 }

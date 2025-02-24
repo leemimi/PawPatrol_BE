@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -268,6 +269,15 @@ public class FindPostService {
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
 
         return FindPostResponseDto.from(findPost);
+    }
+
+    @Transactional(readOnly=true)
+    public List<FindPostResponseDto> getFindPostsWithinRadius(double latitude, double longitude, double radius) {
+        // 위도/경도 기반으로 반경 내의 게시물 조회
+        List<FindPost> findPosts = findPostRepository.findPostsWithinRadius(latitude, longitude, radius);
+        return findPosts.stream()
+                .map(FindPostResponseDto::from)
+                .collect(Collectors.toList());
     }
 }
 

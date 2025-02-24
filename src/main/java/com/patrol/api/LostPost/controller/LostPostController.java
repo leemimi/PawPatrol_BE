@@ -14,6 +14,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/lost-found/lost")
 @RequiredArgsConstructor
@@ -57,6 +59,16 @@ public class LostPostController {
             @RequestParam(name = "size", defaultValue = "5") int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<LostPostResponseDto> posts = lostPostService.getAllLostPosts(pageable);
+        return new RsData<>("200", "실종 신고 게시글 목록을 성공적으로 호출했습니다.", posts);
+    }
+
+    @GetMapping("/map")
+    @Operation(summary = "모든 실종 신고 게시글 조회 (페이징 지원)")
+    public RsData<List<LostPostResponseDto>> getLostPostsByRadius(
+            @RequestParam(name = "latitude") double latitude,
+            @RequestParam(name = "longitude") double longitude,
+            @RequestParam(name = "radius") double radius) {
+        List<LostPostResponseDto> posts = lostPostService.getLostPostsWithinRadius(latitude, longitude, radius);
         return new RsData<>("200", "실종 신고 게시글 목록을 성공적으로 호출했습니다.", posts);
     }
 

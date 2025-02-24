@@ -14,6 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class LostPostService {
@@ -55,7 +58,16 @@ public class LostPostService {
     // 특정 실종 신고글에 연결된 제보글 목록 조회
     @Transactional(readOnly = true)
     public Page<FindPostResponseDto> getFindPostsByLostId(Long lostId, Pageable pageable) {
-        Page<FindPost> findPosts = findPostRepository.findByLostPost_LostId(lostId, pageable);
+        Page<FindPost> findPosts = findPostRepository.findByLostPost_Id(lostId, pageable);
         return findPosts.map(post -> new FindPostResponseDto(post));
+    }
+
+    @Transactional(readOnly=true)
+    public List<LostPostResponseDto> getLostPostsWithinRadius(double latitude, double longitude, double radius) {
+        // 위도/경도 기반으로 반경 내의 게시물 조회
+        List<LostPost> lostPosts = lostPostRepository.lostPostsWithinRadius(latitude, longitude, radius);
+        return lostPosts.stream()
+                .map(LostPostResponseDto::from)
+                .collect(Collectors.toList());
     }
 }

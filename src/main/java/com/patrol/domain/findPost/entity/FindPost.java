@@ -22,7 +22,7 @@ public class FindPost extends BaseEntity {
     private Long memberId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "lostId", nullable = true) // 연관된 실종 게시글 (null 허용)
+    @JoinColumn(name = "lost_post_id", nullable = true) // 연관된 실종 게시글 (null 허용)
     private LostPost lostPost; // FindPost와 LostPost 간의 관계 (Long에서 LostPost로 변경)
 
     @OneToMany(mappedBy = "foundId", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -63,7 +63,7 @@ public class FindPost extends BaseEntity {
     public enum Status {
         FINDING("찾는 중"),
         FOSTERING("임보 중"),
-        FOUND("주인 찾기 완료");
+        FOUND("주인 찾 기 완료");
 
         private final String description;
 
@@ -140,10 +140,6 @@ public class FindPost extends BaseEntity {
             this.gender = Gender.MALE; // 기본값 설정
         }
 
-    }
-    // 신고글 ID를 반환하는 getter 추가
-    public Long getLostId() {
-        return (lostPost != null) ? lostPost.getLostId() : null;
     }
 
     // 새로운 생성자 (연계없는 제보글 생성 시)
