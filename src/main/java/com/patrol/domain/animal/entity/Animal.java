@@ -2,13 +2,12 @@ package com.patrol.domain.animal.entity;
 
 import com.patrol.domain.animal.enums.AnimalGender;
 import com.patrol.domain.animal.enums.AnimalSize;
+import com.patrol.domain.animal.enums.AnimalType;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.global.jpa.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 /**
  * packageName    : com.patrol.domain.animal.entity
@@ -27,22 +26,28 @@ import lombok.Setter;
 @Getter
 @Setter
 @Table(name = "animals")
+@SuperBuilder
 public class Animal extends BaseEntity {
-    private String breed;
+    private String breed;   // 품종
 
     @Enumerated(EnumType.STRING)
-    private AnimalGender gender;
+    private AnimalGender gender;    // 성별
 
     @Enumerated(EnumType.STRING)
-    private AnimalSize size;
+    private AnimalSize size;    // 크기
 
-    private String feature;
-    private String healthCondition;
-    private String name;
-    private String estimatedAge;
+    private String feature; // 특징
+    private String healthCondition; // 건강상태
+    private String name;    // 이름
+    private String estimatedAge;    // 나이
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Member owner;
 
-    private String registrationNo;
+    private String registrationNo;  // 동물등록번호
+
+    private String imageUrl;  // 반려동물 사진
+
+    @Enumerated(EnumType.STRING)
+    private AnimalType animalType;  // 고양이, 강아지 구분
 }
