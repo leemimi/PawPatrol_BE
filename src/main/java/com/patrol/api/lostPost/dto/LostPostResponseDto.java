@@ -1,5 +1,6 @@
-package com.patrol.api.lostpost.dto;
+package com.patrol.api.lostPost.dto;
 
+import com.patrol.api.member.member.dto.MemberResponseDto;
 import com.patrol.domain.lostPost.entity.LostPost;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class LostPostResponseDto {
     private Long lostId;
+    private MemberResponseDto author;
     private String content;     // 내용
     private Double longitude;   // 경도
     private Double latitude;    // 위도
@@ -18,6 +20,7 @@ public class LostPostResponseDto {
 
     public LostPostResponseDto(LostPost lostPost) {
         this.lostId = lostPost.getId();
+        this.author = new MemberResponseDto(lostPost.getAuthor());
         this.content = lostPost.getContent();
         this.longitude = lostPost.getLongitude();
         this.latitude = lostPost.getLatitude();

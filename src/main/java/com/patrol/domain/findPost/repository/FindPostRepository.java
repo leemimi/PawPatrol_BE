@@ -11,9 +11,6 @@ import java.util.List;
 
 @Repository
 public interface FindPostRepository extends JpaRepository<FindPost, Long> {
-    // JPQL 예시
-//    @Query("SELECT fp FROM FindPost fp LEFT JOIN FETCH fp.lostPost WHERE fp.foundId = :foundId")
-//    FindPost findPostWithLostPost(@Param("foundId") Long foundId);
 
     @Query(value = "SELECT f FROM FindPost f " +
             "WHERE (6371 * acos(cos(radians(:latitude)) * cos(radians(f.latitude)) * " +
