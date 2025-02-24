@@ -91,6 +91,13 @@ spring:
 logging:
   level:
     com.patrol: DEBUG
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    
 #    org.hibernate.SQL: DEBUG
 #    org.hibernate.orm.jdbc.bind: TRACE
 #    org.hibernate.orm.jdbc.extract: TRACE
