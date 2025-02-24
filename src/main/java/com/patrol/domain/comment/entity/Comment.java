@@ -1,4 +1,4 @@
-package com.patrol.domain.Comment.entity;
+package com.patrol.domain.comment.entity;
 /*
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.patrol.domain.LostPost.entity.LostPost;

@@ -1,4 +1,4 @@
-package com.patrol.domain.LostPost.entity;
+package com.patrol.domain.lostPost.entity;
 
 import com.patrol.api.LostPost.dto.LostPostRequestDto;
 import com.patrol.global.jpa.BaseEntity;
@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Getter

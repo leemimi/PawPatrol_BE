@@ -3,8 +3,8 @@ package com.patrol.global.initData;
 
 import com.patrol.api.LostPost.dto.LostPostRequestDto;
 import com.patrol.api.findPost.dto.FindPostRequestDto;
-import com.patrol.domain.LostPost.entity.LostPost;
-import com.patrol.domain.LostPost.repository.LostPostRepository;
+import com.patrol.domain.lostPost.entity.LostPost;
+import com.patrol.domain.lostPost.repository.LostPostRepository;
 import com.patrol.domain.findPost.entity.FindPost;
 import com.patrol.domain.findPost.repository.FindPostRepository;
 import com.patrol.domain.member.auth.service.AuthService;

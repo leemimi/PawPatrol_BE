@@ -1,12 +1,9 @@
 package com.patrol.api.LostPost.dto;
 
-import com.patrol.domain.LostPost.entity.LostPost;
-import lombok.AllArgsConstructor;
+import com.patrol.domain.lostPost.entity.LostPost;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.List;
 
 @Getter
 @Setter
@@ -41,4 +38,3 @@ public class LostPostResponseDto {
         return new LostPostResponseDto(lostPost);
     }
 }
-

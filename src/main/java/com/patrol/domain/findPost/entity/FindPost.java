@@ -1,7 +1,7 @@
 package com.patrol.domain.findPost.entity;
 
 import com.patrol.api.findPost.dto.FindPostRequestDto;
-import com.patrol.domain.LostPost.entity.LostPost;
+import com.patrol.domain.lostPost.entity.LostPost;
 import com.patrol.domain.image.entity.Image;
 import com.patrol.global.jpa.BaseEntity;
 import jakarta.persistence.*;

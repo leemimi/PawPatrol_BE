@@ -1,12 +1,12 @@
-package com.patrol.domain.LostPost.service;
+package com.patrol.domain.lostPost.service;
 
 import com.patrol.api.findPost.dto.FindPostResponseDto;
 import com.patrol.api.LostPost.dto.LostPostRequestDto;
 import com.patrol.api.LostPost.dto.LostPostResponseDto;
 import com.patrol.domain.findPost.entity.FindPost;
 import com.patrol.domain.findPost.repository.FindPostRepository;
-import com.patrol.domain.LostPost.entity.LostPost;
-import com.patrol.domain.LostPost.repository.LostPostRepository;
+import com.patrol.domain.lostPost.entity.LostPost;
+import com.patrol.domain.lostPost.repository.LostPostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

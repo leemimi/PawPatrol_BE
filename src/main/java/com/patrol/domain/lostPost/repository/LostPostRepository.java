@@ -1,6 +1,5 @@
-package com.patrol.domain.LostPost.repository;
-import com.patrol.domain.LostPost.entity.LostPost;
-import com.patrol.domain.findPost.entity.FindPost;
+package com.patrol.domain.lostPost.repository;
+import com.patrol.domain.lostPost.entity.LostPost;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

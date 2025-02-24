@@ -3,7 +3,7 @@ package com.patrol.api.LostPost.controller;
 import com.patrol.api.findPost.dto.FindPostResponseDto;
 import com.patrol.api.LostPost.dto.LostPostRequestDto;
 import com.patrol.api.LostPost.dto.LostPostResponseDto;
-import com.patrol.domain.LostPost.service.LostPostService;
+import com.patrol.domain.lostPost.service.LostPostService;
 import com.patrol.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;

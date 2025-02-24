@@ -1,4 +1,4 @@
-package com.patrol.api.Comment.controller;
+package com.patrol.api.comment.controller;
 /*
 import com.patrol.api.Comment.dto.CommentRequestDto;
 import com.patrol.api.Comment.dto.CommentResponseDto;

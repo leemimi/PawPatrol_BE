@@ -1,4 +1,4 @@
-package com.patrol.api.Comment.dto;
+package com.patrol.api.comment.dto;
 /*
 import lombok.Getter;
 import lombok.Setter;

@@ -1,4 +1,4 @@
-package com.patrol.domain.LostPost.entity;
+package com.patrol.domain.lostPost.entity;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
@@ -60,4 +60,3 @@ public class QLostPost extends EntityPathBase<LostPost> {
     }
 
 }
-

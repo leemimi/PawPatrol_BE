@@ -4,8 +4,8 @@ import com.patrol.api.findPost.dto.FindPostRequestDto;
 import com.patrol.api.findPost.dto.FindPostResponseDto;
 import com.patrol.domain.findPost.entity.FindPost;
 import com.patrol.domain.findPost.repository.FindPostRepository;
-import com.patrol.domain.LostPost.entity.LostPost;
-import com.patrol.domain.LostPost.repository.LostPostRepository;
+import com.patrol.domain.lostPost.entity.LostPost;
+import com.patrol.domain.lostPost.repository.LostPostRepository;
 import com.patrol.domain.image.entity.Image;
 import com.patrol.domain.image.repository.ImageRepository;
 import com.patrol.global.error.ErrorCode;
@@ -280,5 +280,3 @@ public class FindPostService {
                 .collect(Collectors.toList());
     }
 }
-
-

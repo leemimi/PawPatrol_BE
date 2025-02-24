@@ -1,4 +1,4 @@
-package com.patrol.domain.Comment.repository;
+package com.patrol.domain.comment.repository;
 /*
 import com.patrol.domain.Comment.entity.Comment;
 import org.springframework.data.jpa.repository.JpaRepository;
