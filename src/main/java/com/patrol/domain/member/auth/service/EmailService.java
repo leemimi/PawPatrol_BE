@@ -45,7 +45,7 @@ public class EmailService {
     
     String title = "이메일 인증 코드";
     String text = String.format("""
-        안녕하세요. 숨은친구찾기입니다.
+        안녕하세요. 퍼피구조대 입니다.
         인증 코드: %s
         
         해당 인증 코드는 30분간 유효합니다.
