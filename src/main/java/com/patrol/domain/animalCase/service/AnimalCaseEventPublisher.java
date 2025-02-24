@@ -1,12 +1,13 @@
 package com.patrol.domain.animalCase.service;
 
-import com.patrol.domain.LostPost.entity.LostPost;
+
 import com.patrol.domain.animalCase.enums.CaseHistoryStatus;
 import com.patrol.domain.animalCase.enums.CaseStatus;
 import com.patrol.domain.animalCase.enums.ContentType;
 import com.patrol.domain.animalCase.events.PostCreatedEvent;
 import com.patrol.domain.animalCase.events.ProtectionStatusChangeEvent;
 import com.patrol.domain.findPost.entity.FindPost;
+import com.patrol.domain.lostPost.entity.LostPost;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,7 @@ public class AnimalCaseEventPublisher {
 
   public void createLostPost(LostPost lostPost) {
     eventPublisher.publishEvent(new PostCreatedEvent(
-        ContentType.LOSTPOST, lostPost.getLostId(),
+        ContentType.LOSTPOST, lostPost.getId(),
         lostPost.getPetId(), (long) 1
     ));
 
@@ -36,7 +37,7 @@ public class AnimalCaseEventPublisher {
   public void createfindPost(FindPost findPost) {
     eventPublisher.publishEvent(new PostCreatedEvent(
         ContentType.FINDPOST, findPost.getId(),
-        findPost.getPetId(), (long) 1
+        findPost.getAnimalId(), (long) 1
     ));
 
     //    eventPublisher.publishEvent(new PostCreatedEvent(
@@ -50,7 +51,7 @@ public class AnimalCaseEventPublisher {
 
     eventPublisher.publishEvent(new PostCreatedEvent(
         ContentType.FINDPOST, findPost.getId(),
-        findPost.getPetId(), (long) 1
+        findPost.getAnimalId(), (long) 1
     ));
 
     //    eventPublisher.publishEvent(new PostCreatedEvent(

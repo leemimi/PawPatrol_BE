@@ -22,8 +22,6 @@ spring:
             redirect-uri: "${custom.site.backUrl}/login/oauth2/code/{registrationId}"
           naver:
             redirect-uri: "${custom.site.backUrl}/login/oauth2/code/{registrationId}"
-          github:
-            redirect-uri: "${custom.site.backUrl}/login/oauth2/code/{registrationId}"
 
 logging:
   level:
