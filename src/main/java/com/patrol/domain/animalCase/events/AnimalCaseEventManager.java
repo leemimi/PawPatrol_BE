@@ -45,18 +45,17 @@ public class AnimalCaseEventManager {
     FindPost findPost = findPostRepository.findById(event.getContentId())
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
 
-    if (!findPost.isRescue()) {
-      handleFindPost(
-          event.getAnimalId(), event.getContentType(),
-          event.getContentId(), event.getMemberId()
-      );
-
-    } else {
+    if (findPost.getStatus().equals(FindPost.Status.FOSTERING)) {
       handleRescueFindPost(
           event.getAnimalId(), event.getContentType(),
           event.getContentId(), event.getMemberId()
       );
     }
+
+    handleFindPost(
+        event.getAnimalId(), event.getContentType(),
+        event.getContentId(), event.getMemberId()
+    );
   }
 
 

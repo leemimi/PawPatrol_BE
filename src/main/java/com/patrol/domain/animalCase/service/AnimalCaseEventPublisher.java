@@ -37,7 +37,7 @@ public class AnimalCaseEventPublisher {
   public void createfindPost(FindPost findPost) {
     eventPublisher.publishEvent(new PostCreatedEvent(
         ContentType.FINDPOST, findPost.getId(),
-        findPost.getAnimalId(), (long) 1
+        findPost.getId(), (long) 1
     ));
 
     //    eventPublisher.publishEvent(new PostCreatedEvent(
@@ -51,7 +51,7 @@ public class AnimalCaseEventPublisher {
 
     eventPublisher.publishEvent(new PostCreatedEvent(
         ContentType.FINDPOST, findPost.getId(),
-        findPost.getAnimalId(), (long) 1
+        findPost.getId(), (long) 1
     ));
 
     //    eventPublisher.publishEvent(new PostCreatedEvent(

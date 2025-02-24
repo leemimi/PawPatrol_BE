@@ -53,7 +53,7 @@ public class ApiV1ProtectionController {
   public RsData<Void> createAnimalCase(
       @RequestBody CreateAnimalCaseRequest request, @LoginUser Member loginUser
   ) {
-    protectionService.createAnimalCase();
+    protectionService.createAnimalCase(request, loginUser);
     return new RsData<>("200", "임시 보호 동물 등록 성공");
   }
 

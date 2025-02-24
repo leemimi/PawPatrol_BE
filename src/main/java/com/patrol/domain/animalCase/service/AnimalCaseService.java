@@ -11,6 +11,7 @@ import com.patrol.domain.animalCase.enums.CaseStatus;
 import com.patrol.domain.animalCase.repository.AnimalCaseRepository;
 import com.patrol.domain.findPost.entity.FindPost;
 import com.patrol.domain.findPost.repository.FindPostRepository;
+import com.patrol.domain.member.member.entity.Member;
 import com.patrol.global.error.ErrorCode;
 import com.patrol.global.exception.CustomException;
 import lombok.RequiredArgsConstructor;
@@ -111,7 +112,7 @@ public class AnimalCaseService {
     FindPost findPost = findPostRepository.findById(rescueHistory.getContentId())
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
 
-    if (!findPost.getMemberId().equals(memberId)) {
+    if (!findPost.getAuthor().getId().equals(memberId)) {
       throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
     }
 

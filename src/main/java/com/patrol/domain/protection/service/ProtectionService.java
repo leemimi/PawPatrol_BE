@@ -3,7 +3,9 @@ package com.patrol.domain.protection.service;
 
 import com.patrol.api.animalCase.dto.AnimalCaseDetailResponse;
 import com.patrol.api.animalCase.dto.AnimalCaseListResponse;
+import com.patrol.api.protection.dto.CreateAnimalCaseRequest;
 import com.patrol.api.protection.dto.ProtectionResponse;
+import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.animalCase.entity.AnimalCase;
 import com.patrol.domain.animalCase.enums.CaseStatus;
 import com.patrol.domain.animalCase.service.AnimalCaseEventPublisher;
@@ -146,7 +148,11 @@ public class ProtectionService {
     animalCaseEventPublisher.rejectProjection(protection.getId(), memberId);
   }
 
-  public void createAnimalCase() {
 
+  @Transactional
+  public void createAnimalCase(CreateAnimalCaseRequest request, Member member) {
+    Animal animal = request.toAnimal();
+    AnimalCase animalCase = animalCaseService.createNewCase(CaseStatus.TEMP_PROTECT_WAITING, animal);
+    animalCase.setCurrentFoster(member);
   }
 }
