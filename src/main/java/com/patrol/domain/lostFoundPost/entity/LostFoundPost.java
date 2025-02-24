@@ -1,6 +1,7 @@
-package com.patrol.domain.findPost.entity;
+package com.patrol.domain.lostFoundPost.entity;
 
-import com.patrol.api.findPost.dto.FindPostRequestDto;
+import com.patrol.api.lostFoundPost.dto.lostFoundPostRequestDto;
+import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.image.entity.Image;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.global.jpa.BaseEntity;
@@ -9,7 +10,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +17,8 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class FindPost extends BaseEntity {
+@Table(name = "lost_found_post")
+public class LostFoundPost extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id")
@@ -26,51 +27,44 @@ public class FindPost extends BaseEntity {
     @OneToMany(mappedBy = "foundId", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images = new ArrayList<>();
 
+    @OneToOne
+    @JoinColumn(name = "pet_id", nullable = true)
+    private Animal pet;
+
     private String title;
     private String content;
     private Double latitude;
     private Double longitude;
     private String location;
     private String findTime;
-
-
+    private String lostTime;
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private PostStatus status;
 
-    public FindPost(FindPostRequestDto requestDto, Member author) {
+    public LostFoundPost(lostFoundPostRequestDto requestDto, Member author) {
         this(requestDto);
         this.author = author;
     }
 
-    // Enum 정의
-    public enum Status {
-        SIGHTED("목격"),
-        FOSTERING("임보"),
-        SHELTER("보호소");
-
-        private final String description;
-
-        Status(String description) {
-            this.description = description;
-        }
-
-        public String getDescription() {
-            return description;
-        }
+    public LostFoundPost(lostFoundPostRequestDto requestDto, Member author, Animal pet) {
+        this(requestDto);
+        this.author = author;
+        this.pet= pet;
     }
 
 
     // 생성자 (FindPostRequestDto로부터 값 초기화)
-    public FindPost(FindPostRequestDto requestDto) {
+    public LostFoundPost(lostFoundPostRequestDto requestDto) {
         this.content = requestDto.getContent();
         this.latitude = requestDto.getLatitude();
         this.longitude = requestDto.getLongitude();
         this.location = requestDto.getLocation();
         this.findTime = requestDto.getFindTime();
+        this.lostTime=requestDto.getLostTime();
         if (requestDto.getStatus() != null) {
-            this.status = Status.valueOf(requestDto.getStatus());
+            this.status = PostStatus.valueOf(requestDto.getStatus());
         } else {
-            this.status = Status.SIGHTED; // 기본값 설정
+            this.status = PostStatus.FINDING; // 기본값 설정
         }
     }
 

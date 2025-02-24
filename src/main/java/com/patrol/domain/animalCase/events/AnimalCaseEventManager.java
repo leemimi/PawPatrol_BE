@@ -8,8 +8,9 @@ import com.patrol.domain.animalCase.enums.CaseStatus;
 import com.patrol.domain.animalCase.enums.ContentType;
 import com.patrol.domain.animalCase.service.AnimalCaseService;
 import com.patrol.domain.animalCase.service.CaseHistoryService;
-import com.patrol.domain.findPost.entity.FindPost;
-import com.patrol.domain.findPost.repository.FindPostRepository;
+import com.patrol.domain.lostFoundPost.entity.LostFoundPost;
+import com.patrol.domain.lostFoundPost.entity.PostStatus;
+import com.patrol.domain.lostFoundPost.repository.LostFoundPostRepository;
 import com.patrol.domain.protection.entity.Protection;
 import com.patrol.domain.protection.service.ProtectionService;
 import com.patrol.global.error.ErrorCode;
@@ -25,7 +26,7 @@ public class AnimalCaseEventManager {
 
   private final AnimalCaseService animalCaseService;
   private final CaseHistoryService caseHistoryService;
-  private final FindPostRepository findPostRepository;
+  private final LostFoundPostRepository lostFoundPostRepository;
   private final AnimalService animalService;
   private final ProtectionService protectionService;
 
@@ -42,10 +43,10 @@ public class AnimalCaseEventManager {
 
   @Transactional
   public void handleFindPostEvent(PostCreatedEvent event) {
-    FindPost findPost = findPostRepository.findById(event.getContentId())
+    LostFoundPost lostfoundPost = lostFoundPostRepository.findById(event.getContentId())
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
 
-    if (findPost.getStatus().equals(FindPost.Status.FOSTERING)) {
+    if (lostfoundPost.getStatus().equals(PostStatus.FOSTERING)) {
       handleRescueFindPost(
           event.getAnimalId(), event.getContentType(),
           event.getContentId(), event.getMemberId()
