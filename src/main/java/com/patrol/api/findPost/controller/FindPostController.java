@@ -46,7 +46,7 @@ public class FindPostController {
 
         try {
             FindPostRequestDto requestDto = objectMapper.readValue(metadataJson, FindPostRequestDto.class);
-            FindPostResponseDto responseDto = findPostService.createFindPost(requestDto, lostPostId,loginUser.getId(), images);
+            FindPostResponseDto responseDto = findPostService.createFindPost(requestDto, lostPostId, loginUser, images);
             return new RsData<>("200", "제보 게시글을 성공적으로 등록했습니다.", responseDto);
         } catch (JsonProcessingException e) {
             return new RsData<>("400", "잘못된 JSON 형식입니다.", null);
@@ -64,7 +64,7 @@ public class FindPostController {
             @LoginUser Member loginUser) {
         try {
             FindPostRequestDto requestDto = objectMapper.readValue(metadataJson, FindPostRequestDto.class);
-            FindPostResponseDto responseDto = findPostService.updateFindPost(postId, lostPostId, requestDto, images);
+            FindPostResponseDto responseDto = findPostService.updateFindPost(postId, lostPostId, requestDto, images,loginUser);
             return new RsData<>("200", "제보 게시글을 성공적으로 수정했습니다.", responseDto);
         } catch (JsonProcessingException e) {
             return new RsData<>("400", "잘못된 JSON 형식입니다.", null);
@@ -74,8 +74,8 @@ public class FindPostController {
     // 신고글 연계 제보 게시글 삭제
     @DeleteMapping("/{postId}")
     @Operation(summary = "신고글 연계 제보 게시글 삭제")
-    public RsData<Void> deleteFindPost(@PathVariable Long postId) {
-        findPostService.deleteFindPost(postId);
+    public RsData<Void> deleteFindPost(@PathVariable Long postId,@LoginUser Member loginUser) {
+        findPostService.deleteFindPost(postId,loginUser);
         return new RsData<>("200", "제보 게시글을 성공적으로 삭제했습니다.");
     }
 
@@ -99,7 +99,7 @@ public class FindPostController {
             @LoginUser Member loginUser) {
         try {
             FindPostRequestDto requestDto = objectMapper.readValue(metadataJson, FindPostRequestDto.class);
-            FindPostResponseDto responseDto = findPostService.createStandaloneFindPost(requestDto, images, loginUser.getId());
+            FindPostResponseDto responseDto = findPostService.createStandaloneFindPost(requestDto, loginUser, images);
             return new RsData<>("200", "독립적인 제보 게시글을 성공적으로 등록했습니다.", responseDto);
         } catch (JsonProcessingException e) {
             return new RsData<>("400", "잘못된 JSON 형식입니다.", null);
@@ -116,7 +116,7 @@ public class FindPostController {
             @LoginUser Member loginUser) {
         try {
             FindPostRequestDto requestDto = objectMapper.readValue(metadataJson, FindPostRequestDto.class);
-            FindPostResponseDto responseDto = findPostService.updateStandaloneFindPost(postId, requestDto, images);
+            FindPostResponseDto responseDto = findPostService.updateStandaloneFindPost(postId, requestDto, images,loginUser);
             return new RsData<>("200", "독립적인 제보 게시글을 성공적으로 수정했습니다.", responseDto);
         } catch (JsonProcessingException e) {
             return new RsData<>("400", "잘못된 JSON 형식입니다.", null);
@@ -127,8 +127,8 @@ public class FindPostController {
     // 독립적인 제보 게시글 삭제
     @DeleteMapping("/find-standalone/{postId}")
     @Operation(summary = "독립적인 제보 게시글 삭제")
-    public RsData<Void> deleteStandaloneFindPost(@PathVariable(name = "postId") Long postId) {
-        findPostService.deleteStandaloneFindPost(postId);
+    public RsData<Void> deleteStandaloneFindPost(@PathVariable(name = "postId") Long postId,@LoginUser Member loginUser) {
+        findPostService.deleteStandaloneFindPost(postId,loginUser);
         return new RsData<>("200", "독립적인 제보 게시글을 성공적으로 삭제했습니다.");
     }
 
@@ -149,5 +149,13 @@ public class FindPostController {
     public RsData<FindPostResponseDto> getStandaloneFindPostById(@PathVariable(name = "postId") Long postId) {
         FindPostResponseDto responseDto = findPostService.getStandaloneFindPostById(postId);
         return new RsData<>("200", "독립적인 제보 게시글을 성공적으로 조회했습니다.", responseDto);
+    }
+
+    // 신고 연계 제보 게시글 상세 조회
+    @GetMapping("/find/{postId}")
+    @Operation(summary = "신고 연계 제보 게시글 상세 조회")
+    public RsData<FindPostResponseDto> getFindPostById(@PathVariable(name = "postId") Long postId) {
+        FindPostResponseDto responseDto = findPostService.getFindPostById(postId);
+        return new RsData<>("200", "신고 연계 제보 게시글을 성공적으로 조회했습니다.", responseDto);
     }
 }

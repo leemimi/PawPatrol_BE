@@ -65,6 +65,14 @@ public class ApiSecurityConfig {
         .securityMatcher("/api/**", "/oauth2/**", "/login/oauth2/**", "/login/**")
         .authorizeHttpRequests(
             authorizeRequests -> authorizeRequests
+                    .requestMatchers(HttpMethod.GET, "/api/lost-found/find/{postId}").permitAll()  // ✅ 신고 연계 제보 게시글 상세 조회 허용
+                    // Allow specific actions related to comments and lost-post/find-post
+                    .requestMatchers(HttpMethod.GET, "/api/comments/lost-post/{lostPostId}").permitAll() // Comments for lost-post
+                    .requestMatchers(HttpMethod.GET, "/api/comments/find-post/{findPostId}").permitAll() // Comments for find-post
+                    .requestMatchers(HttpMethod.POST, "/api/comments").permitAll() // Create comment
+                    .requestMatchers(HttpMethod.PUT, "/api/comments/{commentId}").permitAll() // Update comment
+                    .requestMatchers(HttpMethod.DELETE, "/api/comments/{commentId}").permitAll() // Delete comment
+                    .requestMatchers(HttpMethod.GET, "/api/lost-found/lost/{postId}/find-posts").permitAll()  // ✅ 특정 실종 신고글의 제보글 목록 조회 허용
                     .requestMatchers(HttpMethod.POST, "/api/lost-found/lost").permitAll()  // 실종 신고 게시글 등록
                     .requestMatchers(HttpMethod.PUT, "/api/lost-found/lost/{postId}").permitAll()  // 실종 신고 게시글 수정
                     .requestMatchers(HttpMethod.DELETE, "/api/lost-found/lost/{postId}").permitAll()  // 실종 신고 게시글 삭제

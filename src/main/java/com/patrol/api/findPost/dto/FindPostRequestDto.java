@@ -13,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FindPostRequestDto {
+    //private Long authorId;
     private String title;
     private String content;
     private List<String> tags;

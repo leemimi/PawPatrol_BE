@@ -30,10 +30,14 @@ public abstract class BaseEntity {
   @EqualsAndHashCode.Include
   private Long id;
 
+
   @CreatedDate
   @Column(updatable = false)
   private LocalDateTime createdAt;
 
   @LastModifiedDate
   private LocalDateTime modifiedAt;
+  public Long getId() {
+    return id;
+  }
 }
