@@ -34,6 +34,8 @@ public class QLostPost extends EntityPathBase<LostPost> {
     //inherited
     public final NumberPath<Long> id = _super.id;
 
+    public final ListPath<com.patrol.domain.image.entity.Image, com.patrol.domain.image.entity.QImage> images = this.<com.patrol.domain.image.entity.Image, com.patrol.domain.image.entity.QImage>createList("images", com.patrol.domain.image.entity.Image.class, com.patrol.domain.image.entity.QImage.class, PathInits.DIRECT2);
+
     public final NumberPath<Double> latitude = createNumber("latitude", Double.class);
 
     public final StringPath location = createString("location");
