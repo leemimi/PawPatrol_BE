@@ -83,6 +83,7 @@ public class ApiSecurityConfig {
                 .requestMatchers("/oauth2/**").permitAll()
                 .requestMatchers("/login/oauth2/**").permitAll()
                 .requestMatchers("/login/**").permitAll()
+                    .requestMatchers("/").permitAll()
                 .anyRequest().authenticated()
         )
         .headers(headers ->
