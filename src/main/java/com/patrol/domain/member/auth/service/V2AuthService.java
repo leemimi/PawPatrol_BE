@@ -101,6 +101,10 @@ public class V2AuthService {
         );
     }
 
+    // 엑세스 토큰 발행
+    public String genAccessToken(Member member) {
+        return authTokenService.genAccessToken(member);
+    }
 
     /**
      * 기존 계정(loginUser)에 소셜 계정 정보를 연동
