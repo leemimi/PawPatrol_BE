@@ -10,6 +10,7 @@ import com.patrol.global.exceptions.ServiceException;
 import com.patrol.global.storage.FileStorageHandler;
 import com.patrol.global.storage.FileUploadRequest;
 import com.patrol.global.storage.FileUploadResult;
+import com.patrol.global.storage.StorageConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +33,7 @@ public class V2MemberService {
     private final V2MemberRepository v2MemberRepository;
     private final AnimalRepository animalRepository;
     private final FileStorageHandler fileStorageHandler;
+    private final StorageConfig storageConfig;
 
     // 회원 정보 가져오기
     @Transactional
@@ -61,12 +63,17 @@ public class V2MemberService {
                         .build()
         );
 
+        String imageUrl = storageConfig.getEndpoint()
+                + "/"
+                + storageConfig.getBucketname()
+                + "/"
+                + uploadResult.getFullPath();
+
         // 동물 등록
         if(uploadResult != null) {
-            Animal animal = petRegisterRequest.buildAnimal(member, uploadResult.getFullPath());
+            Animal animal = petRegisterRequest.buildAnimal(member, imageUrl);
             animalRepository.save(animal);
         }
-
 
     }
 }
