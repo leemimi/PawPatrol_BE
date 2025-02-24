@@ -32,12 +32,17 @@ public class AnimalCaseEventHandler {
 
   @EventListener
   public void handleProtectionStatusChange(ProtectionStatusChangeEvent event) {
-        animalCaseEventManager.updateStatus(
+        animalCaseEventManager.handleProtectionStatusChange(
             event.getProtectionId(),
             event.getMemberId(),
             event.getToStatus(),
             event.getHistoryStatus()
         );
+  }
+
+  @EventListener
+  public void handleProtectionCreated(ProtectionCreatedEvent event) {
+    animalCaseEventManager.handleProtectionCreated(event);
   }
 
 }

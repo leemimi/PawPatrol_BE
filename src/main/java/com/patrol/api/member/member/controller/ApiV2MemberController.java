@@ -6,10 +6,7 @@ import com.patrol.domain.member.member.service.V2MemberService;
 import com.patrol.global.globalDto.GlobalResponse;
 import com.patrol.global.webMvc.LoginUser;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * packageName    : com.patrol.api.member.member.controller
@@ -31,7 +28,7 @@ public class ApiV2MemberController {
     // 마이페이지 > 반려동물 등록
     @PostMapping("/pets/register")
     public GlobalResponse<Void> petRegister(@LoginUser Member member,
-                                            @RequestBody PetRegisterRequest petRegisterRequest) {
+                                            @ModelAttribute PetRegisterRequest petRegisterRequest) {
 
         v2MemberService.petRegister(member, petRegisterRequest);
 

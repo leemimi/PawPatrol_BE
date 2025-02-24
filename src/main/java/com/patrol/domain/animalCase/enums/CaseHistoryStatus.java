@@ -13,6 +13,7 @@ public enum CaseHistoryStatus {
   RESCUE_REPORT("구조 제보"), // 누군가 구조했다고 제보
 
   // 임시보호 관련
+  TEMP_PROTECT_REGISTERED("임시보호 등록"),
   TEMP_PROTECT_WAIT("임시보호 대기"), // 임시보호 대기
   TEMP_PROTECT_REQUEST("임시보호 신청"), // 임시보호 신청
   TEMP_PROTECT_APPROVED("임시보호 승인(시작)"), // 임시보호 승인

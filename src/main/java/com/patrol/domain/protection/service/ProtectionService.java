@@ -6,7 +6,9 @@ import com.patrol.api.animalCase.dto.AnimalCaseListResponse;
 import com.patrol.api.protection.dto.CreateAnimalCaseRequest;
 import com.patrol.api.protection.dto.ProtectionResponse;
 import com.patrol.domain.animal.entity.Animal;
+import com.patrol.domain.animal.repository.AnimalRepository;
 import com.patrol.domain.animalCase.entity.AnimalCase;
+import com.patrol.domain.animalCase.enums.CaseHistoryStatus;
 import com.patrol.domain.animalCase.enums.CaseStatus;
 import com.patrol.domain.animalCase.service.AnimalCaseEventPublisher;
 import com.patrol.domain.animalCase.service.AnimalCaseService;
@@ -36,6 +38,7 @@ public class ProtectionService {
   private final AnimalCaseService animalCaseService;
   private final MemberService memberService;
   private final AnimalCaseEventPublisher animalCaseEventPublisher;
+  private final AnimalRepository animalRepository;
 
 
   public AnimalCaseDetailResponse findPossibleAnimalCase(Long caseId) {
@@ -86,8 +89,8 @@ public class ProtectionService {
         .protectionStatus(ProtectionStatus.PENDING)
         .build();
 
-
     protectionRepository.save(protection);
+    animalCaseEventPublisher.applyProtection(protection.getId(), memberId, animalCase.getStatus());
     return ProtectionResponse.of(protection);
   }
 
@@ -131,19 +134,15 @@ public class ProtectionService {
     Protection protection = protectionRepository.findById(protectionId)
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
 
-    // 상태 검증
-    if (protection.getProtectionStatus() != ProtectionStatus.PENDING) {
+    if (protection.getProtectionStatus() != ProtectionStatus.PENDING) {  // 상태 검증
       throw new CustomException(ErrorCode.INVALID_STATUS_CHANGE);
     }
 
-    // 케이스 상태 검증
-    if (protection.getAnimalCase().getStatus() != CaseStatus.TEMP_PROTECT_WAITING) {
+    if (protection.getAnimalCase().getStatus() != CaseStatus.TEMP_PROTECT_WAITING) {  // 케이스 상태 검증
       throw new CustomException(ErrorCode.INVALID_STATUS_CHANGE);
     }
 
-    // 권한 검증 - 구조글 작성자만 거절 가능
-    animalCaseService.validateRescuePostOwner(protection.getAnimalCase().getId(), memberId);
-
+    animalCaseService.validateRescuePostOwner(protection.getAnimalCase().getId(), memberId); // 권한 검증
     protection.reject(rejectReason);
     animalCaseEventPublisher.rejectProjection(protection.getId(), memberId);
   }
@@ -152,7 +151,7 @@ public class ProtectionService {
   @Transactional
   public void createAnimalCase(CreateAnimalCaseRequest request, Member member) {
     Animal animal = request.toAnimal();
-    AnimalCase animalCase = animalCaseService.createNewCase(CaseStatus.TEMP_PROTECT_WAITING, animal);
-    animalCase.setCurrentFoster(member);
+    animalRepository.save(animal);
+    animalCaseEventPublisher.createProtection(member, animal);
   }
 }

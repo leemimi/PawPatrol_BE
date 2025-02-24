@@ -113,7 +113,7 @@ public class AnimalCaseEventManager {
 
   // ProtectionStatusChange 처리
   @Transactional
-  public void updateStatus(
+  public void handleProtectionStatusChange(
       Long protectionId, Long memberId, CaseStatus toStatus, CaseHistoryStatus historyStatus
   ) {
     Protection protection = protectionService.findById(protectionId)
@@ -145,5 +145,13 @@ public class AnimalCaseEventManager {
     if (toStatus.equals(CaseStatus.TEMP_PROTECT_WAITING)) {
       animalCaseService.validateRescuePostOwner(animalCase.getId(), memberId);
     }
+  }
+
+
+  // ProtectionCreated
+  @Transactional
+  public void handleProtectionCreated(ProtectionCreatedEvent event) {
+    AnimalCase animalCase = animalCaseService.createNewCase(CaseStatus.TEMP_PROTECT_WAITING, event.getAnimal());
+    animalCase.setCurrentFoster(event.getMember());
   }
 }
