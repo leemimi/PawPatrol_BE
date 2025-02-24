@@ -4,11 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.patrol.api.findPost.dto.FindPostRequestDto;
 import com.patrol.api.findPost.dto.FindPostResponseDto;
-import com.patrol.api.lostpost.dto.LostPostRequestDto;
 import com.patrol.api.lostpost.dto.LostPostResponseDto;
-import com.patrol.domain.lostpost.service.LostPostService;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.global.rsData.RsData;
 import com.patrol.global.webMvc.LoginUser;
@@ -28,7 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LostPostController {
 
-    private final LostPostService lostPostService;
+    private final com.patrol.domain.LostPost.service.LostPostService lostPostService;
     private final ObjectMapper objectMapper;  // JSON 파싱을 위한 ObjectMapper
 
     @PostMapping
@@ -44,7 +41,7 @@ public class LostPostController {
 
         try {
             // JSON을 DTO로 변환
-            LostPostRequestDto requestDto = objectMapper.readValue(metadataJson, LostPostRequestDto.class);
+            com.patrol.api.LostPost.dto.LostPostRequestDto requestDto = objectMapper.readValue(metadataJson, com.patrol.api.LostPost.dto.LostPostRequestDto.class);
 
             // 게시글 생성
             LostPostResponseDto responseDto = lostPostService.createLostPost(requestDto, images, loginUser);
@@ -66,7 +63,7 @@ public class LostPostController {
             @RequestParam(value = "images", required = false) List<MultipartFile> images,
             @LoginUser Member loginUser) {
         try {
-            LostPostRequestDto requestDto = objectMapper.readValue(metadataJson, LostPostRequestDto.class);
+            com.patrol.api.LostPost.dto.LostPostRequestDto requestDto = objectMapper.readValue(metadataJson, com.patrol.api.LostPost.dto.LostPostRequestDto.class);
             LostPostResponseDto responseDto = lostPostService.updateLostPost(postId, requestDto, images,loginUser);
             return new RsData<>("200", "신고 게시글을 성공적으로 수정했습니다.", responseDto);
         } catch (JsonProcessingException e) {

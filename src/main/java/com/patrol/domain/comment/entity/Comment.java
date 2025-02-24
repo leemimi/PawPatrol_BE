@@ -2,7 +2,7 @@ package com.patrol.domain.comment.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.patrol.domain.findPost.entity.FindPost;
-import com.patrol.domain.lostpost.entity.LostPost;
+import com.patrol.domain.lostPost.entity.LostPost;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.global.jpa.BaseEntity;
 import jakarta.persistence.*;

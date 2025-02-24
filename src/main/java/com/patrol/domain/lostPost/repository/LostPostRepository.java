@@ -1,5 +1,5 @@
-package com.patrol.domain.lostpost.repository;
-import com.patrol.domain.lostpost.entity.LostPost;
+package com.patrol.domain.lostPost.repository;
+import com.patrol.domain.lostPost.entity.LostPost;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

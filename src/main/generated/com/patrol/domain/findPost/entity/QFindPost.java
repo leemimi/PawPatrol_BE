@@ -52,7 +52,7 @@ public class QFindPost extends EntityPathBase<FindPost> {
 
     public final NumberPath<Double> longitude = createNumber("longitude", Double.class);
 
-    public final com.patrol.domain.lostpost.entity.QLostPost lostPost;
+    public final com.patrol.domain.lostPost.entity.QLostPost lostPost;
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;
@@ -88,7 +88,7 @@ public class QFindPost extends EntityPathBase<FindPost> {
     public QFindPost(Class<? extends FindPost> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.author = inits.isInitialized("author") ? new com.patrol.domain.member.member.entity.QMember(forProperty("author"), inits.get("author")) : null;
-        this.lostPost = inits.isInitialized("lostPost") ? new com.patrol.domain.lostpost.entity.QLostPost(forProperty("lostPost"), inits.get("lostPost")) : null;
+        this.lostPost = inits.isInitialized("lostPost") ? new com.patrol.domain.lostPost.entity.QLostPost(forProperty("lostPost"), inits.get("lostPost")) : null;
     }
 
 }

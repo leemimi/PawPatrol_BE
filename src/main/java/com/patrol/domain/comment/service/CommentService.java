@@ -6,15 +6,14 @@ import com.patrol.domain.comment.entity.Comment;
 import com.patrol.domain.comment.repository.CommentRepository;
 import com.patrol.domain.findPost.entity.FindPost;
 import com.patrol.domain.findPost.repository.FindPostRepository;
-import com.patrol.domain.lostpost.entity.LostPost;
-import com.patrol.domain.lostpost.repository.LostPostRepository;
+import com.patrol.domain.lostPost.entity.LostPost;
+import com.patrol.domain.lostPost.repository.LostPostRepository;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
