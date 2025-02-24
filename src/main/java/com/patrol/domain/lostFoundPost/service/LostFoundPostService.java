@@ -1,20 +1,21 @@
-package com.patrol.domain.findPost.service;
+package com.patrol.domain.lostFoundPost.service;
 
-import com.patrol.api.findPost.dto.FindPostRequestDto;
-import com.patrol.api.findPost.dto.FindPostResponseDto;
-import com.patrol.domain.findPost.entity.FindPost;
-import com.patrol.domain.findPost.repository.FindPostRepository;
-import com.patrol.domain.lostPost.repository.LostPostRepository;
+import com.patrol.api.lostFoundPost.dto.lostFoundPostRequestDto;
+import com.patrol.api.lostFoundPost.dto.lostFoundPostResponseDto;
+import com.patrol.domain.animal.entity.Animal;
+import com.patrol.domain.animal.repository.AnimalRepository;
+import com.patrol.domain.lostFoundPost.entity.LostFoundPost;
+import com.patrol.domain.lostFoundPost.repository.LostFoundPostRepository;
 import com.patrol.domain.image.entity.Image;
 import com.patrol.domain.image.repository.ImageRepository;
 import com.patrol.domain.member.member.entity.Member;
-import com.patrol.domain.member.member.repository.MemberRepository;
 import com.patrol.global.error.ErrorCode;
 import com.patrol.global.exception.CustomException;
 import com.patrol.global.storage.FileStorageHandler;
 import com.patrol.global.storage.FileUploadRequest;
 import com.patrol.global.storage.FileUploadResult;
 import com.patrol.global.storage.NcpObjectStorageService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,21 +29,25 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class FindPostService {
+public class LostFoundPostService {
     private final FileStorageHandler fileStorageHandler;
-    private final FindPostRepository findPostRepository;
+    private final LostFoundPostRepository lostFoundPostRepository;
+    private final AnimalRepository animalRepository;
     private final ImageRepository imageRepository;
     private final NcpObjectStorageService ncpObjectStorageService;
 
     @Transactional
-    public FindPostResponseDto createFindPost(FindPostRequestDto requestDto, Member author, List<MultipartFile> images) {
+    public lostFoundPostResponseDto createLostFoundPost(lostFoundPostRequestDto requestDto, Long petId, Member author, List<MultipartFile> images) {
 
-        // FindPost 객체 생성 시 lostPost를 전달
-        FindPost findPost = new FindPost(requestDto, author);
-        findPostRepository.save(findPost);  // Id를 생성하기 위해 먼저 저장
+        Animal pet = null;
+        if (petId != null) {
+            pet = animalRepository.findById(petId)
+                    .orElseThrow(() -> new EntityNotFoundException("Pet not found"));
+        }
 
+        LostFoundPost lostFoundPost = new LostFoundPost(requestDto, author, pet);
+        lostFoundPostRepository.save(lostFoundPost);
 
-        // 여러 개 이미지 업로드
         if (images != null && !images.isEmpty()) {
             List<String> uploadedPaths = new ArrayList<>();
 
@@ -50,7 +55,7 @@ public class FindPostService {
                 for (MultipartFile image : images) {
                     FileUploadResult uploadResult = fileStorageHandler.handleFileUpload(
                             FileUploadRequest.builder()
-                                    .folderPath("findpost/")
+                                    .folderPath("lostfoundpost/")
                                     .file(image)
                                     .build()
                     );
@@ -60,10 +65,10 @@ public class FindPostService {
 
                         Image imageEntity = Image.builder()
                                 .path(uploadResult.getFileName())
-                                .foundId(findPost.getId())
+                                .foundId(lostFoundPost.getId())
                                 .build();
 
-                        findPost.addImage(imageEntity);
+                        lostFoundPost.addImage(imageEntity);
                         imageRepository.save(imageEntity);
                     }
                 }
@@ -77,24 +82,21 @@ public class FindPostService {
             }
         }
 
-        return FindPostResponseDto.from(findPost);
+        return lostFoundPostResponseDto.from(lostFoundPost);
     }
 
     @Transactional
-    public FindPostResponseDto updateFindPost(Long postId, FindPostRequestDto requestDto, List<MultipartFile> images,Member author) {
-        FindPost findPost = findPostRepository.findById(postId)
+    public lostFoundPostResponseDto updateLostFoundPost(Long postId, lostFoundPostRequestDto requestDto, List<MultipartFile> images, Member author) {
+        LostFoundPost lostFoundPost = lostFoundPostRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
 
-
-        // 로그인한 사용자(author)가 게시글 작성자와 일치하는지 확인
-        if (!findPost.getAuthor().equals(author)) {
+        if (!lostFoundPost.getAuthor().equals(author)) {
             throw new RuntimeException("게시글 수정 권한이 없습니다.");
         }
 
-        findPost.setContent(requestDto.getContent());
-        findPost.setFindTime(requestDto.getFindTime());
+        lostFoundPost.setContent(requestDto.getContent());
+        lostFoundPost.setFindTime(requestDto.getFindTime());
 
-        // 새로운 이미지 업로드
         if (images != null && !images.isEmpty()) {
             List<String> uploadedPaths = new ArrayList<>();
 
@@ -102,7 +104,7 @@ public class FindPostService {
                 for (MultipartFile image : images) {
                     FileUploadResult uploadResult = fileStorageHandler.handleFileUpload(
                             FileUploadRequest.builder()
-                                    .folderPath("findpost/")
+                                    .folderPath("lostfoundpost/")
                                     .file(image)
                                     .build()
                     );
@@ -112,7 +114,7 @@ public class FindPostService {
 
                         Image imageEntity = Image.builder()
                                 .path(uploadResult.getFileName())
-                                .foundId(findPost.getId())
+                                .foundId(lostFoundPost.getId())
                                 .build();
 
                         imageRepository.save(imageEntity);
@@ -127,17 +129,17 @@ public class FindPostService {
             }
         }
 
-        return FindPostResponseDto.from(findPost);
+        return lostFoundPostResponseDto.from(lostFoundPost);
     }
 
 
     @Transactional
-    public void deleteFindPost(Long postId,Member author) {
-        FindPost findPost = findPostRepository.findById(postId)
+    public void deleteLostFoundPost(Long postId,Member author) {
+        LostFoundPost lostFoundPost = lostFoundPostRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
 
         // 로그인한 사용자(author)가 게시글 작성자와 일치하는지 확인
-        if (!findPost.getAuthor().equals(author)) {
+        if (!lostFoundPost.getAuthor().equals(author)) {
             throw new RuntimeException("게시글 수정 권한이 없습니다.");
         }
         // 이미지 조회 및 삭제
@@ -147,30 +149,30 @@ public class FindPostService {
             imageRepository.delete(image);
         });
 
-        findPostRepository.deleteById(postId);
+        lostFoundPostRepository.deleteById(postId);
     }
 
 
     @Transactional(readOnly = true)
-    public Page<FindPostResponseDto> getAllFindPosts(Pageable pageable) {
-        Page<FindPost> findPosts = findPostRepository.findAll(pageable) ;
-        return findPosts.map(FindPostResponseDto::from);
+    public Page<lostFoundPostResponseDto> getAllLostFoundPosts(Pageable pageable) {
+        Page<LostFoundPost> findPosts = lostFoundPostRepository.findAll(pageable) ;
+        return findPosts.map(lostFoundPostResponseDto::from);
     }
 
 
     @Transactional(readOnly = true)
-    public FindPostResponseDto getFindPostById(Long postId){
-        FindPost findPost = findPostRepository.findById(postId)
+    public lostFoundPostResponseDto getLostFoundPostById(Long postId){
+        LostFoundPost lostFoundPost = lostFoundPostRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
 
-        return FindPostResponseDto.from(findPost);
+        return lostFoundPostResponseDto.from(lostFoundPost);
     }
 
     @Transactional(readOnly=true)
-    public List<FindPostResponseDto> getFindPostsWithinRadius(double latitude, double longitude, double radius) {
-        List<FindPost> findPosts = findPostRepository.findPostsWithinRadius(latitude, longitude, radius);
-        return findPosts.stream()
-                .map(FindPostResponseDto::from)
+    public List<lostFoundPostResponseDto> getLostFoundPostsWithinRadius(double latitude, double longitude, double radius) {
+        List<LostFoundPost> lostFoundPosts = lostFoundPostRepository.findPostsWithinRadius(latitude, longitude, radius);
+        return lostFoundPosts.stream()
+                .map(lostFoundPostResponseDto::from)
                 .collect(Collectors.toList());
     }
 
