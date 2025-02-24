@@ -7,7 +7,7 @@ spring:
   autoconfigure:
     exclude:
       lifecycle:
-        timeout-per-shutdown-phase: 1h
+       timeout-per-shutdown-phase: 1h
   jpa:
     hibernate:
       ddl-auto: update
