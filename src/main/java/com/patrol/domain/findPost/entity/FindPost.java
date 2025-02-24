@@ -19,6 +19,8 @@ import java.util.List;
 @NoArgsConstructor
 public class FindPost extends BaseEntity {
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id")
     private Member author;
 
     @OneToMany(mappedBy = "foundId", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -1,10 +1,7 @@
 package com.patrol.api.findPost.dto;
 
-import io.swagger.v3.oas.annotations.info.Info;
 import lombok.*;
 
-import java.time.LocalDate;
-import java.util.List;
 
 @Getter
 @Setter

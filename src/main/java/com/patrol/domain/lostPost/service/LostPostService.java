@@ -1,12 +1,12 @@
-package com.patrol.domain.findPost.service;
+package com.patrol.domain.lostPost.service;
 
-import com.patrol.api.findPost.dto.FindPostRequestDto;
-import com.patrol.api.findPost.dto.FindPostResponseDto;
-import com.patrol.domain.findPost.entity.FindPost;
+import com.patrol.api.lostPost.dto.LostPostRequestDto;
+import com.patrol.api.lostPost.dto.LostPostResponseDto;
 import com.patrol.domain.findPost.repository.FindPostRepository;
-import com.patrol.domain.lostPost.repository.LostPostRepository;
 import com.patrol.domain.image.entity.Image;
 import com.patrol.domain.image.repository.ImageRepository;
+import com.patrol.domain.lostPost.entity.LostPost;
+import com.patrol.domain.lostPost.repository.LostPostRepository;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.repository.MemberRepository;
 import com.patrol.global.error.ErrorCode;
@@ -28,19 +28,24 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class FindPostService {
-    private final FileStorageHandler fileStorageHandler;
+public class LostPostService {
+    private final LostPostRepository lostPostRepository;
     private final FindPostRepository findPostRepository;
+    private final FileStorageHandler fileStorageHandler;
+    // Inject LostPostRepository
     private final ImageRepository imageRepository;
     private final NcpObjectStorageService ncpObjectStorageService;
+    private final MemberRepository memberRepository;
 
     @Transactional
-    public FindPostResponseDto createFindPost(FindPostRequestDto requestDto, Member author, List<MultipartFile> images) {
+    public LostPostResponseDto createLostPost(LostPostRequestDto requestDto, List<MultipartFile> images, Member author) {
+        // 실종 게시글 조회 또는 새로 생성
+        LostPost lostPost;
 
-        // FindPost 객체 생성 시 lostPost를 전달
-        FindPost findPost = new FindPost(requestDto, author);
-        findPostRepository.save(findPost);  // Id를 생성하기 위해 먼저 저장
+        lostPost = new LostPost(requestDto, author);  // 새 게시글 생성
 
+
+        lostPostRepository.save(lostPost);  // 저장하여 ID 생성
 
         // 여러 개 이미지 업로드
         if (images != null && !images.isEmpty()) {
@@ -50,7 +55,7 @@ public class FindPostService {
                 for (MultipartFile image : images) {
                     FileUploadResult uploadResult = fileStorageHandler.handleFileUpload(
                             FileUploadRequest.builder()
-                                    .folderPath("findpost/")
+                                    .folderPath("lostpost/")
                                     .file(image)
                                     .build()
                     );
@@ -60,10 +65,10 @@ public class FindPostService {
 
                         Image imageEntity = Image.builder()
                                 .path(uploadResult.getFileName())
-                                .foundId(findPost.getId())
+                                .lostId(lostPost.getId())
                                 .build();
 
-                        findPost.addImage(imageEntity);
+                        lostPost.addImage(imageEntity);
                         imageRepository.save(imageEntity);
                     }
                 }
@@ -77,22 +82,26 @@ public class FindPostService {
             }
         }
 
-        return FindPostResponseDto.from(findPost);
+        // 최종적으로 생성된 LostPost 반환
+        return LostPostResponseDto.from(lostPost);
     }
 
+
+
     @Transactional
-    public FindPostResponseDto updateFindPost(Long postId, FindPostRequestDto requestDto, List<MultipartFile> images,Member author) {
-        FindPost findPost = findPostRepository.findById(postId)
+    public LostPostResponseDto updateLostPost(Long postId, LostPostRequestDto requestDto, List<MultipartFile> images, Member loginUser) {
+        LostPost lostPost = lostPostRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
 
 
         // 로그인한 사용자(author)가 게시글 작성자와 일치하는지 확인
-        if (!findPost.getAuthor().equals(author)) {
+        if (!lostPost.getAuthor().equals(loginUser)) {
             throw new RuntimeException("게시글 수정 권한이 없습니다.");
         }
 
-        findPost.setContent(requestDto.getContent());
-        findPost.setFindTime(requestDto.getFindTime());
+        lostPost.setContent(requestDto.getContent());
+        lostPost.setLostTime(requestDto.getLostTime());
+
 
         // 새로운 이미지 업로드
         if (images != null && !images.isEmpty()) {
@@ -102,7 +111,7 @@ public class FindPostService {
                 for (MultipartFile image : images) {
                     FileUploadResult uploadResult = fileStorageHandler.handleFileUpload(
                             FileUploadRequest.builder()
-                                    .folderPath("findpost/")
+                                    .folderPath("lostpost/")
                                     .file(image)
                                     .build()
                     );
@@ -112,7 +121,7 @@ public class FindPostService {
 
                         Image imageEntity = Image.builder()
                                 .path(uploadResult.getFileName())
-                                .foundId(findPost.getId())
+                                .foundId(lostPost.getId())
                                 .build();
 
                         imageRepository.save(imageEntity);
@@ -127,53 +136,41 @@ public class FindPostService {
             }
         }
 
-        return FindPostResponseDto.from(findPost);
+        return LostPostResponseDto.from(lostPost);
     }
 
 
     @Transactional
-    public void deleteFindPost(Long postId,Member author) {
-        FindPost findPost = findPostRepository.findById(postId)
+    public void deleteLostPost(Long postId,Member loginUser) {
+        LostPost lostPost = lostPostRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
 
-        // 로그인한 사용자(author)가 게시글 작성자와 일치하는지 확인
-        if (!findPost.getAuthor().equals(author)) {
-            throw new RuntimeException("게시글 수정 권한이 없습니다.");
+        // 삭제하려는 게시글의 작성자와 로그인한 사용자가 일치하는지 확인
+        if (!lostPost.getAuthor().equals(loginUser)) {
+            throw new RuntimeException("본인이 작성한 게시글만 삭제할 수 있습니다.");
         }
-        // 이미지 조회 및 삭제
-        List<Image> images = imageRepository.findAllByFoundId(postId);
-        images.forEach(image -> {
-            ncpObjectStorageService.delete(image.getPath());
-            imageRepository.delete(image);
-        });
-
-        findPostRepository.deleteById(postId);
+        lostPostRepository.deleteById(postId);
     }
 
-
     @Transactional(readOnly = true)
-    public Page<FindPostResponseDto> getAllFindPosts(Pageable pageable) {
-        Page<FindPost> findPosts = findPostRepository.findAll(pageable) ;
-        return findPosts.map(FindPostResponseDto::from);
+    public Page<LostPostResponseDto> getAllLostPosts(Pageable pageable) {
+        return lostPostRepository.findAll(pageable).map(LostPostResponseDto::new);
     }
 
-
     @Transactional(readOnly = true)
-    public FindPostResponseDto getFindPostById(Long postId){
-        FindPost findPost = findPostRepository.findById(postId)
+    public LostPostResponseDto getLostPostById(Long postId) {
+        LostPost lostPost = lostPostRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
-
-        return FindPostResponseDto.from(findPost);
+        return new LostPostResponseDto(lostPost);
     }
 
     @Transactional(readOnly=true)
-    public List<FindPostResponseDto> getFindPostsWithinRadius(double latitude, double longitude, double radius) {
-        List<FindPost> findPosts = findPostRepository.findPostsWithinRadius(latitude, longitude, radius);
-        return findPosts.stream()
-                .map(FindPostResponseDto::from)
+    public List<LostPostResponseDto> getLostPostsWithinRadius(double latitude, double longitude, double radius) {
+        // 위도/경도 기반으로 반경 내의 게시물 조회
+        List<LostPost> lostPosts = lostPostRepository.lostPostsWithinRadius(latitude, longitude, radius);
+        return lostPosts.stream()
+                .map(LostPostResponseDto::from)
                 .collect(Collectors.toList());
     }
 
 }
-
-

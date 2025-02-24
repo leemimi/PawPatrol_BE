@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/comments")
+@RequestMapping("/api/v1/comments")
 @RequiredArgsConstructor
 public class CommentController {
     private final CommentService commentService;
@@ -39,14 +39,14 @@ public class CommentController {
         return new RsData<>("200", "댓글이 삭제되었습니다.");
     }
 
-    @GetMapping("/lost-post/{lostPostId}")
+    @GetMapping("/lostposts/{lostPostId}")
     @Operation(summary = "신고글에 대한 댓글 조회")
     public RsData<List<CommentResponseDto>> getCommentsByLostPost(@PathVariable(name = "lostPostId") Long lostPostId) {
         List<CommentResponseDto> comments = commentService.getCommentsByLostPost(lostPostId);
         return new RsData<>("200", "댓글 목록 조회 성공", comments);
     }
 
-    @GetMapping("/find-post/{findPostId}")
+    @GetMapping("/findposts/{findPostId}")
     @Operation(summary = "제보글에 대한 댓글 조회")
     public RsData<List<CommentResponseDto>> getCommentsByFindPost(@PathVariable(name = "findPostId") Long findPostId) {
         List<CommentResponseDto> comments = commentService.getCommentsByFindPost(findPostId);

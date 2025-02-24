@@ -1,10 +1,10 @@
-package com.patrol.api.LostPost.dto;
+package com.patrol.api.lostPost.dto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Getter
 @Builder
@@ -15,6 +15,6 @@ public class LostPostRequestDto {
     private String location;
     private Double latitude;
     private Double longitude;
-    private String lostTime;
+    private LocalDateTime lostTime;
     private String status;
 }
