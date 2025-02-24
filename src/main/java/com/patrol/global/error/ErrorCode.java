@@ -23,7 +23,11 @@ public enum ErrorCode {
 
 
     // AnimalCase
-    INVALID_CASE(HttpStatus.BAD_REQUEST, "실종 신고는 MY_PET 타입만 가능");
+    INVALID_CASE(HttpStatus.BAD_REQUEST, "유효하지 않은 케이스입니다."),
+    INVALID_STATUS_CHANGE(HttpStatus.BAD_REQUEST, "유효하지 않은 상태 변경입니다."),
+    INVALID_HISTORY_STATUS(HttpStatus.BAD_REQUEST, "유효하지 않은 히스토리 상태입니다."),
+    NOT_ASSIGNED_PROTECTION(HttpStatus.BAD_REQUEST, "지정된 보호자가 없습니다."),
+    UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "해당 리소스에 대한 접근 권한이 없습니다.");
 
 
     private final HttpStatus httpStatus;

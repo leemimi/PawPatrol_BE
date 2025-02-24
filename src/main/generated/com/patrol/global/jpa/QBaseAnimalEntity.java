@@ -28,7 +28,7 @@ public class QBaseAnimalEntity extends EntityPathBase<BaseAnimalEntity> {
 
     public final StringPath feature = createString("feature");
 
-    public final EnumPath<com.patrol.domain.protection.animal.enums.AnimalGender> gender = createEnum("gender", com.patrol.domain.protection.animal.enums.AnimalGender.class);
+    public final EnumPath<com.patrol.domain.animal.enums.AnimalGender> gender = createEnum("gender", com.patrol.domain.animal.enums.AnimalGender.class);
 
     public final StringPath healthCondition = createString("healthCondition");
 
@@ -38,7 +38,7 @@ public class QBaseAnimalEntity extends EntityPathBase<BaseAnimalEntity> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;
 
-    public final EnumPath<com.patrol.domain.protection.animal.enums.AnimalSize> size = createEnum("size", com.patrol.domain.protection.animal.enums.AnimalSize.class);
+    public final EnumPath<com.patrol.domain.animal.enums.AnimalSize> size = createEnum("size", com.patrol.domain.animal.enums.AnimalSize.class);
 
     public QBaseAnimalEntity(String variable) {
         super(BaseAnimalEntity.class, forVariable(variable));
