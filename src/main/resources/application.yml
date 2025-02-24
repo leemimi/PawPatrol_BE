@@ -90,7 +90,7 @@ spring:
 
 logging:
   level:
-    com.ll.hfback: DEBUG
+    com.patrol: DEBUG
 #    org.hibernate.SQL: DEBUG
 #    org.hibernate.orm.jdbc.bind: TRACE
 #    org.hibernate.orm.jdbc.extract: TRACE
