@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 /**
  * packageName    : com.patrol.domain.animal.service
  * fileName       : AnimalService
@@ -23,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class AnimalService {
     private final AnimalRepository animalRepository;
     private final FileStorageHandler fileStorageHandler;
@@ -47,4 +49,9 @@ public class AnimalService {
             animalRepository.save(animal);
         }
     }
+
+
+  public Optional<Animal> findById(Long animalId) {
+    return animalRepository.findById(animalId);
+  }
 }
