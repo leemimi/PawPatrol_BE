@@ -77,19 +77,6 @@ public class V2AuthService {
         throw new OAuth2AuthenticationException(
                 new OAuth2Error("temp_token", tempToken, null)
         );
-
-
-//    throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);    // 연결된 계정이 없으면 null 반환
-//        // 여기 수정할것
-//        Optional<Member> existingMember = findByEmail(email); // 이메일이 사용중인지 확인
-//        if (existingMember.isPresent()) {
-//            Member member = existingMember.get();
-//            oAuthService.connectProvider(member, loginType, providerId, email);  // 기존 계정에 소셜 계정 연결
-//            return member;
-//        }
-//
-//        // 여기도 수정할것
-//        return signup(email, null, null, loginType, providerId, email, null);
     }
 
     // 소셜 계정 연동
