@@ -1,8 +1,17 @@
-# 첫 번째 스테이지: 빌드 스테이지
-FROM gradle:jdk23-graal-jammy as builder
+# 첫 번째 스테이지: 빌드 스테이지 (GraalVM 23 사용)
+FROM ghcr.io/graalvm/jdk-community:23 as builder
 
 # 작업 디렉토리 설정
 WORKDIR /app
+
+# Gradle 설치
+RUN apt update && apt install -y wget unzip && \
+    wget https://services.gradle.org/distributions/gradle-8.3-bin.zip -O /tmp/gradle.zip && \
+    unzip /tmp/gradle.zip -d /opt/gradle && \
+    ln -s /opt/gradle/gradle-8.3/bin/gradle /usr/bin/gradle
+
+# Gradle 버전 확인 (디버깅 용도)
+RUN gradle -v
 
 # 소스 코드와 Gradle 래퍼 복사
 COPY gradlew .
@@ -23,7 +32,7 @@ COPY src src
 RUN ./gradlew build --no-daemon
 
 # 두 번째 스테이지: 실행 스테이지
-FROM ghcr.io/graalvm/jdk-community:23
+FROM ghcr.io/graalvm/jdk-community:23  # GraalVM 23 유지
 
 # 작업 디렉토리 설정
 WORKDIR /app
