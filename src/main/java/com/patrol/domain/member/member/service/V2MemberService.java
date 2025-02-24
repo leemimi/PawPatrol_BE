@@ -11,7 +11,6 @@ import com.patrol.global.storage.FileStorageHandler;
 import com.patrol.global.storage.FileUploadRequest;
 import com.patrol.global.storage.FileUploadResult;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,11 +48,12 @@ public class V2MemberService {
         return v2MemberRepository.findByEmail(email).isPresent();
     }
 
-    // 반려동물 등록
+    // 주인 있는 반려동물 등록
     @Transactional
     public void petRegister(Member member,
                             PetRegisterRequest petRegisterRequest) {
 
+        // 이미지 업로드
         FileUploadResult uploadResult = fileStorageHandler.handleFileUpload(
                 FileUploadRequest.builder()
                         .folderPath("petRegister/" + member.getId())
@@ -61,12 +61,12 @@ public class V2MemberService {
                         .build()
         );
 
+        // 동물 등록
         if(uploadResult != null) {
-            Animal animal = petRegisterRequest.toEntity(member, uploadResult.getFullPath());
+            Animal animal = petRegisterRequest.buildAnimal(member, uploadResult.getFullPath());
             animalRepository.save(animal);
         }
 
 
     }
-
 }
