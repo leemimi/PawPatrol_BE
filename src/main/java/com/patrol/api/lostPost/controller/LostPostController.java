@@ -1,11 +1,13 @@
-package com.patrol.api.lostpost.controller;
+package com.patrol.api.lostPost.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.patrol.api.findPost.dto.FindPostResponseDto;
-import com.patrol.api.lostpost.dto.LostPostResponseDto;
+import com.patrol.api.lostPost.dto.LostPostRequestDto;
+import com.patrol.api.lostPost.dto.LostPostResponseDto;
+import com.patrol.domain.lostPost.service.LostPostService;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.global.rsData.RsData;
 import com.patrol.global.webMvc.LoginUser;
@@ -21,11 +23,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/lost-found/lost")
+@RequestMapping("/api/v1/lostposts")
 @RequiredArgsConstructor
 public class LostPostController {
 
-    private final com.patrol.domain.LostPost.service.LostPostService lostPostService;
+    private final LostPostService lostPostService;
     private final ObjectMapper objectMapper;  // JSON 파싱을 위한 ObjectMapper
 
     @PostMapping
@@ -40,8 +42,7 @@ public class LostPostController {
                 .registerModule(new JavaTimeModule());
 
         try {
-            // JSON을 DTO로 변환
-            com.patrol.api.LostPost.dto.LostPostRequestDto requestDto = objectMapper.readValue(metadataJson, com.patrol.api.LostPost.dto.LostPostRequestDto.class);
+            LostPostRequestDto requestDto = objectMapper.readValue(metadataJson, LostPostRequestDto.class);
 
             // 게시글 생성
             LostPostResponseDto responseDto = lostPostService.createLostPost(requestDto, images, loginUser);
@@ -63,7 +64,7 @@ public class LostPostController {
             @RequestParam(value = "images", required = false) List<MultipartFile> images,
             @LoginUser Member loginUser) {
         try {
-            com.patrol.api.LostPost.dto.LostPostRequestDto requestDto = objectMapper.readValue(metadataJson, com.patrol.api.LostPost.dto.LostPostRequestDto.class);
+            LostPostRequestDto requestDto = objectMapper.readValue(metadataJson, LostPostRequestDto.class);
             LostPostResponseDto responseDto = lostPostService.updateLostPost(postId, requestDto, images,loginUser);
             return new RsData<>("200", "신고 게시글을 성공적으로 수정했습니다.", responseDto);
         } catch (JsonProcessingException e) {
@@ -77,6 +78,16 @@ public class LostPostController {
     public RsData<Void> deleteLostPost(@PathVariable(name = "postId") Long postId,@LoginUser Member loginUser) {
         lostPostService.deleteLostPost(postId,loginUser);
         return new RsData<>("200", "실종 신고 게시글을 성공적으로 삭제했습니다.");
+    }
+
+    @GetMapping("/map")
+    @Operation(summary = "반경 내에 실종 게시글 조회")
+    public RsData<List<LostPostResponseDto>> getLostPostsByRadius(
+            @RequestParam(name = "latitude") double latitude,
+            @RequestParam(name = "longitude") double longitude,
+            @RequestParam(name = "radius") double radius) {
+        List<LostPostResponseDto> posts = lostPostService.getLostPostsWithinRadius(latitude, longitude, radius);
+        return new RsData<>("200", "실종 신고 게시글 목록을 성공적으로 호출했습니다.", posts);
     }
 
     // 모든 실종 신고 게시글 조회 (페이징 지원)
@@ -98,16 +109,4 @@ public class LostPostController {
         return new RsData<>("200", "실종 신고 게시글을 성공적으로 조회했습니다.", responseDto);
     }
 
-    // 특정 실종 신고글에 대한 제보글 목록 조회
-    @GetMapping("/{postId}/find-posts")
-    @Operation(summary = "특정 실종 신고글에 연결된 제보글 목록 조회")
-    public RsData<Page<FindPostResponseDto>> getFindPostsByLostPost(
-            @PathVariable(name = "postId") Long postId,
-            @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "5") int size) {
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<FindPostResponseDto> findPosts = lostPostService.getFindPostsByLostId(postId, pageable);
-        return new RsData<>("200", "특정 실종 신고글에 대한 제보글 목록을 성공적으로 호출했습니다.", findPosts);
-    }
 }

@@ -9,7 +9,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "Comment")
+@Table(name = "comments")
 @Getter
 @Setter
 @Builder
