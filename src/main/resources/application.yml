@@ -4,7 +4,6 @@ spring:
   output:
     ansi:
       enabled: ALWAYS
-
   profiles:
     active: dev
     include: secret
