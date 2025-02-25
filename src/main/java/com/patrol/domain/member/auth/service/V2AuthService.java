@@ -46,7 +46,7 @@ public class V2AuthService {
     // 회원가입
     @Transactional
     public Member signUp(SignupRequest request) {
-        logger.info("회원가입");
+        logger.info("회원가입_signUp");
 
         Member member = Member.builder()
                 .email(request.email())
@@ -66,6 +66,7 @@ public class V2AuthService {
                                         String email,
                                         ProviderType loginType, String providerId
     ) {
+        logger.info("소셜 로그인 시, 사이트 자체 계정의 유무에 따른 처리_handleSocialLogin");
         Member connectedMember = oAuthService.findByProviderId(loginType, providerId);
         if (connectedMember != null) {
             connectedMember.setLoginType(loginType);
@@ -83,7 +84,7 @@ public class V2AuthService {
     @Transactional
     public void socialConnect(@Valid SocialConnectRequest socialConnectRequest,
                               String accessToken) {
-
+        logger.info("소셜 계정 연동_socialConnect");
         Map<String, Object> loginUser = authTokenService.payload(accessToken);
         SocialTokenInfo socialTokenInfo = authTokenService.parseSocialToken(socialConnectRequest.tempToken());
 
@@ -103,6 +104,7 @@ public class V2AuthService {
 
     // 엑세스 토큰 발행
     public String genAccessToken(Member member) {
+        logger.info("엑세스 토큰 발행_genAccessToken");
         return authTokenService.genAccessToken(member);
     }
 
@@ -118,6 +120,7 @@ public class V2AuthService {
     public void connectOAuthProvider(
             Member loginUser, ProviderType loginType, String providerId, String providerEmail
     ) {
+        logger.info("기존 계정에 소셜 계정 정보 연동_connectOAuthProvider");
         Member connectedMember = oAuthService.findByProviderId(loginType, providerId);
         if (connectedMember != null) {
             throw new ServiceException(ErrorCodes.SOCIAL_ACCOUNT_ALREADY_IN_USE);
