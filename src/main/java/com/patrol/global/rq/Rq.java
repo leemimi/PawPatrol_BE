@@ -2,7 +2,7 @@ package com.patrol.global.rq;
 
 
 
-import com.patrol.domain.member.auth.service.AuthService;
+import com.patrol.domain.member.auth.service.V2AuthService;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.enums.MemberRole;
 import com.patrol.global.security.SecurityUser;
@@ -29,7 +29,7 @@ public class Rq {
 
   private final HttpServletRequest req;
   private final HttpServletResponse resp;
-  private final AuthService authService;
+  private final V2AuthService authService;
 
   @Value("${custom.cookie.domain}")
   private String domain;

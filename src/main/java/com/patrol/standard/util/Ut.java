@@ -56,8 +56,8 @@ public class Ut {
   public static class jwt {
     // 엑세스 토큰 용도
     public static String toString(String secret, long expireSeconds, Map<String, Object> body) {
-      Date issuedAt = new Date();
-      Date expiration = new Date(issuedAt.getTime() + 1000L * expireSeconds);
+      Date issuedAt = new Date(); // 토큰 발행 시간
+      Date expiration = new Date(issuedAt.getTime() + 1000L * expireSeconds); // 토큰 만료 시간
       SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes());
       String jwt = Jwts.builder()
           .claims(body)
