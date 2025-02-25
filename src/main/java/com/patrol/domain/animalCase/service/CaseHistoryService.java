@@ -39,19 +39,11 @@ public class CaseHistoryService {
   }
 
   @Transactional
-  public void addRescueFindPost(AnimalCase animalCase, ContentType contentType, Long contentId, Long memberId) {
-    addHistory(animalCase, CaseHistoryStatus.RESCUE_REPORT, contentType, contentId, memberId);
+  public void addAnimalCase(AnimalCase animalCase, ContentType contentType, Long contentId, Long memberId) {
+    addHistory(animalCase, CaseHistoryStatus.TEMP_PROTECT_REGISTERED, contentType, contentId, memberId);
   }
 
-  @Transactional
-  public void changeToTempProtectWaiting(AnimalCase animalCase, ContentType contentType, Long contentId, Long memberId) {
-    addHistory(animalCase, CaseHistoryStatus.TEMP_PROTECT_WAIT, contentType, contentId, memberId);
-  }
 
-  public CaseHistory findByAnimalCaseIdAndHistoryStatus(Long animalCaseId, CaseHistoryStatus historyStatus) {
-    return caseHistoryRepository.findByAnimalCaseIdAndHistoryStatus(animalCaseId, historyStatus)
-        .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
-  }
 
   public void addHistory(
       AnimalCase animalCase, CaseHistoryStatus historyStatus,
@@ -78,5 +70,4 @@ public class CaseHistoryService {
         .memberId(memberId)
         .build();
   }
-
 }
