@@ -7,6 +7,7 @@ import com.patrol.global.oauth2.CustomOAuth2AuthenticationSuccessHandler;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -37,6 +38,10 @@ public class ApiSecurityConfig {
   private final CustomAuthenticationFilter customAuthenticationFilter;
   private final CustomOAuth2AuthenticationSuccessHandler customOAuth2AuthenticationSuccessHandler;
   private final CustomAuthorizationRequestResolver customAuthorizationRequestResolver;
+
+  @Value("${custom.oauth2.redirect-uri}")
+  private String domain;
+
 
   @Bean
   public UrlBasedCorsConfigurationSource corsConfigurationSource() {
@@ -136,7 +141,7 @@ public class ApiSecurityConfig {
                             if ("temp_token".equals(error.getErrorCode())) {
                                 String tempToken = error.getDescription();  // tempToken 값 추출
                                 String redirectUrl = UriComponentsBuilder
-                                        .fromUriString("http://localhost:5173/connect")
+                                        .fromUriString(domain)
                                         .queryParam("temp_token", tempToken)
                                         .toUriString();
                                 response.sendRedirect(redirectUrl);

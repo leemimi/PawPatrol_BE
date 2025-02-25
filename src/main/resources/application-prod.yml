@@ -34,3 +34,5 @@ logging:
 custom:
   cookie:
     domain: api.pawpatrols.shop
+  oauth2:
+    redirect-uri: https://api.pawpatrols.shop/connect
