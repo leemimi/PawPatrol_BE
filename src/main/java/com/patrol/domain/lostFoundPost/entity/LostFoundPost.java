@@ -24,7 +24,8 @@ public class LostFoundPost extends BaseEntity {
     @JoinColumn(name = "author_id")
     private Member author;
 
-    @OneToMany(mappedBy = "foundId", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany
+    @JoinColumn(name = "found_id")
     private List<Image> images = new ArrayList<>();
 
     @OneToOne

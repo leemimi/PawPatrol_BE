@@ -205,5 +205,49 @@ $RECYCLE.BIN/
 *.lnk
 
 application-secret.yml
+.terraform
+
+DDl.sql
+logstash.conf
+**/logstash/config/*.yml
+**/logstash/pipeline/*.conf
+elasticsearch/logstash/
+
+
+# CLI configuration files
+.terraformrc
+terraform.rc
+
+crash.*.log
+
+# Sensitive variables files
+*.auto.tfvars
+*.auto.tfvars.json
+
+# Override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+/bin/**
+/bin/
+/out/**
+
+# Terraform
+*.tfvars
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+crash.log
+
+# Local .terraform directories
+**/.terraform/*
+db.mv.db
+db.trace.db
+*.tfstate.backup
+application.yml
+src/main/generated
 
 src/main/generated/
