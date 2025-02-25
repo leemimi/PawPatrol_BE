@@ -1,4 +1,4 @@
-package com.patrol.domain.findPost.entity;
+package com.patrol.domain.lostFoundPost.entity;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
@@ -20,7 +20,7 @@ public class QFindPost extends EntityPathBase<FindPost> {
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
-    public static final QFindPost findPost = new QFindPost("findPost");
+    public static final QFindPost findPost = new QFindPost("lostFoundPost");
 
     public final com.patrol.global.jpa.QBaseEntity _super = new com.patrol.global.jpa.QBaseEntity(this);
 

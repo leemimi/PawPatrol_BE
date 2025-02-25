@@ -1,4 +1,4 @@
-package com.patrol.domain.findPost.entity;
+package com.patrol.domain.lostFoundPost.entity;
 
 
 public enum Gender {

@@ -1,8 +1,7 @@
 package com.patrol.domain.comment.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.patrol.domain.findPost.entity.FindPost;
-import com.patrol.domain.lostPost.entity.LostPost;
+import com.patrol.domain.lostFoundPost.entity.LostFoundPost;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.global.jpa.BaseEntity;
 import jakarta.persistence.*;
@@ -25,13 +24,8 @@ public class Comment extends BaseEntity {
     @ManyToOne
     private Member author;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "lost_id")
-    private LostPost lostPost;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "found_id")
-    private FindPost findPost;  // ✅ 올바른 변수명
+    @JoinColumn(name = "lostfound_id")
+    private LostFoundPost lostFoundPost;  // ✅ 올바른 변수명
 
 }

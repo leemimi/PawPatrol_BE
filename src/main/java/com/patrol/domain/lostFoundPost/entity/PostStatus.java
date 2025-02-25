@@ -1,9 +1,10 @@
-package com.patrol.domain.findPost.entity;
+package com.patrol.domain.lostFoundPost.entity;
 
 public enum PostStatus {
-    FINDING("찾는 중"),
+    SHELTER("보호소"),
     FOSTERING("임보 중"),
-    FOUND("주인 찾기 완료");
+    FOUND("주인 찾기 완료"),
+    FINDING("실종");
 
     private final String description;
 
