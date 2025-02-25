@@ -1,17 +1,10 @@
 package com.patrol.domain.member.member.service;
 
 import com.patrol.api.member.auth.dto.requestV2.ModifyProfileRequest;
-import com.patrol.api.member.member.dto.request.PetRegisterRequest;
-import com.patrol.domain.animal.entity.Animal;
-import com.patrol.domain.animal.repository.AnimalRepository;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.repository.V2MemberRepository;
 import com.patrol.global.exceptions.ErrorCodes;
 import com.patrol.global.exceptions.ServiceException;
-import com.patrol.global.storage.FileStorageHandler;
-import com.patrol.global.storage.FileUploadRequest;
-import com.patrol.global.storage.FileUploadResult;
-import com.patrol.global.storage.StorageConfig;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,9 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class V2MemberService {
     private final V2MemberRepository v2MemberRepository;
-    private final AnimalRepository animalRepository;
-    private final FileStorageHandler fileStorageHandler;
-    private final StorageConfig storageConfig;
     private final PasswordEncoder passwordEncoder;
     private final Logger logger = LoggerFactory.getLogger(V2MemberService.class.getName());
 
@@ -54,18 +44,19 @@ public class V2MemberService {
     @Transactional
     public void modifyProfile(Member member,
                               ModifyProfileRequest modifyProfileRequest) {
+        logger.info("회원 정보 수정_modifyProfile");
         Member modifyMem = v2MemberRepository.findByEmail(member.getEmail()).orElseThrow();
-        System.out.println("============================" + modifyProfileRequest.currentPassword());
-        System.out.println("============================" + modifyProfileRequest.newPassword());
-        System.out.println("============================" + modifyProfileRequest.confirmPassword());
+
         // 닉네임 변경
         if(modifyProfileRequest.nickname() != null) {
+            logger.info("회원 정보 수정 - 닉네임 변경");
             modifyMem.updateNickname(modifyProfileRequest.nickname());
         }
         // 비밀번호 변경
         if (modifyProfileRequest.currentPassword() != null
                 && modifyProfileRequest.newPassword() != null
                 && modifyProfileRequest.confirmPassword() != null) {
+            logger.info("회원 정보 수정 - 비밀번호 변경");
             // 비밀번호 검증 로직
             // 현재 비밀번호와 일치하는지
             if (!passwordEncoder.matches(modifyProfileRequest.currentPassword(), member.getPassword())) {
@@ -80,6 +71,7 @@ public class V2MemberService {
         }
         // 전화번호 인증, 변경
         if (modifyProfileRequest.phoneNumber() != null) {
+            logger.info("회원 정보 수정 - 전화번호 변경");
             modifyMem.updatePhoneNum(modifyProfileRequest.phoneNumber());
         }
     }
@@ -92,30 +84,4 @@ public class V2MemberService {
         return v2MemberRepository.findByEmail(email).isPresent();
     }
 
-    // 주인 있는 반려동물 등록
-    @Transactional
-    public void petRegister(Member member,
-                            PetRegisterRequest petRegisterRequest) {
-        logger.info("주인 있는 반려동물 등록");
-        // 이미지 업로드
-        FileUploadResult uploadResult = fileStorageHandler.handleFileUpload(
-                FileUploadRequest.builder()
-                        .folderPath("petRegister/" + member.getId())
-                        .file(petRegisterRequest.imageFile())
-                        .build()
-        );
-
-        String imageUrl = storageConfig.getEndpoint()
-                + "/"
-                + storageConfig.getBucketname()
-                + "/"
-                + uploadResult.getFullPath();
-
-        // 동물 등록
-        if(uploadResult != null) {
-            Animal animal = petRegisterRequest.buildAnimal(member, imageUrl);
-            animalRepository.save(animal);
-        }
-
-    }
 }
