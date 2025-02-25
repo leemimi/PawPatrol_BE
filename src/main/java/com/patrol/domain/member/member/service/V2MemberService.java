@@ -3,6 +3,8 @@ package com.patrol.domain.member.member.service;
 import com.patrol.api.member.member.dto.request.PetRegisterRequest;
 import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.animal.repository.AnimalRepository;
+import com.patrol.domain.image.entity.Image;
+import com.patrol.domain.image.repository.ImageRepository;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.repository.V2MemberRepository;
 import com.patrol.global.exceptions.ErrorCodes;
@@ -34,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class V2MemberService {
     private final V2MemberRepository v2MemberRepository;
     private final AnimalRepository animalRepository;
+    private final ImageRepository imageRepository;
     private final FileStorageHandler fileStorageHandler;
     private final StorageConfig storageConfig;
     private final Logger logger = LoggerFactory.getLogger(V2MemberService.class.getName());
@@ -78,6 +81,14 @@ public class V2MemberService {
         if(uploadResult != null) {
             Animal animal = petRegisterRequest.buildAnimal(member, imageUrl);
             animalRepository.save(animal);
+
+            Image imageEntity = Image.builder()
+                    .path(imageUrl)
+                    .animalId(animal.getId())
+                    .build();
+
+            imageRepository.save(imageEntity);
+
         }
 
     }
