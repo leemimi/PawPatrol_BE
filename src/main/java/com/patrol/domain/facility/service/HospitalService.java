@@ -4,6 +4,7 @@ package com.patrol.domain.facility.service;
 import com.patrol.api.facility.dto.FacilitiesResponse;
 import com.patrol.domain.facility.entity.Hospital;
 import com.patrol.domain.facility.repository.HospitalRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;

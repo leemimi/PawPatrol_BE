@@ -8,7 +8,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class lostFoundPostRequestDto {
+public class LostFoundPostRequestDto {
     private String content;
     private Double latitude;  // 위도 추가
     private Double longitude; // 경도 추가

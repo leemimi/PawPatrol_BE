@@ -8,8 +8,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class PostCreatedEvent{
-  private final ContentType contentType;      // FINDPOST, LOSTPOST
-  private final Long lostFoundPostId;     // lostFoundPost의 ID
+  private final ContentType contentType;  // FINDPOST, LOSTPOST
+  private final Long lostFoundPostId;
   private final Long animalId;
   private final Long memberId;
 }

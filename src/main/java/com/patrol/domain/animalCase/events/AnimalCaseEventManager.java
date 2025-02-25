@@ -8,9 +8,6 @@ import com.patrol.domain.animalCase.enums.CaseStatus;
 import com.patrol.domain.animalCase.enums.ContentType;
 import com.patrol.domain.animalCase.service.AnimalCaseService;
 import com.patrol.domain.animalCase.service.CaseHistoryService;
-import com.patrol.domain.lostFoundPost.entity.LostFoundPost;
-import com.patrol.domain.lostFoundPost.entity.PostStatus;
-import com.patrol.domain.lostFoundPost.repository.LostFoundPostRepository;
 import com.patrol.domain.protection.entity.Protection;
 import com.patrol.domain.protection.service.ProtectionService;
 import com.patrol.global.error.ErrorCode;
@@ -30,25 +27,9 @@ public class AnimalCaseEventManager {
   private final ProtectionService protectionService;
 
 
-  // PostCreatedEvent 처리
+  // PostCreated 이벤트 처리
   @Transactional
-  public void handleLostPostEvent(PostCreatedEvent event) {
-    handleLostPost(
-        event.getAnimalId(), event.getContentType(),
-        event.getLostFoundPostId(), event.getMemberId()
-    );
-  }
-
-  @Transactional
-  public void handleFindPostEvent(PostCreatedEvent event) {
-    handleFindPost(
-        event.getAnimalId(), event.getContentType(),
-        event.getLostFoundPostId(), event.getMemberId()
-    );
-  }
-
-
-  private void handleLostPost(
+  public void handleLostPost(
       Long animalId, ContentType contentType, Long contentId, Long memberId
   ) {
     Animal animal = animalService.findById(animalId)
@@ -64,7 +45,9 @@ public class AnimalCaseEventManager {
     }
   }
 
-  private void handleFindPost(
+
+  @Transactional
+  public void handleFindPost(
       Long animalId, ContentType contentType, Long contentId, Long memberId
   ) {
     Animal animal = animalService.findById(animalId)
@@ -81,7 +64,8 @@ public class AnimalCaseEventManager {
   }
 
 
-  // ProtectionStatusChange 처리
+
+  // ProtectionStatusChange 이벤트 처리
   @Transactional
   public void handleProtectionStatusChange(
       Long protectionId, Long memberId, CaseStatus toStatus, CaseHistoryStatus historyStatus
@@ -92,8 +76,7 @@ public class AnimalCaseEventManager {
     AnimalCase animalCase = protection.getAnimalCase();
 
     // 유효성 검증
-    validateStatusTransition(animalCase.getStatus(), toStatus);  // 상태 전이 가능 여부 (임보대기 -> 임보 중
-    validateStatusChangeAuthority(animalCase, toStatus, memberId);  // 권한 검증
+    validateStatusTransition(animalCase.getStatus(), toStatus);  // 상태 전이 가능 여부 (임보대기 -> 임보 중)
 
     animalCase.updateStatus(toStatus);
     caseHistoryService.addHistory(animalCase, historyStatus, ContentType.PROTECTION, protection.getId(), memberId);
@@ -102,7 +85,6 @@ public class AnimalCaseEventManager {
 
   private void validateStatusTransition(CaseStatus fromStatus, CaseStatus toStatus) {
     boolean isValid = switch (toStatus) {
-      case TEMP_PROTECT_WAITING, SHELTER_PROTECTING -> fromStatus == CaseStatus.RESCUE;
       case TEMP_PROTECTING -> fromStatus.isTempProtectible();
       default -> false;
     };
@@ -112,17 +94,14 @@ public class AnimalCaseEventManager {
     }
   }
 
-  private void validateStatusChangeAuthority(AnimalCase animalCase, CaseStatus toStatus, Long memberId) {
-    if (toStatus.equals(CaseStatus.TEMP_PROTECT_WAITING)) {
-      animalCaseService.validateRescuePostOwner(animalCase.getId(), memberId);
-    }
-  }
 
-
-  // ProtectionCreated
+  // AnimalCaseCreated 이벤트 처리
   @Transactional
-  public void handleProtectionCreated(ProtectionCreatedEvent event) {
+  public void handleAnimalCaseCreated(AnimalCaseCreatedEvent event) {
     AnimalCase animalCase = animalCaseService.createNewCase(CaseStatus.TEMP_PROTECT_WAITING, event.getAnimal());
     animalCase.setCurrentFoster(event.getMember());
+    caseHistoryService.addAnimalCase(
+        animalCase, ContentType.ANIMAL_CASE, animalCase.getId(), event.getMember().getId()
+    );
   }
 }

@@ -197,9 +197,9 @@ public class SampleAnimalData {
     imageUrls.add("sample08.jpg");
     imageUrls.add("sample09.jpg");
     imageUrls.add("sample10.jpg");
-    imageUrls.add("sample11.jpeg");
-    imageUrls.add("sample12.jpeg");
-    imageUrls.add("sample01.jpeg");
+    imageUrls.add("sample11.jpg");
+    imageUrls.add("sample12.jpg");
+    imageUrls.add("sample01.jpg");
     imageUrls.add("sample02.jpg");
     imageUrls.add("sample03.jpg");
     imageUrls.add("sample04.jpg");
