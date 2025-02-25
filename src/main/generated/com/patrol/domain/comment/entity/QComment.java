@@ -31,12 +31,10 @@ public class QComment extends EntityPathBase<Comment> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
-    public final com.patrol.domain.findPost.entity.QFindPost findPost;
-
     //inherited
     public final NumberPath<Long> id = _super.id;
 
-    public final com.patrol.domain.lostPost.entity.QLostPost lostPost;
+    public final com.patrol.domain.lostFoundPost.entity.QLostFoundPost lostFoundPost;
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;
@@ -60,8 +58,7 @@ public class QComment extends EntityPathBase<Comment> {
     public QComment(Class<? extends Comment> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.author = inits.isInitialized("author") ? new com.patrol.domain.member.member.entity.QMember(forProperty("author"), inits.get("author")) : null;
-        this.findPost = inits.isInitialized("findPost") ? new com.patrol.domain.findPost.entity.QFindPost(forProperty("findPost"), inits.get("findPost")) : null;
-        this.lostPost = inits.isInitialized("lostPost") ? new com.patrol.domain.lostPost.entity.QLostPost(forProperty("lostPost"), inits.get("lostPost")) : null;
+        this.lostFoundPost = inits.isInitialized("lostFoundPost") ? new com.patrol.domain.lostFoundPost.entity.QLostFoundPost(forProperty("lostFoundPost"), inits.get("lostFoundPost")) : null;
     }
 
 }

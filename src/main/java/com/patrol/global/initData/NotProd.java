@@ -2,6 +2,9 @@ package com.patrol.global.initData;
 
 
 import com.patrol.api.member.auth.dto.request.SignupRequest;
+import com.patrol.api.member.member.dto.request.PetRegisterRequest;
+import com.patrol.domain.animal.entity.Animal;
+import com.patrol.domain.animal.service.AnimalService;
 import com.patrol.domain.member.auth.service.AuthService;
 import com.patrol.domain.member.auth.service.V2AuthService;
 import com.patrol.domain.member.member.entity.Member;
@@ -13,11 +16,17 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Configuration
 @Profile("!prod")
 public class NotProd {
   @Bean
-  public ApplicationRunner applicationRunner(V2AuthService authService) {
+  public ApplicationRunner applicationRunner(
+      V2AuthService authService,
+      AnimalService animalService
+
+  ) {
     return new ApplicationRunner() {
       @Transactional
       @Override
@@ -31,6 +40,19 @@ public class NotProd {
         Member member1 = authService.signUp(request1);
         Member member2 = authService.signUp(request2);
         Member member3 = authService.signUp(request3);
+
+        List<PetRegisterRequest> sampleAnimals = SampleAnimalData.getSampleStrayAnimals();
+        List<String> imageUrls = SampleAnimalData.getSampleImageUrls();
+
+        for (int i = 0; i < sampleAnimals.size(); i++) {
+          PetRegisterRequest animalRequest = sampleAnimals.get(i);
+          String imageUrl = imageUrls.get(i);
+
+          Animal animal = animalService.registerWithImageUrl(animalRequest, imageUrl);
+          System.out.println("샘플 데이터 생성 : " + animal.getAnimalType() +
+              " - " + animal.getBreed() + " (" + animal.getImageUrl() + ")");
+        }
+
       }
     };
   }

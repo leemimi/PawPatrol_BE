@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,7 +31,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class AnimalService {
     private final AnimalRepository animalRepository;
     private final FileStorageHandler fileStorageHandler;
@@ -60,6 +62,17 @@ public class AnimalService {
             Animal animal = petRegisterRequest.buildAnimal(imageUrl);
             animalRepository.save(animal);
         }
+    }
+
+
+    @Transactional
+    public Animal registerWithImageUrl(PetRegisterRequest petRegisterRequest, String imageUrl) {
+      Animal animal = petRegisterRequest.buildAnimal(imageUrl);
+      return animalRepository.save(animal);
+    }
+
+    public Optional<Animal> findById(Long animalId) {
+      return animalRepository.findById(animalId);
     }
 
     // 등록된 나의 반려동물 리스트 가져오기 (마이페이지)

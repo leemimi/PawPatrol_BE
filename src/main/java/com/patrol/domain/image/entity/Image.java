@@ -16,9 +16,6 @@ public class Image {
 
     private String path;
 
-    @Column(name = "lost_id", nullable = true)
-    private Long lostId;
-
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -26,9 +23,8 @@ public class Image {
     private Long foundId;
 
     @Builder
-    public Image(String path, Long lostId, Long foundId) {
+    public Image(String path, Long foundId) {
         this.path = path;
-        this.lostId = lostId;
         this.foundId = foundId;
         this.createdAt = LocalDateTime.now();
     }

@@ -39,18 +39,12 @@ public class CommentController {
         return new RsData<>("200", "댓글이 삭제되었습니다.");
     }
 
-    @GetMapping("/lostposts/{lostPostId}")
+    @GetMapping("/lost-foundposts/{postId}")
     @Operation(summary = "신고글에 대한 댓글 조회")
-    public RsData<List<CommentResponseDto>> getCommentsByLostPost(@PathVariable(name = "lostPostId") Long lostPostId) {
-        List<CommentResponseDto> comments = commentService.getCommentsByLostPost(lostPostId);
+    public RsData<List<CommentResponseDto>> getCommentsByLostPost(@PathVariable(name = "postId") Long lostPostId) {
+        List<CommentResponseDto> comments = commentService.getCommentsByLostFoundPost(lostPostId);
         return new RsData<>("200", "댓글 목록 조회 성공", comments);
     }
 
-    @GetMapping("/findposts/{findPostId}")
-    @Operation(summary = "제보글에 대한 댓글 조회")
-    public RsData<List<CommentResponseDto>> getCommentsByFindPost(@PathVariable(name = "findPostId") Long findPostId) {
-        List<CommentResponseDto> comments = commentService.getCommentsByFindPost(findPostId);
-        return new RsData<>("200", "댓글 목록 조회 성공", comments);
-    }
 }
 
