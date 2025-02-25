@@ -1,6 +1,7 @@
 package com.patrol.domain.animal.service;
 
 import com.patrol.api.animal.dto.MyPetListResponse;
+import com.patrol.api.animal.dto.request.DeleteMyPetInfoRequest;
 import com.patrol.api.animal.dto.request.ModiPetInfoRequest;
 import com.patrol.api.member.member.dto.request.PetRegisterRequest;
 import com.patrol.domain.animal.entity.Animal;
@@ -136,11 +137,8 @@ public class AnimalService {
         logger.info("내 반려동물 정보 수정 (마이페이지)");
         Animal animal = animalRepository.findById(modiPetInfoRequest.getId()).orElseThrow();
 
-        // 유효성 검증
-        if (!Objects.equals(animal.getOwner().getId(), member.getId())) {
-            logger.error("해당 반려동물의 소유자가 아닙니다. 본인이 등록한 반려동물만 수정할 수 있습니다.");
-            throw new CustomException(ErrorCode.PET_OWNER_MISMATCH);
-        }
+        // 반려동물 소유자 검증
+        validateOwner(animal, member);
 
         // 반려동물 정보 업데이트
         animal.setEstimatedAge(modiPetInfoRequest.getEstimatedAge());
@@ -167,6 +165,27 @@ public class AnimalService {
 
             // 이미지 URL 업데이트
             animal.setImageUrl(imageUrl);
+        }
+    }
+
+    // 내 반려동물 정보 삭제 (마이페이지)
+    @Transactional
+    public void deleteMyPetInfo(Member member,
+                                DeleteMyPetInfoRequest deleteMyPetInfoRequest) {
+        logger.info("내 반려동물 정보 삭제 (마이페이지)");
+        Animal animal = animalRepository.findById(deleteMyPetInfoRequest.id()).orElseThrow();
+
+        // 반려동물 소유자 검증
+        validateOwner(animal, member);
+
+        animalRepository.delete(animal);
+    }
+
+    // 반려동물 소유자 검증
+    public void validateOwner(Animal animal, Member member) {
+        if (!Objects.equals(animal.getOwner().getId(), member.getId())) {
+            logger.error("해당 반려동물의 소유자가 아닙니다. 본인이 등록한 반려동물만 수정할 수 있습니다.");
+            throw new CustomException(ErrorCode.PET_OWNER_MISMATCH);
         }
     }
 }

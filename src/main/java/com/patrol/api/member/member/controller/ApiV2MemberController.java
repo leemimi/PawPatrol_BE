@@ -1,6 +1,7 @@
 package com.patrol.api.member.member.controller;
 
 import com.patrol.api.animal.dto.MyPetListResponse;
+import com.patrol.api.animal.dto.request.DeleteMyPetInfoRequest;
 import com.patrol.api.animal.dto.request.ModiPetInfoRequest;
 import com.patrol.api.member.auth.dto.requestV2.ModifyProfileRequest;
 import com.patrol.api.member.member.dto.request.PetRegisterRequest;
@@ -67,8 +68,15 @@ public class ApiV2MemberController {
     public GlobalResponse<Void> modifyMyPetInfo(@LoginUser Member member,
                                                 @ModelAttribute ModiPetInfoRequest modiPetInfoRequest) {
 
-        System.out.println("==================="+ modiPetInfoRequest.getId());
         animalService.modifyMyPetInfo(member, modiPetInfoRequest);
+        return GlobalResponse.success();
+    }
+
+    // 마이페이지 > 내 반려동물 정보 삭제
+    @DeleteMapping("/pets/{pet-id}")
+    public GlobalResponse<Void> deleteMyPetInfo(@LoginUser Member member,
+                                                @RequestBody DeleteMyPetInfoRequest deleteMyPetInfoRequest) {
+        animalService.deleteMyPetInfo(member, deleteMyPetInfoRequest);
         return GlobalResponse.success();
     }
 }
