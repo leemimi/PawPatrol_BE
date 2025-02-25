@@ -1,5 +1,6 @@
 package com.patrol.domain.member.member.service;
 
+import com.patrol.api.member.auth.dto.requestV2.ModifyProfileRequest;
 import com.patrol.api.member.member.dto.request.PetRegisterRequest;
 import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.animal.repository.AnimalRepository;
@@ -14,6 +15,7 @@ import com.patrol.global.storage.StorageConfig;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +38,7 @@ public class V2MemberService {
     private final AnimalRepository animalRepository;
     private final FileStorageHandler fileStorageHandler;
     private final StorageConfig storageConfig;
+    private final PasswordEncoder passwordEncoder;
     private final Logger logger = LoggerFactory.getLogger(V2MemberService.class.getName());
 
     // 회원 정보 가져오기
@@ -45,6 +48,40 @@ public class V2MemberService {
         return v2MemberRepository.findByEmail(email)
                 // 이거 어떻게 바꿔야 하는지
                 .orElseThrow(() -> new ServiceException(ErrorCodes.INVALID_EMAIL));
+    }
+
+    // 회원 정보 수정 > 번화번호 수정 시 인증 필요함
+    @Transactional
+    public void modifyProfile(Member member,
+                              ModifyProfileRequest modifyProfileRequest) {
+        Member modifyMem = v2MemberRepository.findByEmail(member.getEmail()).orElseThrow();
+        System.out.println("============================" + modifyProfileRequest.currentPassword());
+        System.out.println("============================" + modifyProfileRequest.newPassword());
+        System.out.println("============================" + modifyProfileRequest.confirmPassword());
+        // 닉네임 변경
+        if(modifyProfileRequest.nickname() != null) {
+            modifyMem.updateNickname(modifyProfileRequest.nickname());
+        }
+        // 비밀번호 변경
+        if (modifyProfileRequest.currentPassword() != null
+                && modifyProfileRequest.newPassword() != null
+                && modifyProfileRequest.confirmPassword() != null) {
+            // 비밀번호 검증 로직
+            // 현재 비밀번호와 일치하는지
+            if (!passwordEncoder.matches(modifyProfileRequest.currentPassword(), member.getPassword())) {
+                throw new ServiceException(ErrorCodes.CURRENT_PASSWORD_NOT_MATCH);
+            }
+            // 새 비밀번호와 비밀번호 확인이 일치하는지
+            if (!modifyProfileRequest.confirmPassword().equals(modifyProfileRequest.newPassword())) {
+                throw new ServiceException(ErrorCodes.INVALID_PASSWORD);
+            }
+
+            modifyMem.updatePassword(passwordEncoder.encode(modifyProfileRequest.newPassword()));
+        }
+        // 전화번호 인증, 변경
+        if (modifyProfileRequest.phoneNumber() != null) {
+            modifyMem.updatePhoneNum(modifyProfileRequest.phoneNumber());
+        }
     }
 
     // 소셜 로그인 연동 시, 자체 계정 유무 확인
