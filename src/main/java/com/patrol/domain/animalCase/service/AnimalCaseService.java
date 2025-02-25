@@ -9,9 +9,6 @@ import com.patrol.domain.animalCase.entity.CaseHistory;
 import com.patrol.domain.animalCase.enums.CaseHistoryStatus;
 import com.patrol.domain.animalCase.enums.CaseStatus;
 import com.patrol.domain.animalCase.repository.AnimalCaseRepository;
-import com.patrol.domain.findPost.entity.FindPost;
-import com.patrol.domain.findPost.repository.FindPostRepository;
-import com.patrol.domain.member.member.entity.Member;
 import com.patrol.global.error.ErrorCode;
 import com.patrol.global.exception.CustomException;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +27,6 @@ public class AnimalCaseService {
 
   private final AnimalCaseRepository animalCaseRepository;
   private final CaseHistoryService caseHistoryService;
-  private final FindPostRepository findPostRepository;
 
 
   @Transactional
@@ -108,13 +104,6 @@ public class AnimalCaseService {
     CaseHistory rescueHistory = caseHistoryService.findByAnimalCaseIdAndHistoryStatus(
         caseId, CaseHistoryStatus.RESCUE_REPORT
     );
-
-    FindPost findPost = findPostRepository.findById(rescueHistory.getContentId())
-        .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
-
-    if (!findPost.getAuthor().getId().equals(memberId)) {
-      throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
-    }
 
     return rescueHistory;
   }
