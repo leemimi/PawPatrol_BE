@@ -8,6 +8,7 @@ import com.patrol.domain.member.member.entity.Member;
 import com.patrol.global.storage.FileStorageHandler;
 import com.patrol.global.storage.FileUploadRequest;
 import com.patrol.global.storage.FileUploadResult;
+import com.patrol.global.storage.StorageConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 public class AnimalService {
     private final AnimalRepository animalRepository;
     private final FileStorageHandler fileStorageHandler;
+    private final StorageConfig storageConfig;
 
 
     // 주인 없는 반려동물 등록
@@ -46,9 +48,16 @@ public class AnimalService {
                         .build()
         );
 
+        // 네이버 S3 이미지 URL
+        String imageUrl = storageConfig.getEndpoint()
+                + "/"
+                + storageConfig.getBucketname()
+                + "/"
+                + uploadResult.getFullPath();
+
         // 동물 등록
         if(uploadResult != null) {
-            Animal animal = petRegisterRequest.buildAnimal(uploadResult.getFullPath());
+            Animal animal = petRegisterRequest.buildAnimal(imageUrl);
             animalRepository.save(animal);
         }
     }
