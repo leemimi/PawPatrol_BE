@@ -22,9 +22,10 @@ public class MyPetListResponse {
     private Long id;
     private String name;
     private String breed;
-    private String birthDate;
-    private String characteristics;
+    private String estimatedAge;
+    private String feature;
     private String size;
     private String registrationNumber;
     private String imageUrl;
+    private String healthCondition;
 }
