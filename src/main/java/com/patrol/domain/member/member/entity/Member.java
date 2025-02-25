@@ -78,8 +78,8 @@ public class Member extends BaseEntity {
     }
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "ENUM('ROLE_USER', 'ROLE_ADMIN') DEFAULT 'ROLE_USER'")
-    private MemberRole role = MemberRole.ROLE_USER;  // 권한 (관리자, 사용자)
+    @Column(nullable = false, columnDefinition = "ENUM('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SHELTER') DEFAULT 'ROLE_USER'")
+    private MemberRole role = MemberRole.ROLE_USER;  // 권한 (관리자, 사용자, 보호소)
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (this.role != null) {
             return Collections.singletonList(new SimpleGrantedAuthority(this.role.name()));
