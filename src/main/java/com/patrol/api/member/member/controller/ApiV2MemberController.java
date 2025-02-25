@@ -30,6 +30,14 @@ public class ApiV2MemberController {
     private final V2MemberService v2MemberService;
     private final AnimalService animalService;
 
+
+    // 마이페이지 > 회원정보 수정
+    @PatchMapping("/profile")
+    public GlobalResponse<Void> modifyProfile() {
+
+        return GlobalResponse.success();
+    }
+
     // 마이페이지 > 반려동물 등록
     @PostMapping("/pets/register")
     public GlobalResponse<Void> petRegister(@LoginUser Member member,
@@ -40,7 +48,7 @@ public class ApiV2MemberController {
         return GlobalResponse.success();
     }
 
-    // 내 반려동물 리스트
+    // 마이페이지 > 내 반려동물 리스트
     @GetMapping("/pets")
     public GlobalResponse<List<MyPetListResponse>> myPetList(@LoginUser Member member) {
 
