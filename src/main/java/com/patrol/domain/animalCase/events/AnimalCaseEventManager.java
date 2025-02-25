@@ -26,7 +26,6 @@ public class AnimalCaseEventManager {
 
   private final AnimalCaseService animalCaseService;
   private final CaseHistoryService caseHistoryService;
-  private final LostFoundPostRepository lostFoundPostRepository;
   private final AnimalService animalService;
   private final ProtectionService protectionService;
 
@@ -36,26 +35,15 @@ public class AnimalCaseEventManager {
   public void handleLostPostEvent(PostCreatedEvent event) {
     handleLostPost(
         event.getAnimalId(), event.getContentType(),
-        event.getContentId(), event.getMemberId()
+        event.getLostFoundPostId(), event.getMemberId()
     );
   }
 
-
   @Transactional
   public void handleFindPostEvent(PostCreatedEvent event) {
-    LostFoundPost lostfoundPost = lostFoundPostRepository.findById(event.getContentId())
-        .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
-
-    if (lostfoundPost.getStatus().equals(PostStatus.FOSTERING)) {
-      handleRescueFindPost(
-          event.getAnimalId(), event.getContentType(),
-          event.getContentId(), event.getMemberId()
-      );
-    }
-
     handleFindPost(
         event.getAnimalId(), event.getContentType(),
-        event.getContentId(), event.getMemberId()
+        event.getLostFoundPostId(), event.getMemberId()
     );
   }
 
@@ -93,25 +81,6 @@ public class AnimalCaseEventManager {
   }
 
 
-  private void handleRescueFindPost(
-      Long animalId, ContentType contentType, Long contentId, Long memberId
-  ) {
-    Animal animal = animalService.findById(animalId)
-        .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
-
-    AnimalCase animalCase = animalCaseService.findByAnimal(animal);
-    if (animalCase == null) {
-      animalCase = animalCaseService.createNewCase(CaseStatus.RESCUE, animal);
-      caseHistoryService.addRescueFindPost(animalCase, contentType, contentId, memberId);
-
-    } else {
-      animalCase.updateStatus(CaseStatus.RESCUE);
-      caseHistoryService.addRescueFindPost(animalCase, contentType, contentId, memberId);
-    }
-  }
-
-
-
   // ProtectionStatusChange 처리
   @Transactional
   public void handleProtectionStatusChange(
@@ -129,6 +98,7 @@ public class AnimalCaseEventManager {
     animalCase.updateStatus(toStatus);
     caseHistoryService.addHistory(animalCase, historyStatus, ContentType.PROTECTION, protection.getId(), memberId);
   }
+
 
   private void validateStatusTransition(CaseStatus fromStatus, CaseStatus toStatus) {
     boolean isValid = switch (toStatus) {
