@@ -2,8 +2,8 @@ package com.patrol.api.comment.controller;
 
 import com.patrol.api.comment.dto.CommentRequestDto;
 import com.patrol.api.comment.dto.CommentResponseDto;
-import com.patrol.domain.comment.service.CommentService;
 import com.patrol.domain.member.member.entity.Member;
+import com.patrol.domain.comment.service.CommentService;
 import com.patrol.global.rsData.RsData;
 import com.patrol.global.webMvc.LoginUser;
 import io.swagger.v3.oas.annotations.Operation;

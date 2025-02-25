@@ -33,7 +33,7 @@ public class CommentService {
         // FindPost 조회 후 설정
         if (requestDto.getFindPostId() != null) {
             LostFoundPost lostFoundPost = lostFoundPostRepository.findById(requestDto.getFindPostId())
-                    .orElseThrow(() -> new RuntimeException("해당 ID의 제보 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new RuntimeException("해당 ID의 제보 게시글을 찾을 수 없습니다."));
             comment.setLostFoundPost(lostFoundPost);
         }
 
@@ -45,7 +45,7 @@ public class CommentService {
     @Transactional
     public CommentResponseDto updateComment(Long commentId, CommentRequestDto requestDto,  Member author) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
+            .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
 
         // 로그인한 사용자(author)가 댓글 작성자와 일치하는지 확인
         if (!comment.getAuthor().equals(author)) {
@@ -58,7 +58,7 @@ public class CommentService {
     @Transactional
     public void deleteComment(Long commentId, Member author) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
+            .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
         // 로그인한 사용자(author)가 댓글 작성자와 일치하는지 확인
         if (!comment.getAuthor().equals(author)) {
             throw new RuntimeException("댓글 삭제 권한이 없습니다.");
