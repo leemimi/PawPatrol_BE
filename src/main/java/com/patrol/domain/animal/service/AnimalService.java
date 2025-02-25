@@ -62,7 +62,7 @@ public class AnimalService {
         }
     }
 
-    // 등록된 나의 반려동물 리스트 가져오기
+    // 등록된 나의 반려동물 리스트 가져오기 (마이페이지)
     @Transactional
     public List<MyPetListResponse> myPetList(Member member) {
         return animalRepository.findByOwnerId(member.getId())

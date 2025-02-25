@@ -7,7 +7,6 @@ import com.patrol.api.member.auth.dto.EmailResponse;
 import com.patrol.api.member.auth.dto.FindEmailsResponse;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.enums.MemberRole;
-import com.patrol.domain.member.member.enums.MemberStatus;
 import com.patrol.domain.member.member.enums.ProviderType;
 import com.patrol.domain.member.member.repository.MemberRepository;
 import com.patrol.global.exceptions.ErrorCodes;
@@ -34,37 +33,37 @@ public class AuthService {
     private final MemberRepository memberRepository;
 
 
-    @Transactional
-    public Member signup(
-        String email, String password, String nickname,
-        ProviderType loginType, String providerId, String providerEmail, String profileImageUrl
-    ) {
-        _validateEmailAndPassword(email, password, loginType);
-
-        Optional<Member> existingMember = memberRepository.findByEmail(email);
-        if (existingMember.isPresent()) {
-            throw new ServiceException(ErrorCodes.DUPLICATE_EMAIL);
-        }
-
-        Member member = Member.builder()
-            .email(email)
-            .password(
-                loginType.equals(ProviderType.SELF) ? passwordEncoder.encode(password) : null
-            )
-            .nickname(nickname)
-            .loginType(loginType)
-            .profileImageUrl(profileImageUrl)
-            .apiKey(UUID.randomUUID().toString())
-            .role(MemberRole.ROLE_USER)
-            .status(MemberStatus.ACTIVE)
-            .build();
-
-        if (providerId != null) {
-            oAuthService.connectProvider(member, loginType, providerId, providerEmail);
-        }
-
-        return memberRepository.save(member);
-    }
+//    @Transactional
+//    public Member signup(
+//        String email, String password, String nickname,
+//        ProviderType loginType, String providerId, String providerEmail, String profileImageUrl
+//    ) {
+//        _validateEmailAndPassword(email, password, loginType);
+//
+//        Optional<Member> existingMember = memberRepository.findByEmail(email);
+//        if (existingMember.isPresent()) {
+//            throw new ServiceException(ErrorCodes.DUPLICATE_EMAIL);
+//        }
+//
+//        Member member = Member.builder()
+//            .email(email)
+//            .password(
+//                loginType.equals(ProviderType.SELF) ? passwordEncoder.encode(password) : null
+//            )
+//            .nickname(nickname)
+//            .loginType(loginType)
+//            .profileImageUrl(profileImageUrl)
+//            .apiKey(UUID.randomUUID().toString())
+//            .role(MemberRole.ROLE_USER)
+//            .status(MemberStatus.ACTIVE)
+//            .build();
+//
+//        if (providerId != null) {
+//            oAuthService.connectProvider(member, loginType, providerId, providerEmail);
+//        }
+//
+//        return memberRepository.save(member);
+//    }
 
 
     public Optional<Member> findByEmail(String email) {
@@ -115,26 +114,26 @@ public class AuthService {
     }
 
     
-    @Transactional
-    public Member handleSocialLogin(    // 소셜 로그인 시, 사이트 자체 계정의 유무에 따른 처리
-        String email,
-        ProviderType loginType, String providerId
-    ) {
-        Member connectedMember = oAuthService.findByProviderId(loginType, providerId);
-        if (connectedMember != null) {
-            connectedMember.setLoginType(loginType);
-            return connectedMember;  // 연결된 계정이 있다면 그 계정으로 로그인
-        }
-
-        Optional<Member> existingMember = findByEmail(email); // 이메일이 사용중인지 확인
-        if (existingMember.isPresent()) {
-            Member member = existingMember.get();
-            oAuthService.connectProvider(member, loginType, providerId, email);  // 기존 계정에 소셜 계정 연결
-            return member;
-        }
-
-        return signup(email, null, null, loginType, providerId, email, null);
-    }
+//    @Transactional
+//    public Member handleSocialLogin(    // 소셜 로그인 시, 사이트 자체 계정의 유무에 따른 처리
+//        String email,
+//        ProviderType loginType, String providerId
+//    ) {
+//        Member connectedMember = oAuthService.findByProviderId(loginType, providerId);
+//        if (connectedMember != null) {
+//            connectedMember.setLoginType(loginType);
+//            return connectedMember;  // 연결된 계정이 있다면 그 계정으로 로그인
+//        }
+//
+//        Optional<Member> existingMember = findByEmail(email); // 이메일이 사용중인지 확인
+//        if (existingMember.isPresent()) {
+//            Member member = existingMember.get();
+//            oAuthService.connectProvider(member, loginType, providerId, email);  // 기존 계정에 소셜 계정 연결
+//            return member;
+//        }
+//
+//        return signup(email, null, null, loginType, providerId, email, null);
+//    }
 
 
     @Transactional

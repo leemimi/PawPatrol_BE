@@ -112,46 +112,46 @@ public class ApiV1AuthController {
 
     // [2. 회원가입 프로세스]
     // AUTH02_SIGNUP01 : 회원가입
-    @PostMapping("/signup")
-    public RsData<SignupResponse> signup(@Valid @RequestBody SignupRequest request) {
-        String verified = redisTemplate.opsForValue().get("email:verify:" + request.email());
-        if (verified == null) {
-            throw new ServiceException(ErrorCodes.EMAIL_NOT_VERIFIED);
-        }
-
-        Member member = authService.signup(
-            request.email(), request.password(), request.nickname(),
-            ProviderType.SELF, null, null, "default.png"
-        );
-
-        return new RsData<>(
-            "201-1",
-            "회원가입 성공!  %s님 환영합니다.".formatted(request.nickname()),
-            SignupResponse.of(member)
-        );
-    }
+//    @PostMapping("/signup")
+//    public RsData<SignupResponse> signup(@Valid @RequestBody SignupRequest request) {
+//        String verified = redisTemplate.opsForValue().get("email:verify:" + request.email());
+//        if (verified == null) {
+//            throw new ServiceException(ErrorCodes.EMAIL_NOT_VERIFIED);
+//        }
+//
+//        Member member = authService.signup(
+//            request.email(), request.password(), request.nickname(),
+//            ProviderType.SELF, null, null, "default.png"
+//        );
+//
+//        return new RsData<>(
+//            "201-1",
+//            "회원가입 성공!  %s님 환영합니다.".formatted(request.nickname()),
+//            SignupResponse.of(member)
+//        );
+//    }
 
 
     // AUTH02_SIGNUP02 : 이메일 인증 코드 발송
-    @PostMapping("/email/verification-code")
-    public RsData<Void> sendVerificationEmail(@Valid @RequestBody EmailRequest request) {
-        emailService.sendVerificationEmail(request.email());
-        return new RsData<>("200-1", "입력하신 이메일로 인증 코드가 발송되었습니다.");
-    }
+//    @PostMapping("/email/verification-code")
+//    public RsData<Void> sendVerificationEmail(@Valid @RequestBody EmailRequest request) {
+//        emailService.sendVerificationEmail(request.email());
+//        return new RsData<>("200-1", "입력하신 이메일로 인증 코드가 발송되었습니다.");
+//    }
 
 
     // AUTH02_SIGNUP03 : 이메일 인증 코드 확인
-    @PostMapping("/email/verify")
-    public RsData<Void> verifyEmail(@Valid @RequestBody EmailVerifyRequest request) {
-        boolean isValid = emailService.verifyCode(request.email(), request.code());
-        if (!isValid) {
-            throw new ServiceException(ErrorCodes.EMAIL_VERIFICATION_NOT_MATCH);
-        }
-
-        redisTemplate.opsForValue()
-            .set("email:verify:" + request.email(), "verified", 3, TimeUnit.MINUTES);
-        return new RsData<>("200-1", "이메일 인증이 완료되었습니다.");
-    }
+//    @PostMapping("/email/verify")
+//    public RsData<Void> verifyEmail(@Valid @RequestBody EmailVerifyRequest request) {
+//        boolean isValid = emailService.verifyCode(request.email(), request.code());
+//        if (!isValid) {
+//            throw new ServiceException(ErrorCodes.EMAIL_VERIFICATION_NOT_MATCH);
+//        }
+//
+//        redisTemplate.opsForValue()
+//            .set("email:verify:" + request.email(), "verified", 3, TimeUnit.MINUTES);
+//        return new RsData<>("200-1", "이메일 인증이 완료되었습니다.");
+//    }
 
 
 
