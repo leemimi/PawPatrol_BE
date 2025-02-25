@@ -1,5 +1,9 @@
 package com.patrol.api.animal.dto;
 
+import com.patrol.domain.animal.enums.AnimalGender;
+import com.patrol.domain.animal.enums.AnimalSize;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,8 +28,11 @@ public class MyPetListResponse {
     private String breed;
     private String estimatedAge;
     private String feature;
-    private String size;
-    private String registrationNumber;
+    @Enumerated(EnumType.STRING)
+    private AnimalSize size;
+    private String registrationNo;
     private String imageUrl;
     private String healthCondition;
+    @Enumerated(EnumType.STRING)
+    private AnimalGender gender;
 }
