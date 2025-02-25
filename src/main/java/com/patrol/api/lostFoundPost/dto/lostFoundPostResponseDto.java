@@ -19,25 +19,29 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 public class lostFoundPostResponseDto {
-    private Long foundId;
+    private Long id;
     private MemberResponseDto author;
     private String content;
     private Double latitude;
     private Double longitude;
     private String findTime;
+    private String lostTime;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
     private String status;
     private PetResponseDto pet;
     private List<ImageResponseDto> images;
+    private String location;
 
     public lostFoundPostResponseDto(LostFoundPost lostFoundPost) {
-        this.foundId = lostFoundPost.getId();
+        this.id = lostFoundPost.getId();
         this.author = new MemberResponseDto(lostFoundPost.getAuthor());
         this.content = lostFoundPost.getContent();
         this.latitude = lostFoundPost.getLatitude();
         this.longitude = lostFoundPost.getLongitude();
+        this.location= lostFoundPost.getLocation();
         this.findTime = lostFoundPost.getFindTime();
+        this.lostTime = lostFoundPost.getLostTime();
         this.status= String.valueOf(lostFoundPost.getStatus());
         this.createdAt = lostFoundPost.getCreatedAt();
         this.modifiedAt = lostFoundPost.getModifiedAt();
