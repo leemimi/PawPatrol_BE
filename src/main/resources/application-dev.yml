@@ -26,3 +26,5 @@ spring:
 custom:
   oauth2:
     redirect-uri: http://localhost:5173/connect
+  auth:
+    redirect-uri: http://localhost:5173/login-pet

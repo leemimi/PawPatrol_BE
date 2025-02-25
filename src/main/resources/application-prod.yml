@@ -36,3 +36,5 @@ custom:
     domain: api.pawpatrols.shop
   oauth2:
     redirect-uri: https://api.pawpatrols.shop/connect
+  auth:
+    redirect-uri: https://api.pawpatrols.shop/login-pet
