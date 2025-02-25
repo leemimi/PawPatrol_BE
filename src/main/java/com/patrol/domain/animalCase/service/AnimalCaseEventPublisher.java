@@ -8,8 +8,7 @@ import com.patrol.domain.animalCase.enums.ContentType;
 import com.patrol.domain.animalCase.events.PostCreatedEvent;
 import com.patrol.domain.animalCase.events.ProtectionCreatedEvent;
 import com.patrol.domain.animalCase.events.ProtectionStatusChangeEvent;
-import com.patrol.domain.findPost.entity.FindPost;
-import com.patrol.domain.lostPost.entity.LostPost;
+import com.patrol.domain.lostFoundPost.entity.LostFoundPost;
 import com.patrol.domain.member.member.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -24,10 +23,10 @@ public class AnimalCaseEventPublisher {
   private final ApplicationEventPublisher eventPublisher;
 
 
-  public void createLostPost(LostPost lostPost) {
+  public void createLostPost(LostFoundPost lostPost) {
     eventPublisher.publishEvent(new PostCreatedEvent(
         ContentType.LOSTPOST, lostPost.getId(),
-        lostPost.getPetId(), (long) 1
+        lostPost.getPet().getId(), (long) 1
     ));
 
     //    eventPublisher.publishEvent(new PostCreatedEvent(
@@ -37,10 +36,10 @@ public class AnimalCaseEventPublisher {
   }
 
   // MyPet 제보글
-  public void createfindPost(FindPost findPost) {
+  public void createfindPost(LostFoundPost findPost) {
     eventPublisher.publishEvent(new PostCreatedEvent(
         ContentType.FINDPOST, findPost.getId(),
-        findPost.getId(), (long) 1
+        findPost.getPet().getId(), (long) 1
     ));
 
     //    eventPublisher.publishEvent(new PostCreatedEvent(
@@ -50,11 +49,11 @@ public class AnimalCaseEventPublisher {
   }
 
   // 제보글 중 MyPet이 아닌 Animal인 경우
-  public void createRescueFindPost(FindPost findPost) {
+  public void createRescueFindPost(LostFoundPost findPost) {
 
     eventPublisher.publishEvent(new PostCreatedEvent(
         ContentType.FINDPOST, findPost.getId(),
-        findPost.getId(), (long) 1
+        findPost.getPet().getId(), (long) 1
     ));
 
     //    eventPublisher.publishEvent(new PostCreatedEvent(
