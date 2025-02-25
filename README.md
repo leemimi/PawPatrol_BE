@@ -2,6 +2,7 @@
 벡엔드 입니다
 
 http://pawpatrols.shop/swagger-ui/index.html
+http://pawpatrols.shop/
 ```
 PawPatrol_BE
 └─ src
