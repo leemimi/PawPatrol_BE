@@ -1,7 +1,7 @@
 package com.patrol.domain.lostFoundPost.service;
 
-import com.patrol.api.lostFoundPost.dto.lostFoundPostRequestDto;
-import com.patrol.api.lostFoundPost.dto.lostFoundPostResponseDto;
+import com.patrol.api.lostFoundPost.dto.LostFoundPostRequestDto;
+import com.patrol.api.lostFoundPost.dto.LostFoundPostResponseDto;
 import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.animal.repository.AnimalRepository;
 import com.patrol.domain.lostFoundPost.entity.LostFoundPost;
@@ -43,7 +43,7 @@ public class LostFoundPostService {
     private static final String FOLDER_PATH = "lostfoundpost/";
 
     @Transactional
-    public lostFoundPostResponseDto createLostFoundPost(lostFoundPostRequestDto requestDto, Long petId, Member author, List<MultipartFile> images) {
+    public LostFoundPostResponseDto createLostFoundPost(LostFoundPostRequestDto requestDto, Long petId, Member author, List<MultipartFile> images) {
         Animal pet = null;
         if (petId != null) {
             pet = animalRepository.findById(petId)
@@ -65,11 +65,11 @@ public class LostFoundPostService {
             uploadImages(images, lostFoundPost);
         }
 
-        return lostFoundPostResponseDto.from(lostFoundPost);
+        return LostFoundPostResponseDto.from(lostFoundPost);
     }
 
     @Transactional
-    public lostFoundPostResponseDto updateLostFoundPost(Long postId, lostFoundPostRequestDto requestDto, List<MultipartFile> images, Member author) {
+    public LostFoundPostResponseDto updateLostFoundPost(Long postId, LostFoundPostRequestDto requestDto, List<MultipartFile> images, Member author) {
         LostFoundPost lostFoundPost = lostFoundPostRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
 
@@ -84,7 +84,7 @@ public class LostFoundPostService {
             uploadImages(images, lostFoundPost);
         }
 
-        return lostFoundPostResponseDto.from(lostFoundPost);
+        return LostFoundPostResponseDto.from(lostFoundPost);
     }
 
     private void uploadImages(List<MultipartFile> images, LostFoundPost lostFoundPost) {
@@ -142,24 +142,24 @@ public class LostFoundPostService {
     }
 
     @Transactional(readOnly = true)
-    public Page<lostFoundPostResponseDto> getAllLostFoundPosts(Pageable pageable) {
+    public Page<LostFoundPostResponseDto> getAllLostFoundPosts(Pageable pageable) {
         Page<LostFoundPost> findPosts = lostFoundPostRepository.findAll(pageable);
-        return findPosts.map(lostFoundPostResponseDto::from);
+        return findPosts.map(LostFoundPostResponseDto::from);
     }
 
     @Transactional(readOnly = true)
-    public lostFoundPostResponseDto getLostFoundPostById(Long postId) {
+    public LostFoundPostResponseDto getLostFoundPostById(Long postId) {
         LostFoundPost lostFoundPost = lostFoundPostRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
 
-        return lostFoundPostResponseDto.from(lostFoundPost);
+        return LostFoundPostResponseDto.from(lostFoundPost);
     }
 
     @Transactional(readOnly = true)
-    public List<lostFoundPostResponseDto> getLostFoundPostsWithinRadius(double latitude, double longitude, double radius) {
+    public List<LostFoundPostResponseDto> getLostFoundPostsWithinRadius(double latitude, double longitude, double radius) {
         List<LostFoundPost> lostFoundPosts = lostFoundPostRepository.findPostsWithinRadius(latitude, longitude, radius);
         return lostFoundPosts.stream()
-                .map(lostFoundPostResponseDto::from)
+                .map(LostFoundPostResponseDto::from)
                 .collect(Collectors.toList());
     }
 }

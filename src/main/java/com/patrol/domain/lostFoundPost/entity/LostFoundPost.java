@@ -1,6 +1,6 @@
 package com.patrol.domain.lostFoundPost.entity;
 
-import com.patrol.api.lostFoundPost.dto.lostFoundPostRequestDto;
+import com.patrol.api.lostFoundPost.dto.LostFoundPostRequestDto;
 import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.image.entity.Image;
 import com.patrol.domain.member.member.entity.Member;
@@ -42,12 +42,12 @@ public class LostFoundPost extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private PostStatus status;
 
-    public LostFoundPost(lostFoundPostRequestDto requestDto, Member author) {
+    public LostFoundPost(LostFoundPostRequestDto requestDto, Member author) {
         this(requestDto);
         this.author = author;
     }
 
-    public LostFoundPost(lostFoundPostRequestDto requestDto, Member author, Animal pet) {
+    public LostFoundPost(LostFoundPostRequestDto requestDto, Member author, Animal pet) {
         this(requestDto);
         this.author = author;
         this.pet= pet;
@@ -55,7 +55,7 @@ public class LostFoundPost extends BaseEntity {
 
 
     // 생성자 (FindPostRequestDto로부터 값 초기화)
-    public LostFoundPost(lostFoundPostRequestDto requestDto) {
+    public LostFoundPost(LostFoundPostRequestDto requestDto) {
         this.content = requestDto.getContent();
         this.latitude = requestDto.getLatitude();
         this.longitude = requestDto.getLongitude();

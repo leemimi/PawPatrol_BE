@@ -3,7 +3,6 @@ package com.patrol.api.lostFoundPost.dto;
 import com.patrol.api.animal.dto.PetResponseDto;
 import com.patrol.api.image.dto.ImageResponseDto;
 import com.patrol.api.member.member.dto.MemberResponseDto;
-import com.patrol.api.member.member.dto.request.PetRegisterRequest;
 import com.patrol.domain.lostFoundPost.entity.LostFoundPost;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,7 +17,7 @@ import java.util.stream.Collectors;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class lostFoundPostResponseDto {
+public class LostFoundPostResponseDto {
     private Long id;
     private MemberResponseDto author;
     private String content;
@@ -33,7 +32,7 @@ public class lostFoundPostResponseDto {
     private List<ImageResponseDto> images;
     private String location;
 
-    public lostFoundPostResponseDto(LostFoundPost lostFoundPost) {
+    public LostFoundPostResponseDto(LostFoundPost lostFoundPost) {
         this.id = lostFoundPost.getId();
         this.author = new MemberResponseDto(lostFoundPost.getAuthor());
         this.content = lostFoundPost.getContent();
@@ -51,8 +50,8 @@ public class lostFoundPostResponseDto {
                 .collect(Collectors.toList());
     }
 
-    public static lostFoundPostResponseDto from(LostFoundPost lostFoundPost) {
-        return new lostFoundPostResponseDto(lostFoundPost);
+    public static LostFoundPostResponseDto from(LostFoundPost lostFoundPost) {
+        return new LostFoundPostResponseDto(lostFoundPost);
     }
 }
 
