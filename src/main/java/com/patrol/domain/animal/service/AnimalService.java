@@ -1,16 +1,22 @@
 package com.patrol.domain.animal.service;
 
+import com.patrol.api.animal.dto.MyPetListResponse;
 import com.patrol.api.member.member.dto.request.PetRegisterRequest;
 import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.animal.repository.AnimalRepository;
+import com.patrol.domain.member.member.entity.Member;
 import com.patrol.global.storage.FileStorageHandler;
 import com.patrol.global.storage.FileUploadRequest;
 import com.patrol.global.storage.FileUploadResult;
+import com.patrol.global.storage.StorageConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * packageName    : com.patrol.domain.animal.service
@@ -29,6 +35,7 @@ import java.util.Optional;
 public class AnimalService {
     private final AnimalRepository animalRepository;
     private final FileStorageHandler fileStorageHandler;
+    private final StorageConfig storageConfig;
 
 
     // 주인 없는 반려동물 등록
@@ -43,9 +50,16 @@ public class AnimalService {
                         .build()
         );
 
+        // 네이버 S3 이미지 URL
+        String imageUrl = storageConfig.getEndpoint()
+                + "/"
+                + storageConfig.getBucketname()
+                + "/"
+                + uploadResult.getFullPath();
+
         // 동물 등록
         if(uploadResult != null) {
-            Animal animal = petRegisterRequest.buildAnimal(uploadResult.getFullPath());
+            Animal animal = petRegisterRequest.buildAnimal(imageUrl);
             animalRepository.save(animal);
         }
     }
@@ -59,5 +73,22 @@ public class AnimalService {
 
     public Optional<Animal> findById(Long animalId) {
       return animalRepository.findById(animalId);
+    }
+
+    // 등록된 나의 반려동물 리스트 가져오기 (마이페이지)
+    @Transactional
+    public List<MyPetListResponse> myPetList(Member member) {
+        return animalRepository.findByOwnerId(member.getId())
+                .stream()
+                .map(animal -> MyPetListResponse.builder()
+                        .id(animal.getId())
+                        .name(animal.getName())
+                        .breed(animal.getBreed())
+                        .characteristics(animal.getFeature())
+                        .size(animal.getSize().toString())
+                        .registrationNumber(animal.getRegistrationNo())
+                        .imageUrl(animal.getImageUrl())
+                        .build())
+                .collect(Collectors.toList());
     }
 }

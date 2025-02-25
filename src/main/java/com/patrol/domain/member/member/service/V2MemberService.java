@@ -10,7 +10,10 @@ import com.patrol.global.exceptions.ServiceException;
 import com.patrol.global.storage.FileStorageHandler;
 import com.patrol.global.storage.FileUploadRequest;
 import com.patrol.global.storage.FileUploadResult;
+import com.patrol.global.storage.StorageConfig;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,10 +35,13 @@ public class V2MemberService {
     private final V2MemberRepository v2MemberRepository;
     private final AnimalRepository animalRepository;
     private final FileStorageHandler fileStorageHandler;
+    private final StorageConfig storageConfig;
+    private final Logger logger = LoggerFactory.getLogger(V2MemberService.class.getName());
 
     // 회원 정보 가져오기
     @Transactional
     public Member getMember(String email) {
+        logger.info("회원 정보 가져오기_getMember");
         return v2MemberRepository.findByEmail(email)
                 // 이거 어떻게 바꿔야 하는지
                 .orElseThrow(() -> new ServiceException(ErrorCodes.INVALID_EMAIL));
@@ -44,6 +50,7 @@ public class V2MemberService {
     // 소셜 로그인 연동 시, 자체 계정 유무 확인
     @Transactional
     public boolean validateNewEmail(String email) {
+        logger.info("소셜 로그인 연동 시 자체 계정 유무 확인_validateNewEmail");
         // 가입된 회원이 있으면 true 반환, 없으면 false 반환
         return v2MemberRepository.findByEmail(email).isPresent();
     }
@@ -52,7 +59,7 @@ public class V2MemberService {
     @Transactional
     public void petRegister(Member member,
                             PetRegisterRequest petRegisterRequest) {
-
+        logger.info("주인 있는 반려동물 등록");
         // 이미지 업로드
         FileUploadResult uploadResult = fileStorageHandler.handleFileUpload(
                 FileUploadRequest.builder()
@@ -61,12 +68,17 @@ public class V2MemberService {
                         .build()
         );
 
+        String imageUrl = storageConfig.getEndpoint()
+                + "/"
+                + storageConfig.getBucketname()
+                + "/"
+                + uploadResult.getFullPath();
+
         // 동물 등록
         if(uploadResult != null) {
-            Animal animal = petRegisterRequest.buildAnimal(member, uploadResult.getFullPath());
+            Animal animal = petRegisterRequest.buildAnimal(member, imageUrl);
             animalRepository.save(animal);
         }
-
 
     }
 }
