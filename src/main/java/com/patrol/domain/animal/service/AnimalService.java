@@ -51,7 +51,13 @@ public class AnimalService {
     }
 
 
-  public Optional<Animal> findById(Long animalId) {
-    return animalRepository.findById(animalId);
-  }
+    @Transactional
+    public Animal registerWithImageUrl(PetRegisterRequest petRegisterRequest, String imageUrl) {
+      Animal animal = petRegisterRequest.buildAnimal(imageUrl);
+      return animalRepository.save(animal);
+    }
+
+    public Optional<Animal> findById(Long animalId) {
+      return animalRepository.findById(animalId);
+    }
 }
