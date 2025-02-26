@@ -8,7 +8,6 @@ import com.patrol.api.protection.dto.ProtectionResponse;
 import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.animal.repository.AnimalRepository;
 import com.patrol.domain.animalCase.entity.AnimalCase;
-import com.patrol.domain.animalCase.enums.CaseHistoryStatus;
 import com.patrol.domain.animalCase.enums.CaseStatus;
 import com.patrol.domain.animalCase.service.AnimalCaseEventPublisher;
 import com.patrol.domain.animalCase.service.AnimalCaseService;
@@ -70,6 +69,11 @@ public class ProtectionService {
     return protectionRepository.findByIdWithFetchAll(protectionId);
   }
 
+  public Page<AnimalCaseListResponse> findMyAnimalCases(Member currentFoster, Pageable pageable) {
+    return animalCaseService.findAllByCurrentFoster(currentFoster, pageable);
+  }
+
+
   @Transactional
   public ProtectionResponse applyProtection(Long caseId, Long memberId, String reason) {
     Member applicant = memberService.findById(memberId)
@@ -123,6 +127,10 @@ public class ProtectionService {
       throw new CustomException(ErrorCode.INVALID_STATUS_CHANGE);
     }
 
+    if (!protection.getAnimalCase().getCurrentFoster().getId().equals(memberId)) { // 권한 검사
+      throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+    }
+
     protection.approve();
     protection.getAnimalCase().updateStatus(CaseStatus.TEMP_PROTECTING);
     animalCaseEventPublisher.acceptProtection(protection.getId(), memberId);
@@ -142,7 +150,10 @@ public class ProtectionService {
       throw new CustomException(ErrorCode.INVALID_STATUS_CHANGE);
     }
 
-    animalCaseService.validateRescuePostOwner(protection.getAnimalCase().getId(), memberId); // 권한 검증
+    if (!protection.getAnimalCase().getCurrentFoster().getId().equals(memberId)) { // 권한 검사
+      throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+    }
+
     protection.reject(rejectReason);
     animalCaseEventPublisher.rejectProjection(protection.getId(), memberId);
   }
@@ -152,6 +163,6 @@ public class ProtectionService {
   public void createAnimalCase(CreateAnimalCaseRequest request, Member member) {
     Animal animal = request.toAnimal();
     animalRepository.save(animal);
-    animalCaseEventPublisher.createProtection(member, animal);
+    animalCaseEventPublisher.createAnimalCase(member, animal);
   }
 }

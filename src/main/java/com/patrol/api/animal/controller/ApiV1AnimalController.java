@@ -1,13 +1,13 @@
 package com.patrol.api.animal.controller;
 
+import com.patrol.api.animal.dto.PetResponseDto;
 import com.patrol.api.member.member.dto.request.PetRegisterRequest;
 import com.patrol.domain.animal.service.AnimalService;
 import com.patrol.global.globalDto.GlobalResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * packageName    : com.patrol.api.animal.controller
@@ -33,5 +33,10 @@ public class ApiV1AnimalController {
         animalService.petRegister(petRegisterRequest);
 
         return GlobalResponse.success();
+    }
+    @GetMapping("/list")
+    public GlobalResponse<List<PetResponseDto>> getAllAnimals() {
+        List<PetResponseDto> animals = animalService.getAllAnimals();  // Fetch all animals without pagination
+        return GlobalResponse.success(animals);
     }
 }

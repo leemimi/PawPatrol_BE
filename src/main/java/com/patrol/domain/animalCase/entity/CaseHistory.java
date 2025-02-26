@@ -25,7 +25,7 @@ public class CaseHistory extends BaseEntity {
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
-  private ContentType contentType;  // 기록 대상 : findPost or lostPost or protection
+  private ContentType contentType;  // 기록 대상 : findPost, lostPost, protection, animalCase
 
   @Column(nullable = false)
   private Long contentId;  // 기록 대상의 ID

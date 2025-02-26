@@ -6,9 +6,10 @@ import com.patrol.domain.animalCase.enums.CaseHistoryStatus;
 import com.patrol.domain.animalCase.enums.CaseStatus;
 import com.patrol.domain.animalCase.enums.ContentType;
 import com.patrol.domain.animalCase.events.PostCreatedEvent;
-import com.patrol.domain.animalCase.events.ProtectionCreatedEvent;
+import com.patrol.domain.animalCase.events.AnimalCaseCreatedEvent;
 import com.patrol.domain.animalCase.events.ProtectionStatusChangeEvent;
 import com.patrol.domain.lostFoundPost.entity.LostFoundPost;
+import com.patrol.domain.lostFoundPost.entity.PostStatus;
 import com.patrol.domain.member.member.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -23,43 +24,18 @@ public class AnimalCaseEventPublisher {
   private final ApplicationEventPublisher eventPublisher;
 
 
-  public void createLostPost(LostFoundPost lostPost) {
-    eventPublisher.publishEvent(new PostCreatedEvent(
-        ContentType.LOSTPOST, lostPost.getId(),
-        lostPost.getPet().getId(), (long) 1
-    ));
-
-    //    eventPublisher.publishEvent(new PostCreatedEvent(
-    //        ContentType.LOSTPOST, lostPost.getLostId(),
-    //        TargetType.MY_PET, lostPost.getPetId()
-    //    ));
-  }
-
-  // MyPet 제보글
-  public void createfindPost(LostFoundPost findPost) {
-    eventPublisher.publishEvent(new PostCreatedEvent(
-        ContentType.FINDPOST, findPost.getId(),
-        findPost.getPet().getId(), (long) 1
-    ));
-
-    //    eventPublisher.publishEvent(new PostCreatedEvent(
-    //        ContentType.FINDPOST, findPost.getId(),
-    //        TargetType.MY_PET, findPost.getPetId()
-    //    ));
-  }
-
-  // 제보글 중 MyPet이 아닌 Animal인 경우
-  public void createRescueFindPost(LostFoundPost findPost) {
+  public void createLostFoundPost(LostFoundPost lostFoundPostPost) {
+    if (lostFoundPostPost.getStatus().equals(PostStatus.FINDING)) {
+      eventPublisher.publishEvent(new PostCreatedEvent(
+          ContentType.LOSTPOST, lostFoundPostPost.getId(),
+          lostFoundPostPost.getPet().getId(), lostFoundPostPost.getAuthor().getId()
+      ));
+    }
 
     eventPublisher.publishEvent(new PostCreatedEvent(
-        ContentType.FINDPOST, findPost.getId(),
-        findPost.getPet().getId(), (long) 1
+        ContentType.FINDPOST, lostFoundPostPost.getId(),
+        lostFoundPostPost.getPet().getId(), lostFoundPostPost.getAuthor().getId()
     ));
-
-    //    eventPublisher.publishEvent(new PostCreatedEvent(
-    //        ContentType.FINDPOST, findPost.getId(),
-    //        TargetType.ANIMAL, findPost.getPetId()
-    //    ));
   }
 
 
@@ -78,8 +54,8 @@ public class AnimalCaseEventPublisher {
     ));
   }
 
-  public void createProtection(Member member, Animal animal) {
-    eventPublisher.publishEvent(new ProtectionCreatedEvent(
+  public void createAnimalCase(Member member, Animal animal) {
+    eventPublisher.publishEvent(new AnimalCaseCreatedEvent(
         member, animal,
         CaseStatus.TEMP_PROTECT_WAITING, CaseHistoryStatus.TEMP_PROTECT_REGISTERED
     ));

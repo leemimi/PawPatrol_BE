@@ -1,6 +1,7 @@
 package com.patrol.domain.animal.service;
 
 import com.patrol.api.animal.dto.MyPetListResponse;
+import com.patrol.api.animal.dto.PetResponseDto;
 import com.patrol.api.member.member.dto.request.PetRegisterRequest;
 import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.animal.repository.AnimalRepository;
@@ -90,5 +91,12 @@ public class AnimalService {
                         .imageUrl(animal.getImageUrl())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    public List<PetResponseDto> getAllAnimals() {
+        // Fetch all animals from the repository and convert to PetResponseDto
+        return animalRepository.findAll().stream()
+                .map(PetResponseDto::new)  // Convert Animal to PetResponseDto using the constructor
+                .collect(Collectors.toList());  // Collect them into a List
     }
 }

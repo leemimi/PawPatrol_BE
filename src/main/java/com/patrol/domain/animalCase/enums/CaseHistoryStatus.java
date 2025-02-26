@@ -6,11 +6,10 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum CaseHistoryStatus {
-  // 게시글
+  // LostFoundPost 게시글
   INITIAL_MISSING_REPORT("최초 실종 신고"), // 처음 실종 신고했을 때
   ADDITIONAL_MISSING_REPORT("추가 실종 신고"), // 이미 신고된 실종 건에 추가 신고할 때
   FOUND_REPORT("발견 제보"), // 누군가 발견했다고 제보
-  RESCUE_REPORT("구조 제보"), // 누군가 구조했다고 제보
 
   // 임시보호 관련
   TEMP_PROTECT_REGISTERED("임시보호 등록"),

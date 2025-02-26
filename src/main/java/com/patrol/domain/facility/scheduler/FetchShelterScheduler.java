@@ -1,6 +1,7 @@
 package com.patrol.domain.facility.scheduler;
 
 import com.patrol.domain.facility.service.ShelterService;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,7 +33,8 @@ public class FetchShelterScheduler {
   private final ShelterService shelterService;
 
 
-  @Scheduled(cron = "${schedule.cron_for_shelter}")
+//  @Scheduled(cron = "${schedule.cron_for_shelter}")
+  @PostConstruct
   public void getApisApiData() {
 
     if(useSchedule) {

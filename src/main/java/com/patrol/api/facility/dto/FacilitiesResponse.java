@@ -6,12 +6,12 @@ import lombok.Builder;
 
 @Builder
 public record FacilitiesResponse(
-    String name, String address, String tel, Double latitude, Double longitude,
+    Long id, String name, String address, String tel, Double latitude, Double longitude,
     OperatingHours operatingHours
 ) {
 
   public static FacilitiesResponse of(Facility facility) {
-    return FacilitiesResponse.builder()
+    return FacilitiesResponse.builder().id(facility.getId())
         .name(facility.getName())
         .address(facility.getAddress())
         .tel(facility.getTel())

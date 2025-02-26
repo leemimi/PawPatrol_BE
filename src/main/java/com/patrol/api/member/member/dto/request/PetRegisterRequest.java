@@ -4,6 +4,7 @@ import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.animal.enums.AnimalGender;
 import com.patrol.domain.animal.enums.AnimalSize;
 import com.patrol.domain.animal.enums.AnimalType;
+import com.patrol.domain.image.entity.Image;
 import com.patrol.domain.member.member.entity.Member;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -41,6 +42,7 @@ public record PetRegisterRequest (
 ) {
         // 반려동물 등록시 Animal 객체 생성에 사용 (주인 있는 경우)
         public Animal buildAnimal(Member owner, String imageUrl) {
+
                 return Animal.builder()
                         .owner(owner)
                         .name(this.name)
@@ -61,7 +63,8 @@ public record PetRegisterRequest (
         public Animal buildAnimal(String imageUrl) {
                 Animal.AnimalBuilder builder = Animal.builder()
                         .animalType(this.animalType)    // 필수
-                        .imageUrl(imageUrl);            // 필수
+                        .imageUrl(imageUrl);
+
 
                 // 선택적 파라미터들은 null 체크 후 설정
                 Optional.ofNullable(this.breed).ifPresent(builder::breed);

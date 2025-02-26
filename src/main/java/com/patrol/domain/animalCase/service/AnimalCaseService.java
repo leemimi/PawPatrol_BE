@@ -5,10 +5,9 @@ import com.patrol.api.animalCase.dto.AnimalCaseDetailResponse;
 import com.patrol.api.animalCase.dto.AnimalCaseListResponse;
 import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.animalCase.entity.AnimalCase;
-import com.patrol.domain.animalCase.entity.CaseHistory;
-import com.patrol.domain.animalCase.enums.CaseHistoryStatus;
 import com.patrol.domain.animalCase.enums.CaseStatus;
 import com.patrol.domain.animalCase.repository.AnimalCaseRepository;
+import com.patrol.domain.member.member.entity.Member;
 import com.patrol.global.error.ErrorCode;
 import com.patrol.global.exception.CustomException;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +25,6 @@ import java.util.Optional;
 public class AnimalCaseService {
 
   private final AnimalCaseRepository animalCaseRepository;
-  private final CaseHistoryService caseHistoryService;
-
 
   @Transactional
   public AnimalCase createNewCase(CaseStatus status, Animal animal) {
@@ -37,13 +34,6 @@ public class AnimalCaseService {
         .build();
     return animalCaseRepository.save(animalCase);
   }
-
-
-  @Transactional
-  public void updateStatus(AnimalCase animalCase, CaseStatus status) {
-    animalCase.updateStatus(status);
-  }
-
 
   public AnimalCase findByAnimal(Animal animal) {
     return animalCaseRepository.findByAnimal(animal);
@@ -61,10 +51,6 @@ public class AnimalCaseService {
   public AnimalCaseDetailResponse findByIdWithHistories(Long caseId) {
     AnimalCase animalCase = animalCaseRepository.findByIdWithHistories(caseId)
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
-
-    // TODO:
-    // AnimalInfo animalInfo = getAnimalInfo(animalCase.getTargetType(), animalCase.getTargetId());
-    // return AnimalCaseDetailResponse.of(animalCase, animalInfo);
     return AnimalCaseDetailResponse.of(animalCase);
   }
 
@@ -81,31 +67,13 @@ public class AnimalCaseService {
         .map(AnimalCaseListResponse::of);
   }
 
-
   public Page<AnimalCaseListResponse> findAll(Pageable pageable) {
     return animalCaseRepository.findAll(pageable)
         .map(AnimalCaseListResponse::of);
   }
 
-
-  @Transactional
-  public void updateToTempProtectWaiting(Long caseId, Long memberId) {
-    AnimalCase animalCase = animalCaseRepository.findByIdAndStatus(caseId, CaseStatus.RESCUE)
-        .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
-
-    CaseHistory rescueHistory = validateRescuePostOwner(animalCase.getId(), memberId);
-    animalCase.updateStatus(CaseStatus.TEMP_PROTECT_WAITING);
-
-    caseHistoryService.changeToTempProtectWaiting(animalCase, rescueHistory.getContentType(), rescueHistory.getContentId(), memberId);
+  public Page<AnimalCaseListResponse> findAllByCurrentFoster(Member currentFoster, Pageable pageable) {
+    return animalCaseRepository.findAllByCurrentFoster(currentFoster, pageable)
+        .map(AnimalCaseListResponse::of);
   }
-
-
-  public CaseHistory validateRescuePostOwner(Long caseId, Long memberId) {
-    CaseHistory rescueHistory = caseHistoryService.findByAnimalCaseIdAndHistoryStatus(
-        caseId, CaseHistoryStatus.RESCUE_REPORT
-    );
-
-    return rescueHistory;
-  }
-
 }
