@@ -1,6 +1,7 @@
 package com.patrol.api.facility.controller;
 
 import com.patrol.api.facility.dto.FacilitiesResponse;
+import com.patrol.api.lostFoundPost.dto.LostFoundPostResponseDto;
 import com.patrol.domain.facility.service.FacilityService;
 import com.patrol.global.globalDto.GlobalResponse;
 import com.patrol.global.rsData.RsData;

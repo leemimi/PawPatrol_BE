@@ -2,6 +2,7 @@ package com.patrol.domain.lostFoundPost.entity;
 
 import com.patrol.api.lostFoundPost.dto.LostFoundPostRequestDto;
 import com.patrol.domain.animal.entity.Animal;
+import com.patrol.domain.comment.entity.Comment;
 import com.patrol.domain.image.entity.Image;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.global.jpa.BaseEntity;
@@ -24,13 +25,17 @@ public class LostFoundPost extends BaseEntity {
     @JoinColumn(name = "author_id")
     private Member author;
 
-    @OneToMany
-    @JoinColumn(name = "found_id")
+    @OneToMany(mappedBy = "foundId", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images = new ArrayList<>();
 
-    @OneToOne
+
+    @OneToMany(mappedBy = "lostFoundPost", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();  // Comments relationship
+
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pet_id", nullable = true)
     private Animal pet;
+
 
     private String title;
     private String content;
@@ -50,7 +55,7 @@ public class LostFoundPost extends BaseEntity {
     public LostFoundPost(LostFoundPostRequestDto requestDto, Member author, Animal pet) {
         this(requestDto);
         this.author = author;
-        this.pet= pet;
+        this.pet = pet != null ? pet : null;
     }
 
 
@@ -60,13 +65,26 @@ public class LostFoundPost extends BaseEntity {
         this.latitude = requestDto.getLatitude();
         this.longitude = requestDto.getLongitude();
         this.location = requestDto.getLocation();
-        this.findTime = requestDto.getFindTime();
-        this.lostTime=requestDto.getLostTime();
+        // Check if lostTime is provided
+        // Handle findTime and lostTime based on input
+        if (requestDto.getLostTime() != null && requestDto.getFindTime() == null) {
+            this.lostTime = requestDto.getLostTime();
+            this.findTime = null;  // Ensure findTime is null when lostTime is provided
+        } else if (requestDto.getFindTime() != null && requestDto.getLostTime() == null) {
+            this.findTime = requestDto.getFindTime();
+            this.lostTime = null;  // Ensure lostTime is null when findTime is provided
+        } else {
+            // Optionally, you could throw an error if both times are provided, but for now, set both to null
+            this.findTime = null;
+            this.lostTime = null;
+        }
+        // status 필드가 null이 아니면 PostStatus로 변환
         if (requestDto.getStatus() != null) {
             this.status = PostStatus.valueOf(requestDto.getStatus());
         } else {
             this.status = PostStatus.FINDING; // 기본값 설정
         }
+
     }
 
 
@@ -76,4 +94,6 @@ public class LostFoundPost extends BaseEntity {
         }
         this.images.add(image);
     }
+
+
 }

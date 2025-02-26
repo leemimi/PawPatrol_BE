@@ -1,5 +1,8 @@
 package com.patrol.domain.lostFoundPost.repository;
 import com.patrol.domain.lostFoundPost.entity.LostFoundPost;
+import com.patrol.domain.lostFoundPost.entity.PostStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,5 +22,8 @@ public interface LostFoundPostRepository extends JpaRepository<LostFoundPost, Lo
             @Param("longitude") double longitude,
             @Param("radius") double radius
     );
+
+    Page<LostFoundPost> findByStatus(PostStatus status, Pageable pageable);
+    LostFoundPost findByPetId(Long petId);
 
 }
