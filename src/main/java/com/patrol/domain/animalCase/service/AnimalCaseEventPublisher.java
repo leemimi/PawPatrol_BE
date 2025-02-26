@@ -53,7 +53,7 @@ public class AnimalCaseEventPublisher {
   public void rejectProtection(Long protectionId, Long memberId) {
     eventPublisher.publishEvent(new ProtectionStatusChangeEvent(
         protectionId, memberId,
-        CaseStatus.TEMP_PROTECT_WAITING, CaseHistoryStatus.TEMP_PROTECT_REJECTED
+        CaseStatus.PROTECT_WAITING, CaseHistoryStatus.TEMP_PROTECT_REJECTED
     ));
   }
 

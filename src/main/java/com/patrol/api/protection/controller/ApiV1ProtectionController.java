@@ -57,6 +57,7 @@ public class ApiV1ProtectionController {
     return new RsData<>("200", "임시 보호 동물 등록 성공");
   }
 
+
   @GetMapping("/my-cases")
   @Operation(summary = "내가 등록한 임시 보호 동물 목록")
   public RsData<Page<AnimalCaseListResponse>> getMyAnimalCases(

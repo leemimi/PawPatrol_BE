@@ -13,7 +13,6 @@ import com.patrol.domain.protection.entity.Protection;
 import com.patrol.domain.protection.service.ProtectionService;
 import com.patrol.global.error.ErrorCode;
 import com.patrol.global.exception.CustomException;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -103,7 +102,7 @@ public class AnimalCaseEventManager {
   @Transactional
   public void handleAnimalCaseCreated(
       Animal animal, Member member, String title) {
-    AnimalCase animalCase = animalCaseService.createNewCase(CaseStatus.TEMP_PROTECT_WAITING, animal);
+    AnimalCase animalCase = animalCaseService.createNewCase(CaseStatus.PROTECT_WAITING, animal);
     animalCase.setCurrentFoster(member);
     animalCase.setTitle(title);
     caseHistoryService.addAnimalCase(

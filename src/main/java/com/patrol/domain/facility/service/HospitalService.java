@@ -49,6 +49,20 @@ public class HospitalService implements FacilityService {
         .collect(Collectors.toList());
   }
 
+  @Override
+  public List<FacilitiesResponse> getFacilitiesWithinRadius(
+          double latitude,
+          double longitude,
+          double radius
+  ) {
+    return hospitalRepository.findHospitalsWithinRadius(latitude, longitude, radius)
+            .stream()
+            .map(FacilitiesResponse::of)
+            .collect(Collectors.toList());
+  }
+
+
+
   private Hospital convertToEntity(CsvParser.HospitalData data) {
     log.info(data.getTel());
 

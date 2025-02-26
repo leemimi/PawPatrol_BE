@@ -43,7 +43,7 @@ public class ProtectionService {
 
   public AnimalCaseDetailResponse findPossibleAnimalCase(Long caseId) {
     Collection<CaseStatus> possibleStatuses = List.of(
-        CaseStatus.TEMP_PROTECT_WAITING,
+        CaseStatus.PROTECT_WAITING,
         CaseStatus.TEMP_PROTECTING,
         CaseStatus.SHELTER_PROTECTING
     );
@@ -53,7 +53,7 @@ public class ProtectionService {
   public Page<AnimalCaseListResponse> findPossibleAnimalCases(Pageable pageable) {
     return animalCaseService.findAllByStatuses(
         List.of(
-            CaseStatus.TEMP_PROTECT_WAITING,
+            CaseStatus.PROTECT_WAITING,
             CaseStatus.TEMP_PROTECTING,
             CaseStatus.SHELTER_PROTECTING
         ),
@@ -80,7 +80,7 @@ public class ProtectionService {
     Member applicant = memberService.findById(memberId)
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
 
-    AnimalCase animalCase = animalCaseService.findByIdAndStatus(caseId, CaseStatus.TEMP_PROTECT_WAITING)
+    AnimalCase animalCase = animalCaseService.findByIdAndStatus(caseId, CaseStatus.PROTECT_WAITING)
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
 
     if (animalCase.getCurrentFoster() == null) {
@@ -148,7 +148,7 @@ public class ProtectionService {
       throw new CustomException(ErrorCode.INVALID_STATUS_CHANGE);
     }
 
-    if (protection.getAnimalCase().getStatus() != CaseStatus.TEMP_PROTECT_WAITING) {  // 케이스 상태 검증
+    if (protection.getAnimalCase().getStatus() != CaseStatus.PROTECT_WAITING) {  // 케이스 상태 검증
       throw new CustomException(ErrorCode.INVALID_STATUS_CHANGE);
     }
 
