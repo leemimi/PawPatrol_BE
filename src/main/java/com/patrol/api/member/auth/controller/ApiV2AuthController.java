@@ -5,7 +5,9 @@ import com.patrol.api.member.auth.dto.request.EmailVerifyRequest;
 import com.patrol.api.member.auth.dto.request.SignupRequest;
 import com.patrol.api.member.auth.dto.requestV2.LoginRequest;
 import com.patrol.api.member.auth.dto.LoginUserInfoResponse;
+import com.patrol.api.member.auth.dto.requestV2.NewPasswordRequest;
 import com.patrol.api.member.auth.dto.requestV2.SocialConnectRequest;
+import com.patrol.api.member.auth.dto.requestV2.VerifyResetCodeRequest;
 import com.patrol.domain.member.auth.service.EmailService;
 import com.patrol.domain.member.auth.service.V2AuthService;
 import com.patrol.domain.member.member.entity.Member;
@@ -15,17 +17,17 @@ import com.patrol.global.exceptions.ErrorCodes;
 import com.patrol.global.exceptions.ServiceException;
 import com.patrol.global.globalDto.GlobalResponse;
 import com.patrol.global.rq.Rq;
-import com.patrol.global.rsData.RsData;
 import com.patrol.global.webMvc.LoginUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.concurrent.TimeUnit;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * packageName    : com.patrol.api.member.auth.controller
@@ -135,5 +137,75 @@ public class ApiV2AuthController {
             }
 
             return GlobalResponse.error(ErrorCode.MEMBER_NOT_FOUND);
+    }
+
+    // 비밀번호 찾기 1단계 > 이메일 인증
+    @PostMapping("/password/reset")
+    public GlobalResponse<Map<String, String>> resetPassword(@Valid @RequestBody EmailRequest request) {
+        // 이미 가입된 회원이 있을 때 이메일 인증
+        if (v2MemberService.validateNewEmail(request.email())) {
+            emailService.sendVerificationEmail(request.email());
+
+            // 토큰 생성, 저장, 반환 (Redis에 저장하여 나중에 검증)\
+            Map<String, String> response = v2AuthService.resetToken(request.email());
+
+            return GlobalResponse.success(response);
+        }
+        return GlobalResponse.error(ErrorCode.EMAIL_NOT_FOUND);
+    }
+
+    // 비밀번호 찾기 2단계 > 이메일 인증 코드 확인
+    @PostMapping("/password/reset/verify")
+    public GlobalResponse<Map<String, String>> verifyResetCode(
+            @Valid @RequestBody VerifyResetCodeRequest request) {
+
+        // 토큰 유효성 검증
+        boolean isValidToken = v2AuthService._validateContinuationToken(
+                request.email(),
+                request.continuationToken()
+        );
+
+        if (!isValidToken) {
+            return GlobalResponse.error(ErrorCode.VERIFICATION_NOT_FOUND);
+        }
+
+        // 인증 코드 검증
+        boolean isValidCode = emailService.verifyCode(
+                request.email(),
+                request.verificationCode()
+        );
+
+        if (!isValidCode) {
+            return GlobalResponse.error(ErrorCode.VERIFICATION_NOT_FOUND);
+        }
+
+        // 토큰 생성, 저장, 반환 (Redis에 저장하여 나중에 검증)\
+        Map<String, String> response = v2AuthService.resetToken(request.email());
+
+        return GlobalResponse.success(response);
+    }
+
+    // 비밀번호 찾기 3단계 > 새 비밀번호 등록 (끝)
+    @PostMapping("/password/reset/new")
+    public GlobalResponse<Void> setNewPassword(
+            @Valid @RequestBody NewPasswordRequest request) {
+
+        // 토큰 유효성 검증
+        boolean isValidToken = v2AuthService._validateContinuationToken(
+                request.email(),
+                request.continuationToken()
+        );
+
+        if (!isValidToken) {
+            return GlobalResponse.error(ErrorCode.VERIFICATION_NOT_FOUND);
+        }
+
+        // 비밀번호 변경 처리
+        v2AuthService.resetPassword(request);
+
+        // 사용한 토큰 삭제
+        v2AuthService.deleteToken(request.email());
+
+        return GlobalResponse.success();
     }
 }
