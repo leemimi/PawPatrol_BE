@@ -4,6 +4,7 @@ import com.patrol.api.lostFoundPost.dto.LostFoundPostRequestDto;
 import com.patrol.api.lostFoundPost.dto.LostFoundPostResponseDto;
 import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.animal.repository.AnimalRepository;
+import com.patrol.domain.lostFoundPost.entity.AnimalType;
 import com.patrol.domain.lostFoundPost.entity.LostFoundPost;
 import com.patrol.domain.lostFoundPost.entity.PostStatus;
 import com.patrol.domain.lostFoundPost.repository.LostFoundPostRepository;
@@ -53,8 +54,12 @@ public class LostFoundPostService {
                     .orElseThrow(() -> new IllegalArgumentException("Pet not found"));
         }
 
+        AnimalType animalType = requestDto.getAnimalType() != null
+                ? AnimalType.valueOf(requestDto.getAnimalType())
+                : null;
+
         // LostFoundPost 객체 생성
-        LostFoundPost lostFoundPost = new LostFoundPost(requestDto, author, pet);
+        LostFoundPost lostFoundPost = new LostFoundPost(requestDto, author, pet, animalType);
         System.out.println("Received petId: " + requestDto.getPetId());
         System.out.println("📌 LostFoundPost created with pet: " + lostFoundPost.getPet());
 
