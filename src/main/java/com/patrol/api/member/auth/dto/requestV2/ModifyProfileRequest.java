@@ -19,5 +19,6 @@ public record ModifyProfileRequest (
         String newPassword,
         String confirmPassword,
         String phoneNumber,
-        MultipartFile file
+        MultipartFile file,
+        String imageUrl
 ) {}

@@ -33,4 +33,5 @@ public class ModiPetInfoRequest {
     private String registrationNo;
     private MultipartFile imageFile;
     private String healthCondition;
+    private String imageUrl;
 }
