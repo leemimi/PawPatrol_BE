@@ -7,4 +7,12 @@ import java.util.List;
 
 public interface FacilityService {
   List<FacilitiesResponse> findAll();
+
+  List<FacilitiesResponse> getFacilitiesWithinRadius(
+          double latitude,
+          double longitude,
+          double radius
+  );
+
+
 }
