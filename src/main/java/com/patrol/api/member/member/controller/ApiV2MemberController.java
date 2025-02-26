@@ -3,6 +3,7 @@ package com.patrol.api.member.member.controller;
 import com.patrol.api.animal.dto.MyPetListResponse;
 import com.patrol.api.animal.dto.request.DeleteMyPetInfoRequest;
 import com.patrol.api.animal.dto.request.ModiPetInfoRequest;
+import com.patrol.api.member.auth.dto.ModifyProfileResponse;
 import com.patrol.api.member.auth.dto.requestV2.ModifyProfileRequest;
 import com.patrol.api.member.member.dto.request.PetRegisterRequest;
 import com.patrol.domain.animal.service.AnimalService;
@@ -36,12 +37,9 @@ public class ApiV2MemberController {
 
     // 마이페이지 > 회원정보 수정
     @PatchMapping("/profile")
-    public GlobalResponse<Void> modifyProfile(@LoginUser Member member,
-                                              @RequestBody ModifyProfileRequest modifyProfileRequest) {
-
-        v2MemberService.modifyProfile(member, modifyProfileRequest);
-
-        return GlobalResponse.success();
+    public GlobalResponse<ModifyProfileResponse> modifyProfile(@LoginUser Member member,
+                                                               @ModelAttribute  ModifyProfileRequest modifyProfileRequest) {
+        return GlobalResponse.success(v2MemberService.modifyProfile(member, modifyProfileRequest));
     }
 
     // 마이페이지 > 반려동물 등록

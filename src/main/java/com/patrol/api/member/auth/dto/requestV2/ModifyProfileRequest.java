@@ -1,5 +1,7 @@
 package com.patrol.api.member.auth.dto.requestV2;
 
+import org.springframework.web.multipart.MultipartFile;
+
 /**
  * packageName    : com.patrol.api.member.auth.dto.requestV2
  * fileName       : ModifyProfileRequest
@@ -16,5 +18,6 @@ public record ModifyProfileRequest (
         String currentPassword,
         String newPassword,
         String confirmPassword,
-        String phoneNumber
+        String phoneNumber,
+        MultipartFile file
 ) {}

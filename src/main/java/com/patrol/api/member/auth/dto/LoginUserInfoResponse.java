@@ -18,11 +18,13 @@ import lombok.Builder;
 @Builder
 public record LoginUserInfoResponse(
         @NotNull String email,
-        @NotNull String nickname) {
+        @NotNull String nickname,
+        String profileImage) {
     public static LoginUserInfoResponse of(Member member) {
         return LoginUserInfoResponse.builder()
                 .email(member.getEmail())
                 .nickname(member.getNickname())
+                .profileImage(member.getProfileImageUrl())
                 .build();
     }
 }

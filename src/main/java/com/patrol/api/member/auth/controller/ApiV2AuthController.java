@@ -25,9 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * packageName    : com.patrol.api.member.auth.controller
@@ -112,6 +110,7 @@ public class ApiV2AuthController {
         LoginUserInfoResponse userInfo = LoginUserInfoResponse.builder()
                 .email(member.getEmail())
                 .nickname(member.getNickname())
+                .profileImage(member.getProfileImageUrl())
                 .build();
         return GlobalResponse.success(userInfo);
     }
