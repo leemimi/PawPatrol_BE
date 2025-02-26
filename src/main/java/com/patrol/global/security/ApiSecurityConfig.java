@@ -41,7 +41,8 @@ public class ApiSecurityConfig {
 
   @Value("${custom.oauth2.redirect-uri}")
   private String domain;
-
+  @Value("${custom.auth.redirect-uri}")
+  private String redirect;
 
   @Bean
   public UrlBasedCorsConfigurationSource corsConfigurationSource() {
@@ -67,7 +68,9 @@ public class ApiSecurityConfig {
   @Bean
   SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
     http
-        .securityMatcher("/api/**", "/oauth2/**", "/login/oauth2/**", "/login/**")
+        .securityMatcher("/api/**", "/oauth2/**",
+                "/login/oauth2/**", "/login/**",
+                "/login-pet/**")
         .authorizeHttpRequests(
             authorizeRequests -> authorizeRequests
                     .requestMatchers(HttpMethod.GET, "/api/lost-found/find/{postId}").permitAll()  // ✅ 신고 연계 제보 게시글 상세 조회 허용
@@ -149,7 +152,7 @@ public class ApiSecurityConfig {
                             }
                         }
                         // 다른 인증 에러의 경우 기본 에러 페이지로 리다이렉트
-                        response.sendRedirect("/login?error=true");
+                        response.sendRedirect(redirect);
                     }
                 })
         )
