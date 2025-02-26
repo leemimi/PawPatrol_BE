@@ -152,6 +152,10 @@ public class AnimalService {
 
         // 이미지 파일이 제공된 경우에만 처리
         if (modiPetInfoRequest.getImageFile() != null && !modiPetInfoRequest.getImageFile().isEmpty()) {
+
+            // 기존 파일 삭제
+            fileStorageHandler.handleFileDelete(modiPetInfoRequest.getImageUrl());
+
             // 이미지 업로드
             FileUploadResult uploadResult = fileStorageHandler.handleFileUpload(
                     FileUploadRequest.builder()

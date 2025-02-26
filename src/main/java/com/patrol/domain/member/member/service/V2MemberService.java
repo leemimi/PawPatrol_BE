@@ -48,7 +48,7 @@ public class V2MemberService {
                 .orElseThrow(() -> new ServiceException(ErrorCodes.INVALID_EMAIL));
     }
 
-    // 회원 정보 수정 > 번화번호 수정 시 인증 필요함
+    // 회원 정보 수정 > 전화번호 수정 시 인증 필요함
     @Transactional
     public ModifyProfileResponse modifyProfile(Member member,
                                                ModifyProfileRequest modifyProfileRequest) {
@@ -81,6 +81,12 @@ public class V2MemberService {
         // 프로필 이미지 변경
         if (modifyProfileRequest.file() != null && !modifyProfileRequest.file().isEmpty()) {
             logger.info("회원 정보 수정 - 프로필 이미지 변경");
+
+            // 기본 이미지가 아닐때
+            if(!modifyProfileRequest.imageUrl().equals("default.png")) {
+                // 기존 파일 삭제
+                fileStorageHandler.handleFileDelete(modifyProfileRequest.imageUrl());
+            }
 
             // 이미지 업로드
             FileUploadResult uploadResult = fileStorageHandler.handleFileUpload(
