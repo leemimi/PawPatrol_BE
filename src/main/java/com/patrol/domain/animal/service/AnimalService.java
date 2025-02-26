@@ -1,6 +1,7 @@
 package com.patrol.domain.animal.service;
 
 import com.patrol.api.animal.dto.MyPetListResponse;
+import com.patrol.api.animal.dto.PetResponseDto;
 import com.patrol.api.animal.dto.request.DeleteMyPetInfoRequest;
 import com.patrol.api.animal.dto.request.ModiPetInfoRequest;
 import com.patrol.api.member.member.dto.request.PetRegisterRequest;
@@ -187,5 +188,12 @@ public class AnimalService {
             logger.error("해당 반려동물의 소유자가 아닙니다. 본인이 등록한 반려동물만 수정할 수 있습니다.");
             throw new CustomException(ErrorCode.PET_OWNER_MISMATCH);
         }
+    }
+
+    public List<PetResponseDto> getAllAnimals() {
+        // Fetch all animals from the repository and convert to PetResponseDto
+        return animalRepository.findAll().stream()
+                .map(PetResponseDto::new)  // Convert Animal to PetResponseDto using the constructor
+                .collect(Collectors.toList());  // Collect them into a List
     }
 }
