@@ -6,6 +6,7 @@ import com.patrol.domain.animal.enums.AnimalSize;
 import com.patrol.domain.animal.enums.AnimalType;
 
 public record PetResponseDto(
+        Long id,
         String name,
         String registrationNo,
         AnimalType animalType,
@@ -19,6 +20,7 @@ public record PetResponseDto(
 ) {
     public PetResponseDto(Animal animal) {
         this(
+                animal.getId(),
                 animal.getName(),
                 animal.getRegistrationNo(),
                 animal.getAnimalType(),
