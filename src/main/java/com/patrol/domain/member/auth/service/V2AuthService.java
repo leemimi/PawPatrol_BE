@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -126,5 +127,10 @@ public class V2AuthService {
             throw new ServiceException(ErrorCodes.SOCIAL_ACCOUNT_ALREADY_IN_USE);
         }
         oAuthService.connectProvider(loginUser, loginType, providerId, providerEmail);
+    }
+
+    // 엑세스 토큰 재발급을 위해 일치하는 apiKey 있는지 확인하는 메서드
+    public Optional<Member> findByApiKey(String apiKey) {
+        return v2MemberRepository.findByApiKey(apiKey);
     }
 }
