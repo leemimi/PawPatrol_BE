@@ -338,3 +338,30 @@ if __name__ == '__main__':
             
             plt.suptitle(f'Combined Similarity: {similarity:.2f}', fontsize=16)
             plt.show()
+
+
+def image_vector(img1):
+    """
+    두 이미지의 얼굴(강아지 머리)을 비교하여 임베딩 및 랜드마크 기반 유사도를 계산합니다.
+    display=True인 경우 matplotlib으로 시각화합니다.
+    """
+    gray1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
+    faces1 = face_locations(gray1)
+
+    if len(faces1) == 0:  # 🛑 얼굴이 검출되지 않으면 예외 처리 필요
+        raise ValueError("얼굴을 감지하지 못했습니다.")
+
+    face1 = faces1[0]
+
+    # dlib.rectangle 생성 (dlib.rectangle(left, top, right, bottom))
+    face1_rect = dlib.rectangle(face1[3], face1[0], face1[1], face1[2])
+
+    shape1 = predictor(gray1, face1_rect)
+
+    # 랜드마크 특징 추출 (컬러와 그레이스케일 이미지 모두 사용)
+    lmk_features1 = extract_landmark_features(shape1, img1, gray1)
+
+    # CLIP 임베딩 추출
+    embedding1 = extract_face_embedding(img1, face1)
+
+    return lmk_features1, embedding1
