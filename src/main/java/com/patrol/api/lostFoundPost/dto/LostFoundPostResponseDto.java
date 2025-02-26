@@ -32,6 +32,7 @@ public class LostFoundPostResponseDto {
     private String status;
     private PetResponseDto pet;
     private List<ImageResponseDto> images;
+    private String animalType;
     //private Long petId;  // petId 추가
     // Add petId to the ResponseDto
     //private Long petId;
@@ -45,6 +46,7 @@ public class LostFoundPostResponseDto {
         this.longitude = lostFoundPost.getLongitude();
         this.findTime = lostFoundPost.getFindTime();
         this.lostTime = lostFoundPost.getLostTime();
+        this.animalType= String.valueOf(lostFoundPost.getAnimalType());
         this.status= String.valueOf(lostFoundPost.getStatus());
         this.location = lostFoundPost.getLocation();
         this.createdAt = lostFoundPost.getCreatedAt();

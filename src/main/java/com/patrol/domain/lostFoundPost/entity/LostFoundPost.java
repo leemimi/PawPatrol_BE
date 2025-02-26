@@ -36,6 +36,9 @@ public class LostFoundPost extends BaseEntity {
     @JoinColumn(name = "pet_id", nullable = true)
     private Animal pet;
 
+    @Enumerated(EnumType.STRING)
+    private AnimalType animalType;  // Add animalType field
+
 
     private String title;
     private String content;
@@ -52,10 +55,11 @@ public class LostFoundPost extends BaseEntity {
         this.author = author;
     }
 
-    public LostFoundPost(LostFoundPostRequestDto requestDto, Member author, Animal pet) {
+    public LostFoundPost(LostFoundPostRequestDto requestDto, Member author, Animal pet,AnimalType animalType) {
         this(requestDto);
         this.author = author;
         this.pet = pet != null ? pet : null;
+        this.animalType = animalType != null ? animalType : null;
     }
 
 
@@ -84,6 +88,8 @@ public class LostFoundPost extends BaseEntity {
         } else {
             this.status = PostStatus.FINDING; // 기본값 설정
         }
+
+        this.animalType = requestDto.getAnimalType() != null ? AnimalType.valueOf(requestDto.getAnimalType()) : null;  // Set animalType
 
     }
 
