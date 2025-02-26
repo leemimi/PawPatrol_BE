@@ -85,7 +85,7 @@ public class NotProd {
           int index = casesForMember1 + i;
           if (index < animalList.size()) {
             animalCaseEventPublisher.createAnimalCase(
-                member2, animalList.get(i), protectionTitles.get(i)
+                member2, animalList.get(index), protectionTitles.get(index)
             );
             System.out.println("Member2의 동물 케이스 생성: " + animalList.get(index).getBreed());
           }
@@ -98,7 +98,7 @@ public class NotProd {
           int index = startIndexForMember3 + i;
           if (index < animalList.size()) {
             animalCaseEventPublisher.createAnimalCase(
-                member3, animalList.get(i), protectionTitles.get(i)
+                member3, animalList.get(index), protectionTitles.get(index)
             );
             System.out.println("Member3의 동물 케이스 생성: " + animalList.get(index).getBreed());
           }

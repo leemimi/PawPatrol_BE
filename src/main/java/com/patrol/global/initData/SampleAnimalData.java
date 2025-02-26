@@ -33,7 +33,7 @@ public class SampleAnimalData {
         null,                   // name
         null,                   // registrationNo
         AnimalType.CAT,         // animalType
-        "국내 단모종 태비", // breed
+        "코숏 태비", // breed
         AnimalGender.W,   // gender
         AnimalSize.SMALL,       // size
         null,                   // imageFile
@@ -47,7 +47,7 @@ public class SampleAnimalData {
         "단이",                   // name
         null,                   // registrationNo
         AnimalType.CAT,         // animalType
-        "국내 단모종",   // breed
+        "코숏",   // breed
         AnimalGender.M,      // gender
         AnimalSize.MEDIUM,      // size
         null,                   // imageFile
@@ -61,7 +61,7 @@ public class SampleAnimalData {
         null,                   // name
         null,                   // registrationNo
         AnimalType.CAT,         // animalType
-        "국내 단모종 태비", // breed
+        "코숏 태비", // breed
         AnimalGender.W,   // gender
         AnimalSize.SMALL,       // size
         null,                   // imageFile
@@ -103,7 +103,7 @@ public class SampleAnimalData {
         "구름",                   // name
         null,                   // registrationNo
         AnimalType.CAT,         // animalType
-        "국내 단모종 태비", // breed
+        "코숏 태비", // breed
         AnimalGender.W,   // gender
         AnimalSize.MEDIUM,      // size
         null,                   // imageFile
@@ -173,7 +173,7 @@ public class SampleAnimalData {
         null,                   // name
         null,                   // registrationNo
         AnimalType.CAT,         // animalType
-        "국내 단모종",   // breed
+        "코숏",   // breed
         AnimalGender.W,   // gender
         AnimalSize.MEDIUM,      // size
         null,                   // imageFile
@@ -215,7 +215,7 @@ public class SampleAnimalData {
         "마루",                   // name
         null,                   // registrationNo
         AnimalType.CAT,         // animalType
-        "국내 단모종 태비",       // breed
+        "코숏 태비",       // breed
         AnimalGender.M,         // gender
         AnimalSize.MEDIUM,      // size
         null,                   // imageFile
@@ -229,7 +229,7 @@ public class SampleAnimalData {
         null,                   // name
         null,                   // registrationNo
         AnimalType.CAT,         // animalType
-        "국내 단모종",           // breed
+        "코숏",           // breed
         AnimalGender.W,         // gender
         AnimalSize.MEDIUM,      // size
         null,                   // imageFile
@@ -243,7 +243,7 @@ public class SampleAnimalData {
         "포포",                   // name
         null,                   // registrationNo
         AnimalType.CAT,         // animalType
-        "국내 단모종",           // breed
+        "코숏",           // breed
         AnimalGender.W,         // gender
         AnimalSize.MEDIUM,      // size
         null,                   // imageFile
@@ -257,7 +257,7 @@ public class SampleAnimalData {
         null,                   // name
         null,                   // registrationNo
         AnimalType.CAT,         // animalType
-        "국내 단모종",           // breed
+        "코숏",           // breed
         AnimalGender.M,         // gender
         AnimalSize.MEDIUM,      // size
         null,                   // imageFile
@@ -271,7 +271,7 @@ public class SampleAnimalData {
         "새벽",                   // name
         null,                   // registrationNo
         AnimalType.CAT,         // animalType
-        "국내 단모종 태비",       // breed
+        "코숏 태비",       // breed
         AnimalGender.W,         // gender
         AnimalSize.MEDIUM,      // size
         null,                   // imageFile
@@ -285,7 +285,7 @@ public class SampleAnimalData {
         null,                   // name
         null,                   // registrationNo
         AnimalType.CAT,         // animalType
-        "국내 단모종",           // breed
+        "코숏",           // breed
         AnimalGender.M,         // gender
         AnimalSize.MEDIUM,      // size
         null,                   // imageFile
@@ -299,7 +299,7 @@ public class SampleAnimalData {
         "오롯이",                   // name
         null,                   // registrationNo
         AnimalType.CAT,         // animalType
-        "국내 단모종 태비",       // breed
+        "코숏 태비",       // breed
         AnimalGender.M,         // gender
         AnimalSize.MEDIUM,      // size
         null,                   // imageFile
@@ -341,7 +341,7 @@ public class SampleAnimalData {
         null,                   // name
         null,                   // registrationNo
         AnimalType.CAT,         // animalType
-        "국내 단모종",           // breed
+        "코숏",           // breed
         AnimalGender.W,         // gender
         AnimalSize.MEDIUM,      // size
         null,                   // imageFile
@@ -467,7 +467,7 @@ public class SampleAnimalData {
         "코코아",                   // name
         null,                   // registrationNo
         AnimalType.CAT,         // animalType
-        "국내 단모종",           // breed
+        "코숏",           // breed
         AnimalGender.W,         // gender
         AnimalSize.SMALL,       // size
         null,                   // imageFile
@@ -481,7 +481,7 @@ public class SampleAnimalData {
         null,                   // name
         null,                   // registrationNo
         AnimalType.CAT,         // animalType
-        "국내 단모종",           // breed
+        "코숏",           // breed
         AnimalGender.W,         // gender
         AnimalSize.SMALL,       // size
         null,                   // imageFile
@@ -495,7 +495,7 @@ public class SampleAnimalData {
         "가온",                   // name
         null,                   // registrationNo
         AnimalType.CAT,         // animalType
-        "국내 단모종",           // breed
+        "코숏",           // breed
         AnimalGender.W,         // gender
         AnimalSize.SMALL,       // size
         null,                   // imageFile
@@ -509,7 +509,7 @@ public class SampleAnimalData {
         null,                   // name
         null,                   // registrationNo
         AnimalType.CAT,         // animalType
-        "국내 단모종 태비",      // breed
+        "코숏 태비",      // breed
         AnimalGender.W,         // gender
         AnimalSize.SMALL,       // size
         null,                   // imageFile
@@ -523,7 +523,7 @@ public class SampleAnimalData {
         "가온",                   // name
         null,                   // registrationNo
         AnimalType.CAT,         // animalType
-        "국내 단모종",           // breed
+        "코숏",           // breed
         AnimalGender.W,         // gender
         AnimalSize.SMALL,       // size
         null,                   // imageFile
