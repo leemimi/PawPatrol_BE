@@ -22,9 +22,13 @@ public class Image {
     @Column(name = "found_id", nullable = true)
     private Long foundId;
 
+    @Column(name= "animal_id", nullable= true)
+    private Long animalId;
+
     @Builder
-    public Image(String path, Long foundId) {
+    public Image(String path, Long animalId, Long foundId) {
         this.path = path;
+        this.animalId=animalId;
         this.foundId = foundId;
         this.createdAt = LocalDateTime.now();
     }

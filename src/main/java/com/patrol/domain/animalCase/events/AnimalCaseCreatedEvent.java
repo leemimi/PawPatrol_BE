@@ -9,7 +9,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class ProtectionCreatedEvent {
+public class AnimalCaseCreatedEvent {
   private final Member member;
   private final Animal animal;
   private final CaseStatus toStatus;

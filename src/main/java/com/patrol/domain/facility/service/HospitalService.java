@@ -4,6 +4,7 @@ package com.patrol.domain.facility.service;
 import com.patrol.api.facility.dto.FacilitiesResponse;
 import com.patrol.domain.facility.entity.Hospital;
 import com.patrol.domain.facility.repository.HospitalRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
@@ -23,6 +24,7 @@ public class HospitalService implements FacilityService {
   private final HospitalRepository hospitalRepository;
   private final CsvParser csvParser;
 
+  @PostConstruct
   @Transactional
   public void loadData() {
     try {
@@ -47,6 +49,19 @@ public class HospitalService implements FacilityService {
         .map(FacilitiesResponse::of)
         .collect(Collectors.toList());
   }
+
+  @Override
+  public List<FacilitiesResponse> getFacilitiesWithinRadius(
+          double latitude,
+          double longitude,
+          double radius
+  ) {
+    return hospitalRepository.findHospitalsWithinRadius(latitude, longitude, radius)
+            .stream()
+            .map(FacilitiesResponse::of)
+            .collect(Collectors.toList());
+  }
+
 
 
   private Hospital convertToEntity(CsvParser.HospitalData data) {

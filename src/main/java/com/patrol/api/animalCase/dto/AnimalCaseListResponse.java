@@ -13,16 +13,18 @@ public record AnimalCaseListResponse(
     String animalName,
     LocalDateTime createdAt,
     LocalDateTime modifiedAt,
-    CaseStatus caseStatus
+    CaseStatus caseStatus,
+    String imageUrl
 ) {
 
   public static AnimalCaseListResponse of(AnimalCase animalCase) {
-    return new AnimalCaseListResponse(
-        animalCase.getAnimal().getName(),
-        animalCase.getCreatedAt(),
-        animalCase.getModifiedAt(),
-        animalCase.getStatus()
-    );
+    return AnimalCaseListResponse.builder()
+        .animalName(animalCase.getAnimal().getName())
+        .createdAt(animalCase.getCreatedAt())
+        .modifiedAt(animalCase.getModifiedAt())
+        .caseStatus(animalCase.getStatus())
+        .imageUrl(animalCase.getAnimal().getImageUrl())
+        .build();
   }
 }
 

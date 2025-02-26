@@ -44,15 +44,4 @@ public class ApiV1AnimalCaseController {
     AnimalCaseDetailResponse response = animalCaseService.findByIdWithHistories(caseId);
     return new RsData<>("200", "%d번 케이스를 성공적으로 호출했습니다.".formatted(caseId), response);
   }
-
-
-  @PatchMapping("/{caseId}/temp-protect-waiting")
-  @Operation(summary = "구조(rescue) 상태의 동물을 임시 보호 대기로 전환 (구조 제보글 주인만)")
-  public RsData<Void> updateToTempProtectWaiting(
-      @PathVariable Long caseId, @LoginUser Member loginUser
-  ) {
-    animalCaseService.updateToTempProtectWaiting(caseId, loginUser.getId());
-    return new RsData<>("200", "임시 보호 대기 상태로 전환 완료");
-  }
-
 }
