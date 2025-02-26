@@ -47,7 +47,9 @@ public class ProtectionService {
         CaseStatus.TEMP_PROTECTING,
         CaseStatus.SHELTER_PROTECTING
     );
-    return animalCaseService.findByIdAndStatusesWithHistories(caseId, possibleStatuses);
+    AnimalCase animalCase = animalCaseService.findByIdAndStatusesWithHistories(caseId, possibleStatuses)
+        .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
+    return AnimalCaseDetailResponse.of(animalCase);
   }
 
   public Page<AnimalCaseListResponse> findPossibleAnimalCases(Pageable pageable) {
@@ -62,7 +64,7 @@ public class ProtectionService {
   }
 
   public Page<ProtectionResponse> findMyProtections(Long memberId, Pageable pageable) {
-    return protectionRepository.findAllByApplicantId(memberId, pageable)
+    return protectionRepository.findAllByApplicantIdAndDeletedAtIsNull(memberId, pageable)
         .map(ProtectionResponse::of);
   }
 
@@ -80,11 +82,24 @@ public class ProtectionService {
     Member applicant = memberService.findById(memberId)
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
 
-    AnimalCase animalCase = animalCaseService.findByIdAndStatus(caseId, CaseStatus.PROTECT_WAITING)
+    AnimalCase animalCase = animalCaseService.findByIdAndStatusesWithHistories(caseId,
+            List.of(CaseStatus.PROTECT_WAITING, CaseStatus.TEMP_PROTECTING))
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
 
     if (animalCase.getCurrentFoster() == null) {
       throw new CustomException(ErrorCode.NOT_ASSIGNED_PROTECTION);
+    }
+
+    if (applicant.getId().equals(animalCase.getCurrentFoster().getId())) {
+      throw new CustomException(ErrorCode.ALREADY_FOSTER);
+    }
+
+    // 기존에 수락 대기 신청이 있는지 확인
+    boolean hasPendingApplication = protectionRepository
+        .existsByApplicantIdAndAnimalCaseIdAndProtectionStatusAndDeletedAtIsNull(
+            memberId, caseId, ProtectionStatus.PENDING);
+    if (hasPendingApplication) {
+      throw new CustomException(ErrorCode.ALREADY_APPLIED);
     }
 
     Protection protection = Protection.builder()
@@ -107,14 +122,17 @@ public class ProtectionService {
     Protection protection = protectionRepository.findById(protectionId)
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
 
+    // 내가 작성한 것인지 확인
     if (!protection.getApplicant().getId().equals(memberId)) {
       throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
     }
 
+    // 이미 취소할 수 없는 상태인지 확인
     if (protection.getProtectionStatus() != ProtectionStatus.PENDING) {
       throw new CustomException(ErrorCode.INVALID_STATUS_CHANGE);
     }
 
+    protection.setProtectionStatus(ProtectionStatus.CANCELED);
     protection.cancel();
   }
 
@@ -158,13 +176,14 @@ public class ProtectionService {
 
     protection.reject(rejectReason);
     animalCaseEventPublisher.rejectProtection(protection.getId(), memberId);
+    protection.cancel();
   }
 
 
   @Transactional
-  public void createAnimalCase(CreateAnimalCaseRequest request, Member member, String title) {
+  public void createAnimalCase(CreateAnimalCaseRequest request, Member member) {
     Animal animal = request.toAnimal();
     animalRepository.save(animal);
-    animalCaseEventPublisher.createAnimalCase(member, animal, title);
+    animalCaseEventPublisher.createAnimalCase(member, animal, request.title(), request.description());
   }
 }

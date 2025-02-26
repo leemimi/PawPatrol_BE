@@ -54,12 +54,8 @@ public class AnimalCaseService {
     return AnimalCaseDetailResponse.of(animalCase);
   }
 
-  public AnimalCaseDetailResponse findByIdAndStatusesWithHistories(
-      Long caseId, Collection<CaseStatus> statuses
-  ) {
-    AnimalCase animalCase = animalCaseRepository.findByIdAndStatusesWithHistories(caseId, statuses)
-        .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
-    return AnimalCaseDetailResponse.of(animalCase);
+  public Optional<AnimalCase> findByIdAndStatusesWithHistories(Long caseId, Collection<CaseStatus> statuses) {
+    return animalCaseRepository.findByIdAndStatusesWithHistories(caseId, statuses);
   }
 
   public Page<AnimalCaseListResponse> findAllByStatuses(Collection<CaseStatus> statuses, Pageable pageable) {

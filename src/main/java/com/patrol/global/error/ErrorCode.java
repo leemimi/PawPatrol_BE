@@ -29,6 +29,11 @@ public enum ErrorCode {
     NOT_ASSIGNED_PROTECTION(HttpStatus.BAD_REQUEST, "지정된 보호자가 없습니다."),
     UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "해당 리소스에 대한 접근 권한이 없습니다."),
 
+    // Protection
+    ALREADY_FOSTER(HttpStatus.BAD_REQUEST, "이미 보호자입니다."),
+    ALREADY_APPLIED(HttpStatus.BAD_REQUEST, "이미 신청하였습니다."),
+
+
     // Member
     MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST,"사용자를 찾을 수 없습니다."),
     DUPLICATE_EMAIL(HttpStatus.BAD_REQUEST, "이미 사용중인 이메일 입니다.");

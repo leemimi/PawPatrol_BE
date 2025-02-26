@@ -74,7 +74,7 @@ public class NotProd {
         int casesForMember1 = Math.min(20, animalList.size());
         for (int i = 0; i < casesForMember1; i++) {
           animalCaseEventPublisher.createAnimalCase(
-              member1, animalList.get(i), protectionTitles.get(i)
+              member1, animalList.get(i), protectionTitles.get(i), null
           );
           System.out.println("Member1의 동물 케이스 생성: " + animalList.get(i).getBreed());
         }
@@ -85,7 +85,7 @@ public class NotProd {
           int index = casesForMember1 + i;
           if (index < animalList.size()) {
             animalCaseEventPublisher.createAnimalCase(
-                member2, animalList.get(index), protectionTitles.get(index)
+                member2, animalList.get(index), protectionTitles.get(index), null
             );
             System.out.println("Member2의 동물 케이스 생성: " + animalList.get(index).getBreed());
           }
@@ -98,7 +98,7 @@ public class NotProd {
           int index = startIndexForMember3 + i;
           if (index < animalList.size()) {
             animalCaseEventPublisher.createAnimalCase(
-                member3, animalList.get(index), protectionTitles.get(index)
+                member3, animalList.get(index), protectionTitles.get(index), null
             );
             System.out.println("Member3의 동물 케이스 생성: " + animalList.get(index).getBreed());
           }

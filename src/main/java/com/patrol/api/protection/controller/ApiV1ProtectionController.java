@@ -53,13 +53,13 @@ public class ApiV1ProtectionController {
   public RsData<Void> createAnimalCase(
       @RequestBody CreateAnimalCaseRequest request, @LoginUser Member loginUser
   ) {
-    protectionService.createAnimalCase(request, loginUser, request.title());
+    protectionService.createAnimalCase(request, loginUser);
     return new RsData<>("200", "임시 보호 동물 등록 성공");
   }
 
 
   @GetMapping("/my-cases")
-  @Operation(summary = "내가 등록한 임시 보호 동물 목록")
+  @Operation(summary = "내가 등록한 임시보호/입양 동물 목록")
   public RsData<Page<AnimalCaseListResponse>> getMyAnimalCases(
       @LoginUser Member loginUser,
       @RequestParam(defaultValue = "0") int page,
@@ -70,8 +70,9 @@ public class ApiV1ProtectionController {
     return new RsData<>("200", "내가 등록한 임시 보호 동물 목록 조회 성공", response);
   }
 
+
   @GetMapping("/my-protections")
-  @Operation(summary = "내가 신청한 임시 보호 신청 목록")
+  @Operation(summary = "내가 신청한 임시보호/입양 신청 목록")
   public RsData<Page<ProtectionResponse>> getMyProtections(
       @LoginUser Member loginUser,
       @RequestParam(defaultValue = "0") int page,

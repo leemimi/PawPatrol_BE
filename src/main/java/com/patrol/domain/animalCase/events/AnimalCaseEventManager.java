@@ -87,6 +87,10 @@ public class AnimalCaseEventManager {
 
 
   private void validateStatusTransition(CaseStatus fromStatus, CaseStatus toStatus) {
+    if (fromStatus == toStatus) {
+      return;
+    }
+
     boolean isValid = switch (toStatus) {
       case TEMP_PROTECTING -> fromStatus.isTempProtectible();
       default -> false;
@@ -101,10 +105,12 @@ public class AnimalCaseEventManager {
   // AnimalCaseCreated 이벤트 처리
   @Transactional
   public void handleAnimalCaseCreated(
-      Animal animal, Member member, String title) {
+      Animal animal, Member member, String title, String description
+  ) {
     AnimalCase animalCase = animalCaseService.createNewCase(CaseStatus.PROTECT_WAITING, animal);
     animalCase.setCurrentFoster(member);
     animalCase.setTitle(title);
+    animalCase.setDescription(description);
     caseHistoryService.addAnimalCase(
         animalCase, ContentType.ANIMAL_CASE, animalCase.getId(), member.getId()
     );

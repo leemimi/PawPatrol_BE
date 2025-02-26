@@ -34,6 +34,7 @@ public class AnimalCase extends BaseEntity {
   private Animal animal;
 
   private String title;
+  private String description;
   private LocalDateTime deletedAt;
 
   @JsonIgnore

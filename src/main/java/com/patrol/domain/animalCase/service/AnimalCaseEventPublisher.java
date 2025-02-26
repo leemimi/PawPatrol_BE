@@ -57,9 +57,9 @@ public class AnimalCaseEventPublisher {
     ));
   }
 
-  public void createAnimalCase(Member member, Animal animal, String title) {
+  public void createAnimalCase(Member member, Animal animal, String title, String description) {
     eventPublisher.publishEvent(new AnimalCaseCreatedEvent(
-        member, animal, title
+        member, animal, title, description
     ));
   }
 

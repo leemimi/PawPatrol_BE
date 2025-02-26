@@ -13,4 +13,5 @@ public class AnimalCaseCreatedEvent {
   private final Member member;
   private final Animal animal;
   private final String title;
+  private final String description;
 }

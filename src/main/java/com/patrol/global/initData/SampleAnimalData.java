@@ -537,7 +537,7 @@ public class SampleAnimalData {
         null,                   // name
         null,                   // registrationNo
         AnimalType.CAT,         // animalType
-        "국내 장모종",           // breed
+        "코숏",           // breed
         AnimalGender.M,         // gender
         AnimalSize.MEDIUM,      // size
         null,                   // imageFile

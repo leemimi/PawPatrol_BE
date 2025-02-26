@@ -11,7 +11,7 @@ import java.util.List;
 @Builder
 public record AnimalCaseDetailResponse(
     AnimalInfo animalInfo, String currentFosterName,
-    LocalDateTime createdAt, LocalDateTime modifiedAt,
+    String description, LocalDateTime createdAt, LocalDateTime modifiedAt,
     CaseStatus caseStatus, List<CaseHistoryResponse> caseHistoryList
 ) {
 
@@ -24,6 +24,7 @@ public record AnimalCaseDetailResponse(
     return AnimalCaseDetailResponse.builder()
         .animalInfo(AnimalInfo.of(animalCase.getAnimal()))
         .currentFosterName(animalCase.getCurrentFoster().getNickname())
+        .description(animalCase.getDescription())
         .createdAt(animalCase.getCreatedAt())
         .modifiedAt(animalCase.getModifiedAt())
         .caseStatus(animalCase.getStatus())
