@@ -15,6 +15,7 @@ import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.service.MemberService;
 import com.patrol.domain.protection.entity.Protection;
 import com.patrol.domain.protection.enums.ProtectionStatus;
+import com.patrol.domain.protection.enums.ProtectionType;
 import com.patrol.domain.protection.repository.ProtectionRepository;
 import com.patrol.global.error.ErrorCode;
 import com.patrol.global.exception.CustomException;
@@ -90,6 +91,7 @@ public class ProtectionService {
         .applicant(applicant)
         .animalCase(animalCase)
         .reason(reason)
+        .protectionType(ProtectionType.TEMP_PROTECTION)
         .protectionStatus(ProtectionStatus.PENDING)
         .build();
 
@@ -155,14 +157,14 @@ public class ProtectionService {
     }
 
     protection.reject(rejectReason);
-    animalCaseEventPublisher.rejectProjection(protection.getId(), memberId);
+    animalCaseEventPublisher.rejectProtection(protection.getId(), memberId);
   }
 
 
   @Transactional
-  public void createAnimalCase(CreateAnimalCaseRequest request, Member member) {
+  public void createAnimalCase(CreateAnimalCaseRequest request, Member member, String title) {
     Animal animal = request.toAnimal();
     animalRepository.save(animal);
-    animalCaseEventPublisher.createAnimalCase(member, animal);
+    animalCaseEventPublisher.createAnimalCase(member, animal, title);
   }
 }

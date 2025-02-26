@@ -6,6 +6,7 @@ import com.patrol.domain.animal.enums.AnimalSize;
 import com.patrol.domain.animal.enums.AnimalType;
 
 public record CreateAnimalCaseRequest(
+    String title,             // 게시글 제목
     String breed,              // 품종
     AnimalGender gender,       // 성별
     AnimalSize size,          // 크기

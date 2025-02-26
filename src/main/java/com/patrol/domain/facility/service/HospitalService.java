@@ -49,7 +49,6 @@ public class HospitalService implements FacilityService {
         .collect(Collectors.toList());
   }
 
-
   private Hospital convertToEntity(CsvParser.HospitalData data) {
     log.info(data.getTel());
 

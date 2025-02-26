@@ -24,17 +24,20 @@ public class AnimalCaseEventPublisher {
   private final ApplicationEventPublisher eventPublisher;
 
 
-  public void createLostFoundPost(LostFoundPost lostFoundPostPost) {
-    if (lostFoundPostPost.getStatus().equals(PostStatus.FINDING)) {
-      eventPublisher.publishEvent(new PostCreatedEvent(
-          ContentType.LOSTPOST, lostFoundPostPost.getId(),
-          lostFoundPostPost.getPet().getId(), lostFoundPostPost.getAuthor().getId()
-      ));
+  public void createLostFoundPost(LostFoundPost lostFoundPost) {
+    PostStatus status = lostFoundPost.getStatus();
+    ContentType contentType;
+    if (status == PostStatus.FINDING) {
+      contentType = ContentType.LOSTPOST;
+    } else if (status == PostStatus.SIGHTING) {
+      contentType = ContentType.FINDPOST;
+    } else {
+      return;
     }
 
     eventPublisher.publishEvent(new PostCreatedEvent(
-        ContentType.FINDPOST, lostFoundPostPost.getId(),
-        lostFoundPostPost.getPet().getId(), lostFoundPostPost.getAuthor().getId()
+        contentType, lostFoundPost.getId(),
+        lostFoundPost.getPet().getId(), lostFoundPost.getAuthor().getId()
     ));
   }
 
@@ -47,17 +50,16 @@ public class AnimalCaseEventPublisher {
   }
 
 
-  public void rejectProjection(Long protectionId, Long memberId) {
+  public void rejectProtection(Long protectionId, Long memberId) {
     eventPublisher.publishEvent(new ProtectionStatusChangeEvent(
         protectionId, memberId,
         CaseStatus.TEMP_PROTECT_WAITING, CaseHistoryStatus.TEMP_PROTECT_REJECTED
     ));
   }
 
-  public void createAnimalCase(Member member, Animal animal) {
+  public void createAnimalCase(Member member, Animal animal, String title) {
     eventPublisher.publishEvent(new AnimalCaseCreatedEvent(
-        member, animal,
-        CaseStatus.TEMP_PROTECT_WAITING, CaseHistoryStatus.TEMP_PROTECT_REGISTERED
+        member, animal, title
     ));
   }
 

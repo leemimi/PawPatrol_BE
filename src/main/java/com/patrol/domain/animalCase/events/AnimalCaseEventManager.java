@@ -8,10 +8,12 @@ import com.patrol.domain.animalCase.enums.CaseStatus;
 import com.patrol.domain.animalCase.enums.ContentType;
 import com.patrol.domain.animalCase.service.AnimalCaseService;
 import com.patrol.domain.animalCase.service.CaseHistoryService;
+import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.protection.entity.Protection;
 import com.patrol.domain.protection.service.ProtectionService;
 import com.patrol.global.error.ErrorCode;
 import com.patrol.global.exception.CustomException;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,11 +37,10 @@ public class AnimalCaseEventManager {
     Animal animal = animalService.findById(animalId)
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
 
-    AnimalCase animalCase = animalCaseService.findByAnimal(animal);
-    if (animalCase == null) {
-      animalCase = animalCaseService.createNewCase(CaseStatus.MISSING, animal);
+    AnimalCase animalCase = getOrCreateAnimalCase(animal, CaseStatus.MISSING);
+    boolean isNewCase = animalCase.getId() == null;
+    if (isNewCase) {
       caseHistoryService.addInitialLostPost(animalCase, contentType, contentId, memberId);
-
     } else {
       caseHistoryService.addAdditionalLostPost(animalCase, contentType, contentId, memberId);
     }
@@ -53,14 +54,17 @@ public class AnimalCaseEventManager {
     Animal animal = animalService.findById(animalId)
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
 
+    AnimalCase animalCase = getOrCreateAnimalCase(animal, CaseStatus.UNKNOWN);
+    caseHistoryService.addFindPost(animalCase, contentType, contentId, memberId);
+  }
+
+
+  private AnimalCase getOrCreateAnimalCase(Animal animal, CaseStatus status) {
     AnimalCase animalCase = animalCaseService.findByAnimal(animal);
     if (animalCase == null) {
-      animalCase = animalCaseService.createNewCase(CaseStatus.UNKNOWN, animal);
-      caseHistoryService.addFindPost(animalCase, contentType, contentId, memberId);
-
-    } else {
-      caseHistoryService.addFindPost(animalCase, contentType, contentId, memberId);
+      animalCase = animalCaseService.createNewCase(status, animal);
     }
+    return animalCase;
   }
 
 
@@ -97,11 +101,13 @@ public class AnimalCaseEventManager {
 
   // AnimalCaseCreated 이벤트 처리
   @Transactional
-  public void handleAnimalCaseCreated(AnimalCaseCreatedEvent event) {
-    AnimalCase animalCase = animalCaseService.createNewCase(CaseStatus.TEMP_PROTECT_WAITING, event.getAnimal());
-    animalCase.setCurrentFoster(event.getMember());
+  public void handleAnimalCaseCreated(
+      Animal animal, Member member, String title) {
+    AnimalCase animalCase = animalCaseService.createNewCase(CaseStatus.TEMP_PROTECT_WAITING, animal);
+    animalCase.setCurrentFoster(member);
+    animalCase.setTitle(title);
     caseHistoryService.addAnimalCase(
-        animalCase, ContentType.ANIMAL_CASE, animalCase.getId(), event.getMember().getId()
+        animalCase, ContentType.ANIMAL_CASE, animalCase.getId(), member.getId()
     );
   }
 }

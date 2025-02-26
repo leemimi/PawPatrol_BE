@@ -12,6 +12,5 @@ import lombok.Getter;
 public class AnimalCaseCreatedEvent {
   private final Member member;
   private final Animal animal;
-  private final CaseStatus toStatus;
-  private final CaseHistoryStatus historyStatus;
+  private final String title;
 }

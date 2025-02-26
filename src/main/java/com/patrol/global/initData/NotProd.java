@@ -46,46 +46,63 @@ public class NotProd {
 
         List<PetRegisterRequest> sampleAnimals = SampleAnimalData.getSampleStrayAnimals();
         List<String> imageUrls = SampleAnimalData.getSampleImageUrls();
+        List<String> animalNameList = SampleAnimalData.getAnimalNameList();
 
         // 생성된 동물들을 저장할 리스트
         List<Animal> animalList = new ArrayList<>();
 
-        // 동물 생성 (이름 변경 없이)
-        int animalCount = Math.min(12, sampleAnimals.size());
+        // 동물 생성 (40마리)
+        int animalCount = Math.min(40, sampleAnimals.size());
         for (int i = 0; i < animalCount; i++) {
           PetRegisterRequest animalRequest = sampleAnimals.get(i);
           String imageUrl = imageUrls.get(i);
+          String name = animalNameList.get(i);
 
           Animal animal = animalService.registerWithImageUrl(animalRequest, imageUrl);
+          animal.setName(name);
           animalList.add(animal);
 
           System.out.println("샘플 데이터 생성: " + animal.getName() +
               " - " + animal.getBreed() + " (" + animal.getImageUrl() + ")");
         }
 
-        // animal1, animal2, ... 변수에 할당
-        Animal animal1 = animalList.size() > 0 ? animalList.get(0) : null;
-        Animal animal2 = animalList.size() > 1 ? animalList.get(1) : null;
-        Animal animal3 = animalList.size() > 2 ? animalList.get(2) : null;
-        Animal animal4 = animalList.size() > 3 ? animalList.get(3) : null;
-        Animal animal5 = animalList.size() > 4 ? animalList.get(4) : null;
-        Animal animal6 = animalList.size() > 5 ? animalList.get(5) : null;
-        Animal animal7 = animalList.size() > 6 ? animalList.get(6) : null;
-        Animal animal8 = animalList.size() > 7 ? animalList.get(7) : null;
-        Animal animal9 = animalList.size() > 8 ? animalList.get(8) : null;
-        Animal animal10 = animalList.size() > 9 ? animalList.get(9) : null;
-        Animal animal11 = animalList.size() > 10 ? animalList.get(10) : null;
-        Animal animal12 = animalList.size() > 11 ? animalList.get(11) : null;
+        // 임시보호용 게시글 타이틀 가져오기
+        List<String> protectionTitles = SampleAnimalData.getSampleTitles();
 
 
-        animalCaseEventPublisher.createAnimalCase(member1, animal1);
-        animalCaseEventPublisher.createAnimalCase(member1, animal2);
-        animalCaseEventPublisher.createAnimalCase(member1, animal3);
-        animalCaseEventPublisher.createAnimalCase(member1, animal4);
-        animalCaseEventPublisher.createAnimalCase(member1, animal5);
-        animalCaseEventPublisher.createAnimalCase(member1, animal6);
+        // member1 - 20마리
+        int casesForMember1 = Math.min(20, animalList.size());
+        for (int i = 0; i < casesForMember1; i++) {
+          animalCaseEventPublisher.createAnimalCase(
+              member1, animalList.get(i), protectionTitles.get(i)
+          );
+          System.out.println("Member1의 동물 케이스 생성: " + animalList.get(i).getBreed());
+        }
 
+        // member2 - 10마리
+        int casesForMember2 = Math.min(10, animalList.size() - casesForMember1);
+        for (int i = 0; i < casesForMember2; i++) {
+          int index = casesForMember1 + i;
+          if (index < animalList.size()) {
+            animalCaseEventPublisher.createAnimalCase(
+                member2, animalList.get(i), protectionTitles.get(i)
+            );
+            System.out.println("Member2의 동물 케이스 생성: " + animalList.get(index).getBreed());
+          }
+        }
 
+        // member3 - 10마리
+        int startIndexForMember3 = casesForMember1 + casesForMember2;
+        int casesForMember3 = Math.min(10, animalList.size() - startIndexForMember3);
+        for (int i = 0; i < casesForMember3; i++) {
+          int index = startIndexForMember3 + i;
+          if (index < animalList.size()) {
+            animalCaseEventPublisher.createAnimalCase(
+                member3, animalList.get(i), protectionTitles.get(i)
+            );
+            System.out.println("Member3의 동물 케이스 생성: " + animalList.get(index).getBreed());
+          }
+        }
       }
     };
   }
