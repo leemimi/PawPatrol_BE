@@ -4,6 +4,22 @@ spring:
   output:
     ansi:
       enabled: ALWAYS
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+  threads:
+    virtual:
+      enabled: true
+  kafka:
+    bootstrap-servers: localhost:19092
+    consumer:
+      group-id: image-processor-group
+      auto-offset-reset: latest
+    producer:
+      retries: 3
+    listener:
+      concurrency: 3
+
 
   profiles:
     active: dev

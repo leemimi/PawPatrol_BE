@@ -4,6 +4,8 @@ import com.patrol.api.lostFoundPost.dto.LostFoundPostRequestDto;
 import com.patrol.api.lostFoundPost.dto.LostFoundPostResponseDto;
 import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.animal.repository.AnimalRepository;
+import com.patrol.domain.image.service.ImageHandlerService;
+import com.patrol.domain.image.service.ImageService;
 import com.patrol.domain.lostFoundPost.entity.LostFoundPost;
 import com.patrol.domain.lostFoundPost.repository.LostFoundPostRepository;
 import com.patrol.domain.image.entity.Image;
@@ -17,6 +19,7 @@ import com.patrol.global.storage.FileUploadResult;
 import com.patrol.global.storage.NcpObjectStorageService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,14 +34,10 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class LostFoundPostService {
-    private final FileStorageHandler fileStorageHandler;
     private final LostFoundPostRepository lostFoundPostRepository;
     private final AnimalRepository animalRepository;
     private final ImageRepository imageRepository;
-    private final NcpObjectStorageService ncpObjectStorageService;
-
-    @Value("${ncp.storage.endpoint}")
-    private String endPoint;
+    private final ImageHandlerService imageHandlerService;
 
     private static final String FOLDER_PATH = "lostfoundpost/";
 
@@ -57,15 +56,11 @@ public class LostFoundPostService {
             Image petImage = imageRepository.findByAnimalId(petId);
             if (petImage != null) {
                 petImage.setFoundId(lostFoundPost.getId());
-                imageRepository.save(petImage);
-            }
+                imageHandlerService.registerImage(petImage.getPath(), petImage.getAnimalId(), lostFoundPost.getId());
+            } // 일반 saveImage 메소드 사용
         }
 
-        if (images != null && !images.isEmpty()) {
-            uploadImages(images, lostFoundPost);
-        }
-
-        return LostFoundPostResponseDto.from(lostFoundPost);
+        return getImageSave(images, lostFoundPost);
     }
 
     @Transactional
@@ -80,44 +75,7 @@ public class LostFoundPostService {
         lostFoundPost.setContent(requestDto.getContent());
         lostFoundPost.setFindTime(requestDto.getFindTime());
 
-        if (images != null && !images.isEmpty()) {
-            uploadImages(images, lostFoundPost);
-        }
-
-        return LostFoundPostResponseDto.from(lostFoundPost);
-    }
-
-    private void uploadImages(List<MultipartFile> images, LostFoundPost lostFoundPost) {
-        List<String> uploadedPaths = new ArrayList<>();
-
-        try {
-            for (MultipartFile image : images) {
-                FileUploadResult uploadResult = fileStorageHandler.handleFileUpload(
-                        FileUploadRequest.builder()
-                                .folderPath(FOLDER_PATH)
-                                .file(image)
-                                .build()
-                );
-
-                if (uploadResult != null) {
-                    String fileName = uploadResult.getFileName();
-                    uploadedPaths.add(fileName);
-
-                    Image imageEntity = Image.builder()
-                            .path(endPoint+"/paw-patrol/"+FOLDER_PATH+fileName)
-                            .foundId(lostFoundPost.getId())
-                            .build();
-
-                    lostFoundPost.addImage(imageEntity);
-                    imageRepository.save(imageEntity);
-                }
-            }
-        } catch (Exception e) {
-            for (String path : uploadedPaths) {
-                ncpObjectStorageService.delete(path);
-            }
-            throw new CustomException(ErrorCode.DATABASE_ERROR);
-        }
+        return getImageSave(images, lostFoundPost);
     }
 
     @Transactional
@@ -131,14 +89,6 @@ public class LostFoundPostService {
 
         deletePostImages(postId);
         lostFoundPostRepository.deleteById(postId);
-    }
-
-    private void deletePostImages(Long postId) {
-        List<Image> images = imageRepository.findAllByFoundId(postId);
-        images.forEach(image -> {
-            ncpObjectStorageService.delete(image.getPath());
-            imageRepository.delete(image);
-        });
     }
 
     @Transactional(readOnly = true)
@@ -161,5 +111,28 @@ public class LostFoundPostService {
         return lostFoundPosts.stream()
                 .map(LostFoundPostResponseDto::from)
                 .collect(Collectors.toList());
+    }
+
+    @NotNull
+    private LostFoundPostResponseDto getImageSave(List<MultipartFile> images, LostFoundPost lostFoundPost) {
+        if (images != null && !images.isEmpty()) {
+            // 새로운 uploadAndRegisterImages 메소드 사용
+            // (animalId는 null, foundId는 게시글 ID)
+            List<Image> savedImages = imageHandlerService.uploadAndRegisterImages(images, FOLDER_PATH, null, lostFoundPost.getId());
+
+            // 게시글에 이미지 추가
+            for (Image image : savedImages) {
+                lostFoundPost.addImage(image);
+            }
+        }
+
+        return LostFoundPostResponseDto.from(lostFoundPost);
+    }
+
+    private void deletePostImages(Long postId) {
+        List<Image> images = imageRepository.findAllByFoundId(postId);
+        for (Image image : images) {
+            imageHandlerService.deleteImage(image); // 이미지 핸들러로 이미지 삭제
+        }
     }
 }

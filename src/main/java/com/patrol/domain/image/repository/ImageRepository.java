@@ -21,4 +21,6 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     List<Image> findByFoundIdIsNotNullAndEmbeddingIsNotNull ();
 
     List<Image> findAllByAnimalIdIsNotNullAndEmbeddingIsNotNull ();
+
+    Image findByPath (String path);
 }

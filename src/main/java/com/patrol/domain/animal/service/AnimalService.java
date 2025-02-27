@@ -4,11 +4,11 @@ import com.patrol.api.animal.dto.MyPetListResponse;
 import com.patrol.api.member.member.dto.request.PetRegisterRequest;
 import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.animal.repository.AnimalRepository;
+import com.patrol.domain.image.service.ImageHandlerService;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.global.storage.FileStorageHandler;
 import com.patrol.global.storage.FileUploadRequest;
 import com.patrol.global.storage.FileUploadResult;
-import com.patrol.global.storage.StorageConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,44 +35,45 @@ import java.util.stream.Collectors;
 public class AnimalService {
     private final AnimalRepository animalRepository;
     private final FileStorageHandler fileStorageHandler;
-    private final StorageConfig storageConfig;
-
+    private final ImageHandlerService imageHandlerService;
+    private static final String FOLDER_PATH = "petRegister/homeless/";
 
     // 주인 없는 반려동물 등록
     @Transactional
     public void petRegister(PetRegisterRequest petRegisterRequest) {
-
         // 이미지 업로드
         FileUploadResult uploadResult = fileStorageHandler.handleFileUpload(
                 FileUploadRequest.builder()
-                        .folderPath("petRegister/homeless")
+                        .folderPath(FOLDER_PATH)
                         .file(petRegisterRequest.imageFile())
                         .build()
         );
 
-        // 네이버 S3 이미지 URL
-        String imageUrl = storageConfig.getEndpoint()
-                + "/"
-                + storageConfig.getBucketname()
-                + "/"
-                + uploadResult.getFullPath();
+        if (uploadResult != null) {
+            // ImageHandlerService를 통해 이미지 URL 생성
+            String imageUrl = imageHandlerService.createImageUrl(FOLDER_PATH, uploadResult.getFileName());
 
-        // 동물 등록
-        if(uploadResult != null) {
+            // 동물 등록
             Animal animal = petRegisterRequest.buildAnimal(imageUrl);
-            animalRepository.save(animal);
+            Animal savedAnimal = animalRepository.save(animal);
+
+            imageHandlerService.registerImage(imageUrl, savedAnimal.getId(), null);
         }
     }
 
-
     @Transactional
     public Animal registerWithImageUrl(PetRegisterRequest petRegisterRequest, String imageUrl) {
-      Animal animal = petRegisterRequest.buildAnimal(imageUrl);
-      return animalRepository.save(animal);
+        // 동물 등록
+        Animal animal = petRegisterRequest.buildAnimal(imageUrl);
+        Animal savedAnimal = animalRepository.save(animal);
+
+        imageHandlerService.registerImage(imageUrl, savedAnimal.getId(), null);
+
+        return savedAnimal;
     }
 
     public Optional<Animal> findById(Long animalId) {
-      return animalRepository.findById(animalId);
+        return animalRepository.findById(animalId);
     }
 
     // 등록된 나의 반려동물 리스트 가져오기 (마이페이지)

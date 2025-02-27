@@ -7,7 +7,6 @@ import com.patrol.domain.image.entity.Image;
 import com.patrol.domain.image.repository.ImageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,17 +22,18 @@ public class ImageService {
 
     private final ImageRepository imageRepository;
     private final AiClient aiClient;
+    private final ImageEventProducer imageEventProducer;
 
-    @Scheduled(fixedDelay = 60000) // 60초마다 실행
-    public void scheduleProcessExistingImages() {
+    public void sendImageEvent(Long imageId, String imagePath) {
+        log.info("이미지 이벤트 전송: ID={}, Path={}", imageId, imagePath);
+        imageEventProducer.sendImageEvent(imageId, imagePath);
+    }
 
-        log.info("🔵 [SCHEDULED] processExistingImages() 실행 시작");
-        processExistingImagesWithTransaction(); // 트랜잭션 적용된 메서드 호출
-        log.info("🟢 [SCHEDULED] processExistingImages() 실행 완료");
-
-        log.info("🔵 [SCHEDULED] processExistingFoundImages() 실행 시작");
-        processExistingFoundImagesWithTransaction(); // 트랜잭션 적용된 메서드 호출
-        log.info("🟢 [SCHEDULED] processExistingFoundImages() 실행 완료");
+    @Transactional
+    public Image saveImage(Image image) {
+        Image savedImage = imageRepository.save(image);
+        log.info("이미지 저장 완료: ID={}, Path={}", savedImage.getId(), savedImage.getPath());
+        return savedImage;
     }
 
     @Transactional
@@ -87,7 +87,6 @@ public class ImageService {
             }
         }
     }
-
 
     public void processExistingFoundImages() {
         List<Image> foundImages = imageRepository.findByFoundIdIsNotNullAndEmbeddingIsNotNull();
