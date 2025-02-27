@@ -182,6 +182,9 @@ public class AnimalService {
         logger.info("내 반려동물 정보 삭제 (마이페이지)");
         Animal animal = animalRepository.findById(deleteMyPetInfoRequest.id()).orElseThrow();
 
+        // S3에 있는 반려동물 이미지 삭제
+        fileStorageHandler.handleFileDelete(animal.getImageUrl());
+
         // 반려동물 소유자 검증
         validateOwner(animal, member);
 
