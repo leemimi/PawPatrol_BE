@@ -26,4 +26,6 @@ public interface LostFoundPostRepository extends JpaRepository<LostFoundPost, Lo
     Page<LostFoundPost> findByStatus(PostStatus status, Pageable pageable);
     LostFoundPost findByPetId(Long petId);
 
+    // 현재 로그인된 멤버의 모든 게시글 페이징 처리 후 가져오기
+    Page<LostFoundPost> findByAuthorId(Long authorId, Pageable pageable);
 }

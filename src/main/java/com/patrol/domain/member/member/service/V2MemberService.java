@@ -1,7 +1,9 @@
 package com.patrol.domain.member.member.service;
 
 import com.patrol.api.member.auth.dto.ModifyProfileResponse;
+import com.patrol.api.member.auth.dto.MyPostsResponse;
 import com.patrol.api.member.auth.dto.requestV2.ModifyProfileRequest;
+import com.patrol.domain.lostFoundPost.service.LostFoundPostService;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.repository.V2MemberRepository;
 import com.patrol.global.exceptions.ErrorCodes;
@@ -13,6 +15,8 @@ import com.patrol.global.storage.StorageConfig;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +40,7 @@ public class V2MemberService {
     private final PasswordEncoder passwordEncoder;
     private final FileStorageHandler fileStorageHandler;
     private final StorageConfig storageConfig;
+    private final LostFoundPostService lostFoundPostService;
 
     private final Logger logger = LoggerFactory.getLogger(V2MemberService.class.getName());
 
@@ -146,4 +151,9 @@ public class V2MemberService {
         return v2MemberRepository.findByEmail(email).isPresent();
     }
 
+    // 마이페이지 > 작성글 리스트 불러오기
+    @Transactional
+    public Page<MyPostsResponse> myPosts(Member member, Pageable pageable) {
+        return lostFoundPostService.myPosts(member, pageable);
+    }
 }
