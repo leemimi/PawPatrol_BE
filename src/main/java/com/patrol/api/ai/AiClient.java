@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +34,7 @@ public class AiClient {
     @Value("${ai.service.url}")
     private String aiServiceUrl;
 
-    public String extractEmbeddingFromUrl(String imageUrl) throws IOException {
+    public Map<String, String> extractEmbeddingAndFeaturesFromUrl(String imageUrl) throws IOException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -45,12 +46,16 @@ public class AiClient {
         ResponseEntity<String> response = restTemplate.postForEntity(
                 aiServiceUrl + "/extract-embedding-from-url",
                 requestEntity,
-                String.class);
+                String.class
+        );
 
         if (response.getStatusCode() == HttpStatus.OK) {
             JsonNode jsonNode = objectMapper.readTree(response.getBody());
             if (jsonNode.has("success") && jsonNode.get("success").asBoolean()) {
-                return jsonNode.get("embedding").toString();
+                Map<String, String> result = new HashMap<>();
+                result.put("embedding", jsonNode.get("embedding").toString());
+                result.put("features", jsonNode.get("features").toString());
+                return result;
             } else {
                 throw new IOException("URL에서 임베딩 추출 실패");
             }
@@ -58,6 +63,7 @@ public class AiClient {
             throw new IOException("URL 임베딩 추출 API 호출 실패: " + response.getStatusCode());
         }
     }
+
 
     public List<AnimalSimilarity> batchCompareUrl(String path, Map<String, List<Double>> animalEmbeddings) throws IOException {
         HttpHeaders headers = new HttpHeaders();

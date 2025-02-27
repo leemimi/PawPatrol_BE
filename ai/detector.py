@@ -342,26 +342,34 @@ if __name__ == '__main__':
 
 def image_vector(img1):
     """
-    두 이미지의 얼굴(강아지 머리)을 비교하여 임베딩 및 랜드마크 기반 유사도를 계산합니다.
-    display=True인 경우 matplotlib으로 시각화합니다.
+    이미지에서 얼굴(강아지 머리)을 감지하고 임베딩 및 특징을 추출합니다.
+    얼굴이 감지되지 않을 경우 이미지 전체에 대한 임베딩을 생성합니다.
     """
     gray1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
     faces1 = face_locations(gray1)
 
-    if len(faces1) == 0:  # 🛑 얼굴이 검출되지 않으면 예외 처리 필요
-        raise ValueError("얼굴을 감지하지 못했습니다.")
+    if len(faces1) == 0:
+        # 얼굴이 감지되지 않으면 이미지 전체를 사용
+        print("얼굴을 감지하지 못했습니다. 이미지 전체를 사용합니다.")
 
+        # 이미지 전체에 대한 CLIP 임베딩 추출
+        img_pil = Image.fromarray(cv2.cvtColor(img1, cv2.COLOR_BGR2RGB))
+        img_tensor = transform(img_pil).unsqueeze(0).to(device)
+
+        with torch.no_grad():
+            embedding1 = clip_model.encode_image(img_tensor)
+
+        # 코사인 유사도 계산을 위해 정규화
+        embedding1 = embedding1 / embedding1.norm(dim=-1, keepdim=True)
+
+        # 임베딩만 반환하고 랜드마크 특징은 빈 배열로 설정
+        return np.array([]), embedding1
+
+    # 얼굴이 감지된 경우 기존 코드 실행
     face1 = faces1[0]
-
-    # dlib.rectangle 생성 (dlib.rectangle(left, top, right, bottom))
     face1_rect = dlib.rectangle(face1[3], face1[0], face1[1], face1[2])
-
     shape1 = predictor(gray1, face1_rect)
-
-    # 랜드마크 특징 추출 (컬러와 그레이스케일 이미지 모두 사용)
     lmk_features1 = extract_landmark_features(shape1, img1, gray1)
-
-    # CLIP 임베딩 추출
     embedding1 = extract_face_embedding(img1, face1)
 
     return lmk_features1, embedding1

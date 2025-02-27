@@ -54,15 +54,23 @@ def extract_embedding_from_url_directly(url: str):
             new_size = (int(image_pil.size[0] * ratio), int(image_pil.size[1] * ratio))
             image_pil = image_pil.resize(new_size, Image.LANCZOS)
 
+        # 얼굴 특징 및 임베딩 추출
         feature1, embedding1 = detector.image_vector(image_cv)
 
-        # 전처리 및 텐서 변환
-        if embedding1 is None or feature1 is None:
+        # embedding1은 torch 텐서, feature1은 numpy 배열
+        if embedding1 is None:
+            print("임베딩 추출 실패")
             return {"embedding": [], "features": [], "success": False}
 
+        # torch 텐서에서 numpy 배열로 변환 후 리스트로 변환
+        embedding_list = embedding1.cpu().numpy().flatten().tolist()
+
+        # feature1이 비어있을 수 있음 (얼굴이 감지되지 않은 경우)
+        features_list = feature1.tolist() if feature1.size > 0 else []
+
         return {
-            "embedding": embedding1.tolist(),
-            "features": feature1.tolist(),
+            "embedding": embedding_list,
+            "features": features_list,
             "success": True
         }
 
@@ -72,20 +80,16 @@ def extract_embedding_from_url_directly(url: str):
 
 
 
-@app.post("/extract-embedding-from-url", response_model=EmbeddingResponse)
+@app.post("/extract-embedding-from-url", response_model=dict)
 async def extract_embedding_from_url(url: str = Form(...)):
     """URL에서 이미지를 직접 임베딩 추출"""
     try:
-        embedding = extract_embedding_from_url_directly(url)
-
-        if embedding is None:
-            return {"embedding": [], "success": False}
-
-        embedding_list = embedding.tolist()
-        return {"embedding": embedding_list, "success": True}
+        result = extract_embedding_from_url_directly(url)
+        return result
     except Exception as e:
-        print(f"URL 임베딩 추출 중 오류 발생: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"URL 임베딩 추출 중 오류 발생: {str(e)}")
+        print(f"현재 URL 임베딩 추출 중 오류 발생: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"현재 URL 임베딩 추출 중 오류 발생: {str(e)}")
+
 
 @app.post("/compare-urls")
 async def compare_urls(url1: str = Form(...), url2: str = Form(...)):

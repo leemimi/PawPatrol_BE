@@ -63,22 +63,31 @@ public class ImageService {
                 String imageUrl = image.getPath();
                 log.debug("이미지 URL에서 임베딩 추출 요청: {}", imageUrl);
 
-                String embedding = aiClient.extractEmbeddingFromUrl(imageUrl);
+                // 임베딩 & 피처 추출
+                Map<String, String> embeddingData = aiClient.extractEmbeddingAndFeaturesFromUrl(imageUrl);
+                String embedding = embeddingData.get("embedding");
+                String features = embeddingData.get("features");
+
                 log.info("추출된 임베딩: {}", embedding);
+                log.info("추출된 피처: {}", features);
 
                 if (embedding == null || embedding.isEmpty()) {
                     log.error("임베딩 추출 실패: 이미지 ID {}, URL {}", image.getId(), imageUrl);
                     continue;
                 }
 
+                // DB 저장
                 image.setEmbedding(embedding);
+                image.setFeatures(features);
                 imageRepository.save(image);
-                log.info("DB 저장 완료: 이미지 ID {}, 임베딩 {}", image.getId(), image.getEmbedding());
+
+                log.info("DB 저장 완료: 이미지 ID {}, 임베딩 {}, 피처 {}", image.getId(), image.getEmbedding(), image.getFeatures());
             } catch (Exception e) {
                 log.error("이미지 ID {}의 임베딩 추출 실패: {}", image.getId(), e.getMessage());
             }
         }
     }
+
 
     public void processExistingFoundImages() {
         List<Image> foundImages = imageRepository.findByFoundIdIsNotNullAndEmbeddingIsNotNull();
