@@ -153,12 +153,27 @@ public class Member extends BaseEntity {
         this.role = role;
     }
 
-    public void updateInfo(MemberUpdateRequest request) {
-        gender = request.getGender();
-        nickname = request.getNickname();
-        marketingAgree = request.isMarketingAgree();
-        birthDate = request.getBirthDate();
-        address = request.getAddress();
-        phoneNumber = request.getPhoneNumber();
+//    public void updateInfo(MemberUpdateRequest request) {
+//        gender = request.getGender();
+//        nickname = request.getNickname();
+//        marketingAgree = request.isMarketingAgree();
+//        birthDate = request.getBirthDate();
+//        address = request.getAddress();
+//        phoneNumber = request.getPhoneNumber();
+//    }
+
+    // 닉네임 업데이트 메서드
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    // 비밀번호 업데이트 메서드
+    public void updatePassword(String password) {
+        this.password = password;
+    }
+
+    // 전화번호 업데이트 메서드
+    public void updatePhoneNum(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 }

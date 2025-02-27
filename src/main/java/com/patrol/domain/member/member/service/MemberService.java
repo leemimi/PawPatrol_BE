@@ -48,14 +48,14 @@ public class MemberService {
     }
 
 
-    @Transactional
-    public Member updateInfo(Member member, MemberUpdateRequest memberUpdateRequest) {
-        Member modifiedMember = memberRepository.findById(member.getId())
-            .orElseThrow(() -> new ServiceException(ErrorCodes.MEMBER_NOT_FOUND));
-
-        modifiedMember.updateInfo(memberUpdateRequest);
-        return modifiedMember;
-    }
+//    @Transactional
+//    public Member updateInfo(Member member, MemberUpdateRequest memberUpdateRequest) {
+//        Member modifiedMember = memberRepository.findById(member.getId())
+//            .orElseThrow(() -> new ServiceException(ErrorCodes.MEMBER_NOT_FOUND));
+//
+//        modifiedMember.updateInfo(memberUpdateRequest);
+//        return modifiedMember;
+//    }
 
     @Transactional
     public void banMember(Long memberId) {

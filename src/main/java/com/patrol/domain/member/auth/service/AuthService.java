@@ -70,9 +70,9 @@ public class AuthService {
         return memberRepository.findByEmail(email);
     }
 
-    public Optional<Member> findByApiKey(String apiKey) {
-        return memberRepository.findByApiKey(apiKey);
-    }
+//    public Optional<Member> findByApiKey(String apiKey) {
+//        return memberRepository.findByApiKey(apiKey);
+//    }
 
     public String genAccessToken(Member member) {
         return authTokenService.genAccessToken(member);

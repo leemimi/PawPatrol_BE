@@ -7,6 +7,7 @@ import com.patrol.global.oauth2.CustomOAuth2AuthenticationSuccessHandler;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -38,6 +39,11 @@ public class ApiSecurityConfig {
   private final CustomOAuth2AuthenticationSuccessHandler customOAuth2AuthenticationSuccessHandler;
   private final CustomAuthorizationRequestResolver customAuthorizationRequestResolver;
 
+  @Value("${custom.oauth2.redirect-uri}")
+  private String domain;
+  @Value("${custom.auth.redirect-uri}")
+  private String redirect;
+
   @Bean
   public UrlBasedCorsConfigurationSource corsConfigurationSource() {
     // 위에서 설정한 CORS 설정 코드와 동일
@@ -62,7 +68,9 @@ public class ApiSecurityConfig {
   @Bean
   SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
     http
-        .securityMatcher("/api/**", "/oauth2/**", "/login/oauth2/**", "/login/**")
+        .securityMatcher("/api/**", "/oauth2/**",
+                "/login/oauth2/**", "/login/**",
+                "/login-pet/**")
         .authorizeHttpRequests(
             authorizeRequests -> authorizeRequests
                     .requestMatchers(HttpMethod.GET, "/api/lost-found/find/{postId}").permitAll()  // ✅ 신고 연계 제보 게시글 상세 조회 허용
@@ -136,7 +144,7 @@ public class ApiSecurityConfig {
                             if ("temp_token".equals(error.getErrorCode())) {
                                 String tempToken = error.getDescription();  // tempToken 값 추출
                                 String redirectUrl = UriComponentsBuilder
-                                        .fromUriString("http://localhost:5173/connect")
+                                        .fromUriString(domain)
                                         .queryParam("temp_token", tempToken)
                                         .toUriString();
                                 response.sendRedirect(redirectUrl);
@@ -144,7 +152,7 @@ public class ApiSecurityConfig {
                             }
                         }
                         // 다른 인증 에러의 경우 기본 에러 페이지로 리다이렉트
-                        response.sendRedirect("/login?error=true");
+                        response.sendRedirect(redirect);
                     }
                 })
         )
