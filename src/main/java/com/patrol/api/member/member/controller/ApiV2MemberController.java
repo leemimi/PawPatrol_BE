@@ -6,6 +6,7 @@ import com.patrol.api.animal.dto.request.ModiPetInfoRequest;
 import com.patrol.api.member.auth.dto.ModifyProfileResponse;
 import com.patrol.api.member.auth.dto.MyPostsResponse;
 import com.patrol.api.member.auth.dto.requestV2.ModifyProfileRequest;
+import com.patrol.api.member.member.dto.OAuthConnectInfoResponse;
 import com.patrol.api.member.member.dto.request.PetRegisterRequest;
 import com.patrol.domain.animal.service.AnimalService;
 import com.patrol.domain.member.member.entity.Member;
@@ -41,15 +42,17 @@ public class ApiV2MemberController {
 
     // 마이페이지 > 회원정보 수정
     @PatchMapping("/profile")
-    public GlobalResponse<ModifyProfileResponse> modifyProfile(@LoginUser Member member,
-                                                               @ModelAttribute  ModifyProfileRequest modifyProfileRequest) {
+    public GlobalResponse<ModifyProfileResponse> modifyProfile(
+            @LoginUser Member member,
+            @ModelAttribute  ModifyProfileRequest modifyProfileRequest) {
         return GlobalResponse.success(v2MemberService.modifyProfile(member, modifyProfileRequest));
     }
 
     // 마이페이지 > 프로필 이미지 삭제
     @PatchMapping("/profile/images")
-    public GlobalResponse<Void> resetProfileImage(@LoginUser Member member,
-                                                   @ModelAttribute  ModifyProfileRequest modifyProfileRequest) {
+    public GlobalResponse<Void> resetProfileImage(
+            @LoginUser Member member,
+            @ModelAttribute  ModifyProfileRequest modifyProfileRequest) {
         v2MemberService.resetProfileImage(member, modifyProfileRequest);
         return GlobalResponse.success();
     }
@@ -75,8 +78,9 @@ public class ApiV2MemberController {
     
     // 마이페이지 > 내 반려동물 정보 수정
     @PatchMapping("/pets")
-    public GlobalResponse<Void> modifyMyPetInfo(@LoginUser Member member,
-                                                @ModelAttribute ModiPetInfoRequest modiPetInfoRequest) {
+    public GlobalResponse<Void> modifyMyPetInfo(
+            @LoginUser Member member,
+            @ModelAttribute ModiPetInfoRequest modiPetInfoRequest) {
 
         animalService.modifyMyPetInfo(member, modiPetInfoRequest);
         return GlobalResponse.success();
@@ -84,8 +88,9 @@ public class ApiV2MemberController {
 
     // 마이페이지 > 내 반려동물 정보 삭제
     @DeleteMapping("/pets/{pet-id}")
-    public GlobalResponse<Void> deleteMyPetInfo(@LoginUser Member member,
-                                                @RequestBody DeleteMyPetInfoRequest deleteMyPetInfoRequest) {
+    public GlobalResponse<Void> deleteMyPetInfo(
+            @LoginUser Member member,
+            @RequestBody DeleteMyPetInfoRequest deleteMyPetInfoRequest) {
         animalService.deleteMyPetInfo(member, deleteMyPetInfoRequest);
         return GlobalResponse.success();
     }
@@ -104,5 +109,11 @@ public class ApiV2MemberController {
             @LoginUser Member member,
             @PageableDefault(size = 5) Pageable pageable) {
         return GlobalResponse.success(v2MemberService.myWitnessPosts(member, pageable));
+    }
+    
+    // 소셜 로그인 연결 상태 불러오기
+    @GetMapping("/socialInfo")
+    public GlobalResponse<OAuthConnectInfoResponse> socialInfo(@LoginUser Member member) {
+        return GlobalResponse.success(v2MemberService.socialInfo(member));
     }
 }
