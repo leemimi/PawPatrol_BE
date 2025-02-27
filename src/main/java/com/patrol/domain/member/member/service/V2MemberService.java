@@ -48,6 +48,21 @@ public class V2MemberService {
                 .orElseThrow(() -> new ServiceException(ErrorCodes.INVALID_EMAIL));
     }
 
+    // 마이페이지 > 프로필 이미지 삭제
+    @Transactional
+    public void resetProfileImage(Member member, ModifyProfileRequest modifyProfileRequest) {
+        logger.info("마이페이지 > 프로필 이미지 삭제 : resetProfileImage");
+        Member modifyMem = v2MemberRepository.findByEmail(member.getEmail()).orElseThrow();
+
+        // 기존 파일 삭제
+        fileStorageHandler.handleFileDelete(modifyProfileRequest.imageUrl());
+        
+        // 프로필을 디폴트 이미지로 변경
+        if(modifyProfileRequest.file() == null && !modifyProfileRequest.imageUrl().isEmpty()) {
+            modifyMem.setProfileImageUrl("default.png");
+        }
+    }
+
     // 회원 정보 수정 > 전화번호 수정 시 인증 필요함
     @Transactional
     public ModifyProfileResponse modifyProfile(Member member,
@@ -83,7 +98,13 @@ public class V2MemberService {
             logger.info("회원 정보 수정 - 프로필 이미지 변경");
 
             // 기본 이미지가 아닐때
-            if(!modifyProfileRequest.imageUrl().equals("default.png")) {
+            String fileName = modifyProfileRequest.imageUrl();
+            int lastSlashIndex = fileName.lastIndexOf('/');
+            if (lastSlashIndex != -1) {
+                fileName = fileName.substring(lastSlashIndex + 1);
+            }
+
+            if (!fileName.equals("default.png")) {
                 // 기존 파일 삭제
                 fileStorageHandler.handleFileDelete(modifyProfileRequest.imageUrl());
             }

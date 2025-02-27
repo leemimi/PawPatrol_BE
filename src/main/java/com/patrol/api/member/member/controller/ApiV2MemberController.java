@@ -42,6 +42,14 @@ public class ApiV2MemberController {
         return GlobalResponse.success(v2MemberService.modifyProfile(member, modifyProfileRequest));
     }
 
+    // 마이페이지 > 프로필 이미지 삭제
+    @PatchMapping("/profile/images")
+    public GlobalResponse<Void> resetProfileImage(@LoginUser Member member,
+                                                   @ModelAttribute  ModifyProfileRequest modifyProfileRequest) {
+        v2MemberService.resetProfileImage(member, modifyProfileRequest);
+        return GlobalResponse.success();
+    }
+
     // 마이페이지 > 반려동물 등록
     @PostMapping("/pets")
     public GlobalResponse<Void> petRegister(@LoginUser Member member,
