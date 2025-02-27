@@ -1,7 +1,9 @@
 package com.patrol.domain.member.member.service;
 
 import com.patrol.api.member.auth.dto.ModifyProfileResponse;
+import com.patrol.api.member.auth.dto.MyPostsResponse;
 import com.patrol.api.member.auth.dto.requestV2.ModifyProfileRequest;
+import com.patrol.domain.lostFoundPost.service.LostFoundPostService;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.repository.V2MemberRepository;
 import com.patrol.global.exceptions.ErrorCodes;
@@ -13,6 +15,8 @@ import com.patrol.global.storage.StorageConfig;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +40,7 @@ public class V2MemberService {
     private final PasswordEncoder passwordEncoder;
     private final FileStorageHandler fileStorageHandler;
     private final StorageConfig storageConfig;
+    private final LostFoundPostService lostFoundPostService;
 
     private final Logger logger = LoggerFactory.getLogger(V2MemberService.class.getName());
 
@@ -46,6 +51,21 @@ public class V2MemberService {
         return v2MemberRepository.findByEmail(email)
                 // 이거 어떻게 바꿔야 하는지
                 .orElseThrow(() -> new ServiceException(ErrorCodes.INVALID_EMAIL));
+    }
+
+    // 마이페이지 > 프로필 이미지 삭제
+    @Transactional
+    public void resetProfileImage(Member member, ModifyProfileRequest modifyProfileRequest) {
+        logger.info("마이페이지 > 프로필 이미지 삭제 : resetProfileImage");
+        Member modifyMem = v2MemberRepository.findByEmail(member.getEmail()).orElseThrow();
+
+        // 기존 파일 삭제
+        fileStorageHandler.handleFileDelete(modifyProfileRequest.imageUrl());
+        
+        // 프로필을 디폴트 이미지로 변경
+        if(modifyProfileRequest.file() == null && !modifyProfileRequest.imageUrl().isEmpty()) {
+            modifyMem.setProfileImageUrl("default.png");
+        }
     }
 
     // 회원 정보 수정 > 전화번호 수정 시 인증 필요함
@@ -83,7 +103,13 @@ public class V2MemberService {
             logger.info("회원 정보 수정 - 프로필 이미지 변경");
 
             // 기본 이미지가 아닐때
-            if(!modifyProfileRequest.imageUrl().equals("default.png")) {
+            String fileName = modifyProfileRequest.imageUrl();
+            int lastSlashIndex = fileName.lastIndexOf('/');
+            if (lastSlashIndex != -1) {
+                fileName = fileName.substring(lastSlashIndex + 1);
+            }
+
+            if (!fileName.equals("default.png")) {
                 // 기존 파일 삭제
                 fileStorageHandler.handleFileDelete(modifyProfileRequest.imageUrl());
             }
@@ -125,4 +151,9 @@ public class V2MemberService {
         return v2MemberRepository.findByEmail(email).isPresent();
     }
 
+    // 마이페이지 > 작성글 리스트 불러오기
+    @Transactional
+    public Page<MyPostsResponse> myPosts(Member member, Pageable pageable) {
+        return lostFoundPostService.myPosts(member, pageable);
+    }
 }

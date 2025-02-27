@@ -4,6 +4,7 @@ import com.patrol.api.animal.dto.MyPetListResponse;
 import com.patrol.api.animal.dto.request.DeleteMyPetInfoRequest;
 import com.patrol.api.animal.dto.request.ModiPetInfoRequest;
 import com.patrol.api.member.auth.dto.ModifyProfileResponse;
+import com.patrol.api.member.auth.dto.MyPostsResponse;
 import com.patrol.api.member.auth.dto.requestV2.ModifyProfileRequest;
 import com.patrol.api.member.member.dto.request.PetRegisterRequest;
 import com.patrol.domain.animal.service.AnimalService;
@@ -12,6 +13,8 @@ import com.patrol.domain.member.member.service.V2MemberService;
 import com.patrol.global.globalDto.GlobalResponse;
 import com.patrol.global.webMvc.LoginUser;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -40,6 +43,14 @@ public class ApiV2MemberController {
     public GlobalResponse<ModifyProfileResponse> modifyProfile(@LoginUser Member member,
                                                                @ModelAttribute  ModifyProfileRequest modifyProfileRequest) {
         return GlobalResponse.success(v2MemberService.modifyProfile(member, modifyProfileRequest));
+    }
+
+    // 마이페이지 > 프로필 이미지 삭제
+    @PatchMapping("/profile/images")
+    public GlobalResponse<Void> resetProfileImage(@LoginUser Member member,
+                                                   @ModelAttribute  ModifyProfileRequest modifyProfileRequest) {
+        v2MemberService.resetProfileImage(member, modifyProfileRequest);
+        return GlobalResponse.success();
     }
 
     // 마이페이지 > 반려동물 등록
@@ -76,5 +87,11 @@ public class ApiV2MemberController {
                                                 @RequestBody DeleteMyPetInfoRequest deleteMyPetInfoRequest) {
         animalService.deleteMyPetInfo(member, deleteMyPetInfoRequest);
         return GlobalResponse.success();
+    }
+
+    // 마이페이지 > 작성글 리스트 불러오기
+    @GetMapping("/posts")
+    public GlobalResponse<Page<MyPostsResponse>> myPosts(@LoginUser Member member, Pageable pageable) {
+        return GlobalResponse.success(v2MemberService.myPosts(member, pageable));
     }
 }
