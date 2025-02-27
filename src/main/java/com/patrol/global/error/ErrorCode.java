@@ -35,6 +35,10 @@ public enum ErrorCode {
     MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST,"사용자를 찾을 수 없습니다."),
     DUPLICATE_EMAIL(HttpStatus.FORBIDDEN, "이미 사용중인 이메일 입니다."),
 
+    // File
+    INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "유효하지 않은 파일 형식입니다."),
+    FILE_SIZE_EXCEEDED(HttpStatus.BAD_REQUEST, "파일 크기는 5MB를 넘을 수 없습니다."),
+
     // Auth
     EMAIL_NOT_FOUND(HttpStatus.FORBIDDEN, "등록되지 않은 이메일 입니다."),
     VERIFICATION_NOT_FOUND(HttpStatus.FORBIDDEN, "유효하지 않은 접근입니다."),
