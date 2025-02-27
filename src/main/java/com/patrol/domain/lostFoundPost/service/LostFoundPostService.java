@@ -38,6 +38,7 @@ public class LostFoundPostService {
     private final AnimalRepository animalRepository;
     private final ImageRepository imageRepository;
     private final NcpObjectStorageService ncpObjectStorageService;
+    private final NotificationService notificationService; // 웹소켓 서비스 추가
 
     @Value("${ncp.storage.endpoint}")
     private String endPoint;
@@ -102,6 +103,8 @@ public class LostFoundPostService {
             }
         }
         System.out.println("Received petId: " + requestDto.getPetId());
+        // 웹소켓을 통해 알림 전송
+        notificationService.sendLostFoundPostNotification(lostFoundPost);
 
         return LostFoundPostResponseDto.from(lostFoundPost);
     }
