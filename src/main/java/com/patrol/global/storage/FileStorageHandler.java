@@ -1,6 +1,9 @@
 package com.patrol.global.storage;
 
+import com.patrol.global.error.ErrorCode;
+import com.patrol.global.exception.CustomException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -11,6 +14,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class FileStorageHandler {
 
+    @Value("${ncp.storage.bucketname}")
+    private String bucketName;
     private final StorageService storageService;
 
     public FileUploadResult handleFileUpload(FileUploadRequest request) {
@@ -49,6 +54,25 @@ public class FileStorageHandler {
 
         } catch (Exception e) {
             throw new RuntimeException("파일 업로드에 실패했습니다.", e);
+        }
+    }
+
+    // 파일 삭제
+    public void handleFileDelete(String url) {
+        try {
+            // URL이 null이거나 비어있는 경우 처리
+            if (url == null || url.isEmpty()) {
+                throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
+            }
+
+            // 버킷 이름은 @Value로 주입받은 값 사용
+            // 버킷 이름 이후의 경로를 fileName으로 사용
+            String fileName = url.substring(url.indexOf(bucketName) + bucketName.length() + 1);
+
+            // StorageService를 통해 파일 삭제
+            storageService.delete(fileName);
+        } catch (Exception e) {
+            throw new RuntimeException("파일 삭제에 실패했습니다.", e);
         }
     }
 }

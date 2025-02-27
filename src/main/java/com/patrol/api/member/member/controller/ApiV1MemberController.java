@@ -110,27 +110,27 @@ public class ApiV1MemberController {
 
 
     // MEM01_MODIFY04 : 회원정보 수정  (성별, 전화번호, 주소, 마케팅 수신여부 ...)
-    @PutMapping("/me/profile")
-    public RsData<MemberDto> updateMember(
-        @LoginUser Member loginUser,
-        @Valid @RequestBody MemberUpdateRequest memberUpdateRequest
-    ) {
-        String phoneNumber = memberUpdateRequest.getPhoneNumber();
-        if (phoneNumber != null && !phoneNumber.trim().isEmpty()) {
-            String normalizedPhoneNumber = phoneNumber.replaceAll("-", "");
-            String verified = redisTemplate.opsForValue().get(PHONE_VERIFICATION_STATUS_PREFIX + normalizedPhoneNumber);
-            if (verified == null) {
-                throw new ServiceException(ErrorCodes.PHONE_NUMBER_NOT_VERIFIED);
-            }
-        }
-
-        Member modifiedMember = memberService.updateInfo(loginUser, memberUpdateRequest);
-        return new RsData<>(
-            "200",
-            "회원 정보 업데이트가 성공하였습니다.",
-            new MemberDto(modifiedMember)
-        );
-    }
+//    @PutMapping("/me/profile")
+//    public RsData<MemberDto> updateMember(
+//        @LoginUser Member loginUser,
+//        @Valid @RequestBody MemberUpdateRequest memberUpdateRequest
+//    ) {
+//        String phoneNumber = memberUpdateRequest.getPhoneNumber();
+//        if (phoneNumber != null && !phoneNumber.trim().isEmpty()) {
+//            String normalizedPhoneNumber = phoneNumber.replaceAll("-", "");
+//            String verified = redisTemplate.opsForValue().get(PHONE_VERIFICATION_STATUS_PREFIX + normalizedPhoneNumber);
+//            if (verified == null) {
+//                throw new ServiceException(ErrorCodes.PHONE_NUMBER_NOT_VERIFIED);
+//            }
+//        }
+//
+//        Member modifiedMember = memberService.updateInfo(loginUser, memberUpdateRequest);
+//        return new RsData<>(
+//            "200",
+//            "회원 정보 업데이트가 성공하였습니다.",
+//            new MemberDto(modifiedMember)
+//        );
+//    }
 
 
     // MEM01_MODIFY05 : 전화번호 인증코드 발송 (SMS 인증)

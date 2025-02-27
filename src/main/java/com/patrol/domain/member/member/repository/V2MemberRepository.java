@@ -18,5 +18,5 @@ import java.util.Optional;
  */
 public interface V2MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByEmail(String email);
-
+    Optional<Member> findByApiKey(String apiKey);
 }

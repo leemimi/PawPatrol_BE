@@ -2,6 +2,7 @@ package com.patrol.domain.lostFoundPost.service;
 
 import com.patrol.api.lostFoundPost.dto.LostFoundPostRequestDto;
 import com.patrol.api.lostFoundPost.dto.LostFoundPostResponseDto;
+import com.patrol.api.member.auth.dto.MyPostsResponse;
 import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.animal.repository.AnimalRepository;
 import com.patrol.domain.lostFoundPost.entity.AnimalType;
@@ -17,7 +18,6 @@ import com.patrol.global.storage.FileStorageHandler;
 import com.patrol.global.storage.FileUploadRequest;
 import com.patrol.global.storage.FileUploadResult;
 import com.patrol.global.storage.NcpObjectStorageService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -259,5 +259,53 @@ public class LostFoundPostService {
     public Page<LostFoundPostResponseDto> getPostsByStatus(PostStatus postStatus, Pageable pageable) {
         Page<LostFoundPost> posts = lostFoundPostRepository.findByStatus(postStatus, pageable);
         return posts.map(LostFoundPostResponseDto::from);
+    }
+
+    // 내가 작성한 게시글 리스트 불러오기
+    @Transactional
+    public Page<MyPostsResponse> myPosts(Member member, Pageable pageable) {
+        Page<LostFoundPost> postsPage = lostFoundPostRepository.findByAuthorId(member.getId(), pageable);
+
+        return postsPage.map(post -> new MyPostsResponse(
+                post.getContent(),
+                post.getStatus(),
+                post.getFindTime(),
+                post.getLostTime(),
+                post.getCreatedAt().toString()
+        ));
+    }
+    // 마이페이지 나의 신고글 리스트 불러오기
+    @Transactional
+    public Page<MyPostsResponse> myReportPosts(Member member, Pageable pageable) {
+        Page<LostFoundPost> reportPosts = lostFoundPostRepository.findByAuthorIdAndStatusIn(
+                member.getId(),
+                List.of(PostStatus.FINDING, PostStatus.FOUND),
+                pageable
+        );
+
+        return reportPosts.map(post -> new MyPostsResponse(
+                post.getContent(),
+                post.getStatus(),
+                post.getFindTime(),
+                post.getLostTime(),
+                post.getCreatedAt().toString()
+        ));
+    }
+    // 마이페이지 나의 제보글 리스트 불러오기
+    @Transactional
+    public Page<MyPostsResponse> myWitnessPosts(Member member, Pageable pageable) {
+        Page<LostFoundPost> witnessPosts = lostFoundPostRepository.findByAuthorIdAndStatusIn(
+                member.getId(),
+                List.of(PostStatus.SHELTER, PostStatus.FOSTERING, PostStatus.SIGHTED),
+                pageable
+        );
+
+        return witnessPosts.map(post -> new MyPostsResponse(
+                post.getContent(),
+                post.getStatus(),
+                post.getFindTime(),
+                post.getLostTime(),
+                post.getCreatedAt().toString()
+        ));
     }
 }
