@@ -15,6 +15,7 @@ import com.patrol.global.webMvc.LoginUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -89,9 +90,19 @@ public class ApiV2MemberController {
         return GlobalResponse.success();
     }
 
-    // 마이페이지 > 작성글 리스트 불러오기
-    @GetMapping("/posts")
-    public GlobalResponse<Page<MyPostsResponse>> myPosts(@LoginUser Member member, Pageable pageable) {
-        return GlobalResponse.success(v2MemberService.myPosts(member, pageable));
+    // 마이페이지 나의 신고글 리스트 불러오기
+    @GetMapping("/posts/reports")
+    public GlobalResponse<Page<MyPostsResponse>> myReportPosts(
+            @LoginUser Member member,
+            @PageableDefault(size = 5) Pageable pageable) {
+        return GlobalResponse.success(v2MemberService.myReportPosts(member, pageable));
+    }
+    
+    // 마이페이지 나의 제보글 리스트 불러오기
+    @GetMapping("/posts/witnesses")
+    public GlobalResponse<Page<MyPostsResponse>> myWitnessPosts(
+            @LoginUser Member member,
+            @PageableDefault(size = 5) Pageable pageable) {
+        return GlobalResponse.success(v2MemberService.myWitnessPosts(member, pageable));
     }
 }
