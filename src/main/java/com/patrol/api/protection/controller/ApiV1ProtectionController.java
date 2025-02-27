@@ -1,12 +1,9 @@
 package com.patrol.api.protection.controller;
 
 
-import com.patrol.api.animalCase.dto.AnimalCaseDetailResponse;
+import com.patrol.api.animalCase.dto.AnimalCaseDetailDto;
 import com.patrol.api.animalCase.dto.AnimalCaseListResponse;
-import com.patrol.api.protection.dto.CreateAnimalCaseRequest;
-import com.patrol.api.protection.dto.ProtectionRequest;
-import com.patrol.api.protection.dto.ProtectionResponse;
-import com.patrol.api.protection.dto.RejectApplicationRequest;
+import com.patrol.api.protection.dto.*;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.protection.service.ProtectionService;
 import com.patrol.global.rsData.RsData;
@@ -23,13 +20,13 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/protections")
-@Tag(name = "임시 보호 관리 API", description = "임시 보호 목록에서 신청, 조회 등")
+@Tag(name = "임시보호/입양 관리 API", description = "임시보호/입양 목록에서 신청, 조회 등")
 public class ApiV1ProtectionController {
 
   private final ProtectionService protectionService;
 
   @GetMapping
-  @Operation(summary = "임시 보호 대기 중인 동물 목록")
+  @Operation(summary = "임시보호/입양 대기 중인 동물 목록")
   public RsData<Page<AnimalCaseListResponse>> getPossibleProtections(
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size
@@ -41,9 +38,11 @@ public class ApiV1ProtectionController {
 
 
   @GetMapping("/{caseId}")
-  @Operation(summary = "임시 보호 대기 중인 동물 상세 조회")
-  public RsData<AnimalCaseDetailResponse> getPossibleAnimalCase(@PathVariable Long caseId) {
-    AnimalCaseDetailResponse response = protectionService.findPossibleAnimalCase(caseId);
+  @Operation(summary = "임시보호/입양 대기 중인 동물 상세 조회")
+  public RsData<AnimalCaseDetailResponse> getPossibleAnimalCase(
+      @PathVariable Long caseId, @LoginUser Member loginUser
+  ) {
+    AnimalCaseDetailResponse response = protectionService.findPossibleAnimalCase(caseId, loginUser.getId());
     return new RsData<>("200", "임시 보호 대기 중인 동물 상세 조회 성공", response);
   }
 
@@ -60,13 +59,13 @@ public class ApiV1ProtectionController {
 
   @GetMapping("/my-cases")
   @Operation(summary = "내가 등록한 임시보호/입양 동물 목록")
-  public RsData<Page<AnimalCaseListResponse>> getMyAnimalCases(
+  public RsData<Page<MyAnimalCaseResponse>> getMyAnimalCases(
       @LoginUser Member loginUser,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size
   ) {
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-    Page<AnimalCaseListResponse> response = protectionService.findMyAnimalCases(loginUser, pageable);
+    Page<MyAnimalCaseResponse> response = protectionService.findMyAnimalCases(loginUser, pageable);
     return new RsData<>("200", "내가 등록한 임시 보호 동물 목록 조회 성공", response);
   }
 
@@ -90,7 +89,7 @@ public class ApiV1ProtectionController {
       @PathVariable Long caseId, @RequestBody ProtectionRequest request, @LoginUser Member loginUser
   ) {
     ProtectionResponse
-        response = protectionService.applyProtection(caseId, loginUser.getId(), request.reason());
+        response = protectionService.applyProtection(caseId, loginUser.getId(), request.reason(), request.protectionType());
     return new RsData<>("200", "임시 보호 신청하기 성공", response);
   }
 

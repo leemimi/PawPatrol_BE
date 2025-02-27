@@ -55,6 +55,8 @@ public interface AnimalCaseRepository extends JpaRepository<AnimalCase, Long> {
   );
 
   @Query(value = "SELECT ac FROM AnimalCase ac " +
+      "LEFT JOIN FETCH ac.animal " +
+      "LEFT JOIN FETCH ac.currentFoster " +
       "WHERE ac.currentFoster = :currentFoster",
       countQuery = "SELECT COUNT(ac) FROM AnimalCase ac WHERE ac.currentFoster = :currentFoster")
   Page<AnimalCase> findAllByCurrentFoster(

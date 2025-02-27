@@ -42,18 +42,18 @@ public class AnimalCaseEventPublisher {
   }
 
 
-  public void acceptProtection(Long protectionId, Long memberId) {
+  public void acceptProtection(Long protectionId, Long memberId, CaseStatus toStatus) {
     eventPublisher.publishEvent(new ProtectionStatusChangeEvent(
         protectionId, memberId,
-        CaseStatus.TEMP_PROTECTING, CaseHistoryStatus.TEMP_PROTECT_APPROVED
+        toStatus, CaseHistoryStatus.TEMP_PROTECT_APPROVED
     ));
   }
 
 
-  public void rejectProtection(Long protectionId, Long memberId) {
+  public void rejectProtection(Long protectionId, Long memberId, CaseStatus toStatus) {
     eventPublisher.publishEvent(new ProtectionStatusChangeEvent(
         protectionId, memberId,
-        CaseStatus.PROTECT_WAITING, CaseHistoryStatus.TEMP_PROTECT_REJECTED
+        toStatus, CaseHistoryStatus.TEMP_PROTECT_REJECTED
     ));
   }
 

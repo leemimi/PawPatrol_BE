@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -28,4 +29,15 @@ public interface ProtectionRepository extends JpaRepository<Protection, Long> {
 
   boolean existsByApplicantIdAndAnimalCaseIdAndProtectionStatusAndDeletedAtIsNull(
       Long applicantId, Long animalCaseId, ProtectionStatus status);
+
+  int countByAnimalCaseIdAndProtectionStatusAndDeletedAtIsNull(Long id, ProtectionStatus protectionStatus);
+
+  @Query("SELECT p FROM Protection p " +
+      "JOIN FETCH p.applicant " +
+      "WHERE p.animalCase.id = :animalCaseId " +
+      "AND p.protectionStatus = :status " +
+      "AND p.deletedAt IS NULL")
+  List<Protection> findAllByAnimalCaseIdAndProtectionStatusAndDeletedAtIsNull(
+      @Param("animalCaseId") Long animalCaseId,
+      @Param("status") ProtectionStatus status);
 }

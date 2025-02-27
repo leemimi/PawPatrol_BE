@@ -1,10 +1,9 @@
 package com.patrol.domain.protection.service;
 
 
-import com.patrol.api.animalCase.dto.AnimalCaseDetailResponse;
+import com.patrol.api.animalCase.dto.AnimalCaseDetailDto;
 import com.patrol.api.animalCase.dto.AnimalCaseListResponse;
-import com.patrol.api.protection.dto.CreateAnimalCaseRequest;
-import com.patrol.api.protection.dto.ProtectionResponse;
+import com.patrol.api.protection.dto.*;
 import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.animal.repository.AnimalRepository;
 import com.patrol.domain.animalCase.entity.AnimalCase;
@@ -41,23 +40,32 @@ public class ProtectionService {
   private final AnimalRepository animalRepository;
 
 
-  public AnimalCaseDetailResponse findPossibleAnimalCase(Long caseId) {
+  public AnimalCaseDetailResponse findPossibleAnimalCase(Long caseId, Long memberId) {
     Collection<CaseStatus> possibleStatuses = List.of(
         CaseStatus.PROTECT_WAITING,
-        CaseStatus.TEMP_PROTECTING,
-        CaseStatus.SHELTER_PROTECTING
+        CaseStatus.TEMP_PROTECTING
     );
     AnimalCase animalCase = animalCaseService.findByIdAndStatusesWithHistories(caseId, possibleStatuses)
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
-    return AnimalCaseDetailResponse.of(animalCase);
+    boolean isOwner = animalCase.getCurrentFoster() != null &&
+        animalCase.getCurrentFoster().getId().equals(memberId);
+
+    if (isOwner) {
+      return AnimalCaseDetailResponse.create(
+          AnimalCaseDetailDto.of(animalCase), isOwner, getPendingProtections(animalCase.getId())
+      );
+    } else {
+      return AnimalCaseDetailResponse.create(
+          AnimalCaseDetailDto.of(animalCase), isOwner, null
+      );
+    }
   }
 
   public Page<AnimalCaseListResponse> findPossibleAnimalCases(Pageable pageable) {
     return animalCaseService.findAllByStatuses(
         List.of(
             CaseStatus.PROTECT_WAITING,
-            CaseStatus.TEMP_PROTECTING,
-            CaseStatus.SHELTER_PROTECTING
+            CaseStatus.TEMP_PROTECTING
         ),
         pageable
     );
@@ -72,13 +80,24 @@ public class ProtectionService {
     return protectionRepository.findByIdWithFetchAll(protectionId);
   }
 
-  public Page<AnimalCaseListResponse> findMyAnimalCases(Member currentFoster, Pageable pageable) {
-    return animalCaseService.findAllByCurrentFoster(currentFoster, pageable);
+
+  public Page<MyAnimalCaseResponse> findMyAnimalCases(Member currentFoster, Pageable pageable) {
+    Page<AnimalCase> cases = animalCaseService.findAllByCurrentFoster(currentFoster, pageable);
+
+    return cases.map(animalCase -> {
+      List<PendingProtectionResponse> pendingProtections = getPendingProtections(animalCase.getId());
+
+      int pendingCount = protectionRepository.countByAnimalCaseIdAndProtectionStatusAndDeletedAtIsNull(
+          animalCase.getId(), ProtectionStatus.PENDING);
+      return MyAnimalCaseResponse.of(animalCase, pendingCount, pendingProtections);
+    });
   }
 
 
   @Transactional
-  public ProtectionResponse applyProtection(Long caseId, Long memberId, String reason) {
+  public ProtectionResponse applyProtection(
+      Long caseId, Long memberId, String reason, ProtectionType protectionType
+  ) {
     Member applicant = memberService.findById(memberId)
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
 
@@ -106,7 +125,7 @@ public class ProtectionService {
         .applicant(applicant)
         .animalCase(animalCase)
         .reason(reason)
-        .protectionType(ProtectionType.TEMP_PROTECTION)
+        .protectionType(protectionType)
         .protectionStatus(ProtectionStatus.PENDING)
         .build();
 
@@ -140,7 +159,7 @@ public class ProtectionService {
 
   @Transactional
   public void acceptProtection(Long protectionId, Long memberId) {
-    Protection protection = protectionRepository.findById(protectionId)
+    Protection protection = protectionRepository.findByIdWithFetchAll(protectionId)
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
 
     if (protection.getProtectionStatus() != ProtectionStatus.PENDING) {
@@ -152,14 +171,21 @@ public class ProtectionService {
     }
 
     protection.approve();
-    protection.getAnimalCase().updateStatus(CaseStatus.TEMP_PROTECTING);
-    animalCaseEventPublisher.acceptProtection(protection.getId(), memberId);
+    AnimalCase animalCase = protection.getAnimalCase();
+    animalCase.updateStatus(CaseStatus.TEMP_PROTECTING);
+    if (protection.getProtectionType().equals(ProtectionType.ADOPTION)) {
+      animalCase.updateStatus(CaseStatus.ADOPTED);
+    }
+
+    animalCase.getAnimal().setOwner(protection.getApplicant());
+    animalCase.setCurrentFoster(protection.getApplicant());
+    animalCaseEventPublisher.acceptProtection(protection.getId(), memberId, animalCase.getStatus());
   }
 
 
   @Transactional
   public void rejectProtection(Long protectionId, Long memberId, String rejectReason) {
-    Protection protection = protectionRepository.findById(protectionId)
+    Protection protection = protectionRepository.findByIdWithFetchAll(protectionId)
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
 
     if (protection.getProtectionStatus() != ProtectionStatus.PENDING) {  // 상태 검증
@@ -175,8 +201,7 @@ public class ProtectionService {
     }
 
     protection.reject(rejectReason);
-    animalCaseEventPublisher.rejectProtection(protection.getId(), memberId);
-    protection.cancel();
+    animalCaseEventPublisher.rejectProtection(protection.getId(), memberId, protection.getAnimalCase().getStatus());
   }
 
 
@@ -185,5 +210,14 @@ public class ProtectionService {
     Animal animal = request.toAnimal();
     animalRepository.save(animal);
     animalCaseEventPublisher.createAnimalCase(member, animal, request.title(), request.description());
+  }
+
+
+  private List<PendingProtectionResponse> getPendingProtections(Long animalCaseId) {
+    return protectionRepository
+        .findAllByAnimalCaseIdAndProtectionStatusAndDeletedAtIsNull(animalCaseId, ProtectionStatus.PENDING)
+        .stream()
+        .map(PendingProtectionResponse::of)
+        .toList();
   }
 }

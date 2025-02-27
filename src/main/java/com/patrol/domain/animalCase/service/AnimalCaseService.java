@@ -1,7 +1,7 @@
 package com.patrol.domain.animalCase.service;
 
 
-import com.patrol.api.animalCase.dto.AnimalCaseDetailResponse;
+import com.patrol.api.animalCase.dto.AnimalCaseDetailDto;
 import com.patrol.api.animalCase.dto.AnimalCaseListResponse;
 import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.animalCase.entity.AnimalCase;
@@ -48,10 +48,10 @@ public class AnimalCaseService {
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
   }
 
-  public AnimalCaseDetailResponse findByIdWithHistories(Long caseId) {
+  public AnimalCaseDetailDto findByIdWithHistories(Long caseId) {
     AnimalCase animalCase = animalCaseRepository.findByIdWithHistories(caseId)
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
-    return AnimalCaseDetailResponse.of(animalCase);
+    return AnimalCaseDetailDto.of(animalCase);
   }
 
   public Optional<AnimalCase> findByIdAndStatusesWithHistories(Long caseId, Collection<CaseStatus> statuses) {
@@ -68,8 +68,7 @@ public class AnimalCaseService {
         .map(AnimalCaseListResponse::of);
   }
 
-  public Page<AnimalCaseListResponse> findAllByCurrentFoster(Member currentFoster, Pageable pageable) {
-    return animalCaseRepository.findAllByCurrentFoster(currentFoster, pageable)
-        .map(AnimalCaseListResponse::of);
+  public Page<AnimalCase> findAllByCurrentFoster(Member currentFoster, Pageable pageable) {
+    return animalCaseRepository.findAllByCurrentFoster(currentFoster, pageable);
   }
 }
