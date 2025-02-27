@@ -151,9 +151,14 @@ public class V2MemberService {
         return v2MemberRepository.findByEmail(email).isPresent();
     }
 
-    // 마이페이지 > 작성글 리스트 불러오기
+    // 마이페이지 나의 신고글 리스트 불러오기
     @Transactional
-    public Page<MyPostsResponse> myPosts(Member member, Pageable pageable) {
-        return lostFoundPostService.myPosts(member, pageable);
+    public Page<MyPostsResponse> myReportPosts(Member member, Pageable pageable) {
+        return lostFoundPostService.myReportPosts(member, pageable);
+    }
+    // 마이페이지 나의 제보글 리스트 불러오기
+    @Transactional
+    public Page<MyPostsResponse> myWitnessPosts(Member member, Pageable pageable) {
+        return lostFoundPostService.myWitnessPosts(member, pageable);
     }
 }

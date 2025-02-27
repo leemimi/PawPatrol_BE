@@ -274,4 +274,38 @@ public class LostFoundPostService {
                 post.getCreatedAt().toString()
         ));
     }
+    // 마이페이지 나의 신고글 리스트 불러오기
+    @Transactional
+    public Page<MyPostsResponse> myReportPosts(Member member, Pageable pageable) {
+        Page<LostFoundPost> reportPosts = lostFoundPostRepository.findByAuthorIdAndStatusIn(
+                member.getId(),
+                List.of(PostStatus.FINDING, PostStatus.FOUND),
+                pageable
+        );
+
+        return reportPosts.map(post -> new MyPostsResponse(
+                post.getContent(),
+                post.getStatus(),
+                post.getFindTime(),
+                post.getLostTime(),
+                post.getCreatedAt().toString()
+        ));
+    }
+    // 마이페이지 나의 제보글 리스트 불러오기
+    @Transactional
+    public Page<MyPostsResponse> myWitnessPosts(Member member, Pageable pageable) {
+        Page<LostFoundPost> witnessPosts = lostFoundPostRepository.findByAuthorIdAndStatusIn(
+                member.getId(),
+                List.of(PostStatus.SHELTER, PostStatus.FOSTERING, PostStatus.SIGHTED),
+                pageable
+        );
+
+        return witnessPosts.map(post -> new MyPostsResponse(
+                post.getContent(),
+                post.getStatus(),
+                post.getFindTime(),
+                post.getLostTime(),
+                post.getCreatedAt().toString()
+        ));
+    }
 }
