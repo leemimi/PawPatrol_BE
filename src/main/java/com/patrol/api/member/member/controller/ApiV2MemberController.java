@@ -127,12 +127,6 @@ public class ApiV2MemberController {
             @PathVariable String provider
             ) {
         ProviderType type = ProviderType.of(provider);
-        System.out.println("================" + provider);
-        System.out.println("================" + member.getOAuthProvider());
-        System.out.println("================" + member.hasOAuthProvider(type));
-//                ================kakao
-//                ================com.patrol.domain.member.auth.entity.OAuthProvider@77
-//                ================true
         oAuthService.disconnectProvider(member, type);
         return GlobalResponse.success();
     }
