@@ -136,7 +136,7 @@ public class ApiV1ProtectionController {
   }
 
 
-  @DeleteMapping("/{protectionId}")
+  @PatchMapping("/{protectionId}/cancel")
   @Operation(summary = "임시보호/입양 신청 취소")
   public RsData<Void> cancelProtection(
       @PathVariable Long protectionId, @LoginUser Member loginUser
