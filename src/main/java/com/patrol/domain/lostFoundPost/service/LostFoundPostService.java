@@ -49,27 +49,27 @@ public class LostFoundPostService {
     @Transactional
     public LostFoundPostResponseDto createLostFoundPost(LostFoundPostRequestDto requestDto, Long petId, Member author, List<MultipartFile> images) {
 
-        // Animal 조회 (petId가 null이면 pet을 null로 설정)
+        // Animal 조회 (petId가 null이면 null을 할당, 아니면 실제 Animal 객체 가져오기)
         Animal pet = null;
         if (requestDto.getPetId() != null) {
-            // petId가 null이 아니면 실제 Animal 객체를 가져옵니다.
-            pet = animalRepository.findById(requestDto.getPetId()).orElseThrow(() -> new IllegalArgumentException("Pet not found"));
+            pet = animalRepository.findById(requestDto.getPetId())
+                    .orElseThrow(() -> new IllegalArgumentException("Pet not found"));
         }
-        // petId가 null일 경우 pet은 null로 유지됩니다. 이후 로직에서 이를 무시하고 진행합니다.
 
-        // AnimalType 처리
         AnimalType animalType = requestDto.getAnimalType() != null
                 ? AnimalType.valueOf(requestDto.getAnimalType())
                 : null;
 
-        // LostFoundPost 객체 생성
+// LostFoundPost 객체 생성 (pet이 null일 수 있음)
         LostFoundPost lostFoundPost = new LostFoundPost(requestDto, author, pet, animalType);
+
         System.out.println("Received petId: " + requestDto.getPetId());
-        System.out.println("📌 LostFoundPost created with pet: " + lostFoundPost.getPet());
+        System.out.println("📌 LostFoundPost created with pet: " + (lostFoundPost.getPet() != null ? lostFoundPost.getPet() : "null"));
 
         // LostFoundPost 저장
         lostFoundPostRepository.save(lostFoundPost);
         System.out.println("💾 LostFoundPost saved with pet: " + lostFoundPost.getPet());
+
 
         // 이미지 처리
         if (images != null && !images.isEmpty()) {

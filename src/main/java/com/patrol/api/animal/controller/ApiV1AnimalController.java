@@ -3,11 +3,13 @@ package com.patrol.api.animal.controller;
 import com.patrol.api.animal.dto.PetResponseDto;
 import com.patrol.api.member.member.dto.request.PetRegisterRequest;
 import com.patrol.domain.animal.service.AnimalService;
+import com.patrol.domain.lostFoundPost.repository.LostFoundPostRepository;
 import com.patrol.global.globalDto.GlobalResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * packageName    : com.patrol.api.animal.controller
@@ -25,6 +27,7 @@ import java.util.List;
 @RequestMapping("/api/v1/animals")
 public class ApiV1AnimalController {
     private final AnimalService animalService;
+    private final LostFoundPostRepository lostFoundPostRepository;
 
     // 반려동물 등록 (주인 없는 경우)
     @PostMapping("/register")
@@ -36,7 +39,18 @@ public class ApiV1AnimalController {
     }
     @GetMapping("/list")
     public GlobalResponse<List<PetResponseDto>> getAllAnimals() {
-        List<PetResponseDto> animals = animalService.getAllAnimals();  // Fetch all animals without pagination
-        return GlobalResponse.success(animals);
+        // 동물 목록을 모두 가져옵니다.
+        List<PetResponseDto> animals = animalService.getAllAnimals();
+
+        // 이미 LostFoundPost에 등록된 petId들을 조회합니다.
+        List<Long> registeredPetIds = lostFoundPostRepository.findAllRegisteredPetIds();
+
+        // 등록된 petId를 제외한 동물만 필터링합니다.
+        List<PetResponseDto> filteredAnimals = animals.stream()
+                .filter(animal -> !registeredPetIds.contains(animal.id()))  // 등록된 petId는 제외
+                .collect(Collectors.toList());
+
+        // 필터링된 동물 목록을 반환합니다.
+        return GlobalResponse.success(filteredAnimals);
     }
 }
