@@ -6,7 +6,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -35,6 +37,18 @@ public class FileStorageHandler {
 //                }
 //                return null;
 //            }
+            // 파일 확장자 검증
+            String contentType = request.getFile().getContentType();
+            List<String> allowedTypes = Arrays.asList("image/jpeg", "image/png", "image/gif", "image/jpg");
+            if (!allowedTypes.contains(contentType)) {
+                throw new CustomException(ErrorCode.INVALID_FILE_TYPE);
+            }
+
+            // 파일 크기 검증 (5MB 제한)
+            long maxSize = 5 * 1024 * 1024; // 5MB
+            if (request.getFile().getSize() > maxSize) {
+                throw new CustomException(ErrorCode.FILE_SIZE_EXCEEDED);
+            }
 
             // 새 파일 업로드
             String filename = UUID.randomUUID().toString();
