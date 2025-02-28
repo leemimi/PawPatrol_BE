@@ -8,8 +8,11 @@ import com.patrol.api.member.auth.dto.MyPostsResponse;
 import com.patrol.api.member.auth.dto.requestV2.ModifyProfileRequest;
 import com.patrol.api.member.member.dto.OAuthConnectInfoResponse;
 import com.patrol.api.member.member.dto.request.PetRegisterRequest;
+import com.patrol.api.member.member.dto.request.SocialDisconnectRequest;
 import com.patrol.domain.animal.service.AnimalService;
+import com.patrol.domain.member.auth.service.OAuthService;
 import com.patrol.domain.member.member.entity.Member;
+import com.patrol.domain.member.member.enums.ProviderType;
 import com.patrol.domain.member.member.service.V2MemberService;
 import com.patrol.global.globalDto.GlobalResponse;
 import com.patrol.global.webMvc.LoginUser;
@@ -38,6 +41,7 @@ import java.util.List;
 public class ApiV2MemberController {
     private final V2MemberService v2MemberService;
     private final AnimalService animalService;
+    private final OAuthService oAuthService;
 
 
     // 마이페이지 > 회원정보 수정
@@ -112,8 +116,25 @@ public class ApiV2MemberController {
     }
     
     // 소셜 로그인 연결 상태 불러오기
-    @GetMapping("/socialInfo")
+    @GetMapping("/social")
     public GlobalResponse<OAuthConnectInfoResponse> socialInfo(@LoginUser Member member) {
         return GlobalResponse.success(v2MemberService.socialInfo(member));
+    }
+
+    // 소셜 로그인 연결 해제
+    @DeleteMapping("/social/{provider}")
+    public GlobalResponse<Void> socialDisconnect(
+            @LoginUser Member member,
+            @PathVariable String provider
+            ) {
+        ProviderType type = ProviderType.of(provider);
+        System.out.println("================" + provider);
+        System.out.println("================" + member.getOAuthProvider());
+        System.out.println("================" + member.hasOAuthProvider(type));
+//                ================kakao
+//                ================com.patrol.domain.member.auth.entity.OAuthProvider@77
+//                ================true
+        oAuthService.disconnectProvider(member, type);
+        return GlobalResponse.success();
     }
 }
