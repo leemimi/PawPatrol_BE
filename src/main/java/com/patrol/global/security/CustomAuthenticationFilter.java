@@ -3,6 +3,7 @@ package com.patrol.global.security;
 
 
 import com.patrol.domain.member.auth.service.AuthService;
+import com.patrol.domain.member.auth.service.V2AuthService;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.global.rq.Rq;
 import jakarta.servlet.FilterChain;
@@ -10,6 +11,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -21,7 +24,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CustomAuthenticationFilter extends OncePerRequestFilter {
   private final AuthService authService;
+  private final V2AuthService v2AuthService;
   private final Rq rq;
+  private final Logger logger = LoggerFactory.getLogger(CustomAuthenticationFilter.class.getName());
   record AuthTokens(String apiKey, String accessToken) {
   }
 
@@ -40,7 +45,9 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
     // 쿠키로 토큰 정보 받았을 경우
     String apiKey = rq.getCookieValue("apiKey");
+    logger.info("_getAuthTokensFromRequest: " + apiKey);
     String accessToken = rq.getCookieValue("accessToken");
+    logger.info("_getAuthTokensFromRequest: " + accessToken);
     if (apiKey != null && accessToken != null) {
       return new AuthTokens(apiKey, accessToken);
     }
@@ -50,6 +57,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
   // 쿠키 시간 만료 되었을 때 재발급
   private void _refreshAccessToken(Member member) {
+    logger.info("access 쿠키 재발급 _refreshAccessTokenByApiKey");
     String newAccessToken = authService.genAccessToken(member);
     // 클라이언트에서 Header에 담에 서버로 보냄, 서버에서는 getHeader만 필요 setHeaderX
 //    rq.setHeader("Authorization", "Bearer " + member.getApiKey() + " " + newAccessToken);
@@ -58,8 +66,10 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
 
   private Member _refreshAccessTokenByApiKey(String apiKey) {
-    Optional<Member> opMemberByApiKey = authService.findByApiKey(apiKey);
+    logger.info("access 토큰 재발급 _refreshAccessTokenByApiKey");
+    Optional<Member> opMemberByApiKey = v2AuthService.findByApiKey(apiKey);
     if (opMemberByApiKey.isEmpty()) {
+      logger.info("access 토큰 재발급 opMemberByApiKey.isEmpty()");
       return null;
     }
     Member member = opMemberByApiKey.get();
@@ -105,6 +115,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
     Member member = authService.getMemberFromAccessToken(accessToken);
     if (member == null) // 토큰이 만료되었을 때, 당연히 멤버 정보 못가져옴
+      logger.info("토큰 만료됨, doFilterInternal");
       member = _refreshAccessTokenByApiKey(apiKey);
     if (member != null) // 토큰이 만료되지 않았을 때
       rq.setLogin(member);

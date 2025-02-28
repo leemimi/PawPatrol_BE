@@ -29,6 +29,8 @@ public enum ErrorCode {
     NOT_ASSIGNED_PROTECTION(HttpStatus.BAD_REQUEST, "지정된 보호자가 없습니다."),
     UNAUTHORIZED_ACCESS(HttpStatus.FORBIDDEN, "해당 리소스에 대한 접근 권한이 없습니다."),
 
+
+    // BAD_REQUEST : 요청이 잘못되었어요, FORBIDDEN : 요청은 이해했는데 당신한테 권한이 없어요
     // Protection
     ALREADY_FOSTER(HttpStatus.BAD_REQUEST, "이미 보호자입니다."),
     ALREADY_APPLIED(HttpStatus.BAD_REQUEST, "이미 신청하였습니다."),
@@ -36,7 +38,18 @@ public enum ErrorCode {
 
     // Member
     MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST,"사용자를 찾을 수 없습니다."),
-    DUPLICATE_EMAIL(HttpStatus.BAD_REQUEST, "이미 사용중인 이메일 입니다.");
+    DUPLICATE_EMAIL(HttpStatus.FORBIDDEN, "이미 사용중인 이메일 입니다."),
+
+    // File
+    INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "유효하지 않은 파일 형식입니다."),
+    FILE_SIZE_EXCEEDED(HttpStatus.BAD_REQUEST, "파일 크기는 5MB를 넘을 수 없습니다."),
+
+    // Auth
+    EMAIL_NOT_FOUND(HttpStatus.FORBIDDEN, "등록되지 않은 이메일 입니다."),
+    VERIFICATION_NOT_FOUND(HttpStatus.FORBIDDEN, "유효하지 않은 접근입니다."),
+
+    // Animal
+    PET_OWNER_MISMATCH(HttpStatus.FORBIDDEN, "해당 반려동물의 소유자가 아닙니다. 본인이 등록한 반려동물만 수정할 수 있습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

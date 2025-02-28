@@ -9,6 +9,8 @@ import com.patrol.global.security.SecurityUser;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,7 +28,7 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class Rq {
-
+  private final Logger logger = LoggerFactory.getLogger(Rq.class.getName());
   private final HttpServletRequest req;
   private final HttpServletResponse resp;
   private final V2AuthService authService;
@@ -38,6 +40,7 @@ public class Rq {
   // JWT 필터(doFilterInternal) 에서 사용,
   // 토큰 검증이 성공했을 때 해당 사용자를 로그인 상태로 만드는 역할
   public void setLogin(Member member) {
+    logger.info("Rq - setLogin");
     UserDetails user = new SecurityUser(
         member.getId(),
         member.getEmail(),
@@ -59,6 +62,7 @@ public class Rq {
   // SecurityContext에서 인증된 사용자 정보를 가져옴
   // 지금은 소셜 로그인 시 유저 정보를 쿠키에 담기 위해서만 사용중임
   public Member getActor() {
+    logger.info("Rq - getActor");
     return Optional.ofNullable(
             SecurityContextHolder
                 .getContext()
@@ -88,6 +92,7 @@ public class Rq {
 
   // accessToken 쿠키 재발급
   public void setCookie(String name, String value) {
+    logger.info("Rq - setCookie");
     ResponseCookie cookie = ResponseCookie.from(name, value)
         .path("/")
         .domain(domain)
@@ -100,6 +105,7 @@ public class Rq {
 
   // 키에서 지정된 이름(name)의 값을 조회, accessToken || apiKey
   public String getCookieValue(String name) {
+    logger.info("Rq - getCookieValue: " + name);
     return Optional
         .ofNullable(req.getCookies())
         .stream() // 1 ~ 0
@@ -112,6 +118,7 @@ public class Rq {
 
 
   public void deleteCookie(String name) {
+    logger.info("Rq - deleteCookie");
     ResponseCookie cookie = ResponseCookie.from(name, null)
         .path("/")
         .domain(domain)
@@ -132,12 +139,14 @@ public class Rq {
 
   // 클라이언트에서 보낸 헤더 정보 받는 메서드
   public String getHeader(String name) {
+    logger.info("Rq - getHeader");
     return req.getHeader(name);
   }
 
 
   // 사용자 인증 정보(apiKey, accessToken)를 쿠키에 저장하고 accessToken 반환
   public String makeAuthCookies(Member member) {
+    logger.info("Rq - makeAuthCookies");
     String accessToken = authService.genAccessToken(member);
     setCookie("apiKey", member.getApiKey());
     setCookie("accessToken", accessToken);
