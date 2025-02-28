@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum ProtectionStatus {
 
   PENDING("승인 대기"),
+  CANCELED("취소됨"),
   APPROVED("임시 보호 승인"),
   REJECTED("임시 보호 거절됨");
 

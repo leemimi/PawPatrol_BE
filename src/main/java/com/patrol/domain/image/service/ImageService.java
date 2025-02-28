@@ -5,29 +5,47 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.patrol.api.ai.AiClient;
 import com.patrol.domain.image.entity.Image;
 import com.patrol.domain.image.repository.ImageRepository;
+import com.patrol.global.error.ErrorCode;
+import com.patrol.global.exception.CustomException;
+import com.patrol.global.storage.FileStorageHandler;
+import com.patrol.global.storage.FileUploadRequest;
+import com.patrol.global.storage.FileUploadResult;
+import com.patrol.global.storage.NcpObjectStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ImageService {
 
     private final ImageRepository imageRepository;
     private final AiClient aiClient;
     private final ImageEventProducer imageEventProducer;
+  private final FileStorageHandler fileStorageHandler;
+  private final ImageRepository imageRepository;
+  private final NcpObjectStorageService ncpObjectStorageService;
+
+  @Value("${ncp.storage.endpoint}")
+  private String endPoint;
 
     public void sendImageEvent(Long imageId, String imagePath) {
         log.info("이미지 이벤트 전송: ID={}, Path={}", imageId, imagePath);
         imageEventProducer.sendImageEvent(imageId, imagePath);
     }
+  public List<Image> uploadAnimalImages(List<MultipartFile> images, Long animalId) {
+    return uploadImages(images, "protection/", animalId, null);
+  }
 
     @Transactional
     public Image saveImage(Image image) {
@@ -35,6 +53,13 @@ public class ImageService {
         log.info("이미지 저장 완료: ID={}, Path={}", savedImage.getId(), savedImage.getPath());
         return savedImage;
     }
+  public List<Image> uploadLostFoundImages(List<MultipartFile> images, Long foundId) {
+    return uploadImages(images, "lostfoundpost/", null, foundId);
+  }
+
+  private List<Image> uploadImages(List<MultipartFile> images, String folderPath, Long animalId, Long foundId) {
+    List<String> uploadedPaths = new ArrayList<>();
+    List<Image> uploadedImages = new ArrayList<>();
 
     @Transactional
     public void processExistingImagesWithTransaction() {
@@ -43,7 +68,38 @@ public class ImageService {
         } catch (Exception e) {
             log.error("processExistingImages() 실행 중 오류 발생: {}", e.getMessage(), e);
         }
+    try {
+      for (MultipartFile image : images) {
+        FileUploadResult uploadResult = fileStorageHandler.handleFileUpload(
+            FileUploadRequest.builder()
+                .folderPath(folderPath)
+                .file(image)
+                .build()
+        );
+
+        if (uploadResult != null) {
+          String fileName = uploadResult.getFileName();
+          uploadedPaths.add(fileName);
+
+          Image imageEntity = Image.builder()
+              .path(endPoint + "/paw-patrol/" + folderPath + fileName)
+              .animalId(animalId)
+              .foundId(foundId)
+              .build();
+
+          imageRepository.save(imageEntity);
+          uploadedImages.add(imageEntity);
+        }
+      }
+      return uploadedImages;
+    } catch (Exception e) {
+      for (String path : uploadedPaths) {
+        ncpObjectStorageService.delete(path);
+      }
+      throw new CustomException(ErrorCode.DATABASE_ERROR);
     }
+  }
+
 
     @Transactional
     public void processExistingFoundImagesWithTransaction() {
@@ -53,6 +109,13 @@ public class ImageService {
             log.error("processExistingFoundImages() 실행 중 오류 발생: {}", e.getMessage(), e);
         }
     }
+  @Transactional
+  public void deleteImages(List<Image> images) {
+    images.forEach(image -> {
+      ncpObjectStorageService.delete(image.getPath());
+      imageRepository.delete(image);
+    });
+  }
 
     public void processExistingImages() throws IOException {
         List<Image> imagesWithoutEmbedding = imageRepository.findByEmbeddingIsNull();
@@ -70,6 +133,14 @@ public class ImageService {
 
                 log.info("추출된 임베딩: {}", embedding);
                 log.info("추출된 피처: {}", features);
+  public String uploadImageAndGetUrl(MultipartFile image, String folderPath) {
+    try {
+      FileUploadResult uploadResult = fileStorageHandler.handleFileUpload(
+          FileUploadRequest.builder()
+              .folderPath(folderPath)
+              .file(image)
+              .build()
+      );
 
                 if (embedding == null || embedding.isEmpty()) {
                     log.error("임베딩 추출 실패: 이미지 ID {}, URL {}", image.getId(), imageUrl);
@@ -126,4 +197,12 @@ public class ImageService {
         }
         return embeddings;
     }
+      if (uploadResult != null) {
+        return endPoint + "/paw-patrol/" + folderPath + uploadResult.getFileName();
+      }
+      return null;
+    } catch (Exception e) {
+      throw new CustomException(ErrorCode.DATABASE_ERROR);
+    }
+  }
 }

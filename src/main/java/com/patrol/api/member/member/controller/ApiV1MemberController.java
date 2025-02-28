@@ -110,27 +110,27 @@ public class ApiV1MemberController {
 
 
     // MEM01_MODIFY04 : 회원정보 수정  (성별, 전화번호, 주소, 마케팅 수신여부 ...)
-    @PutMapping("/me/profile")
-    public RsData<MemberDto> updateMember(
-        @LoginUser Member loginUser,
-        @Valid @RequestBody MemberUpdateRequest memberUpdateRequest
-    ) {
-        String phoneNumber = memberUpdateRequest.getPhoneNumber();
-        if (phoneNumber != null && !phoneNumber.trim().isEmpty()) {
-            String normalizedPhoneNumber = phoneNumber.replaceAll("-", "");
-            String verified = redisTemplate.opsForValue().get(PHONE_VERIFICATION_STATUS_PREFIX + normalizedPhoneNumber);
-            if (verified == null) {
-                throw new ServiceException(ErrorCodes.PHONE_NUMBER_NOT_VERIFIED);
-            }
-        }
-
-        Member modifiedMember = memberService.updateInfo(loginUser, memberUpdateRequest);
-        return new RsData<>(
-            "200",
-            "회원 정보 업데이트가 성공하였습니다.",
-            new MemberDto(modifiedMember)
-        );
-    }
+//    @PutMapping("/me/profile")
+//    public RsData<MemberDto> updateMember(
+//        @LoginUser Member loginUser,
+//        @Valid @RequestBody MemberUpdateRequest memberUpdateRequest
+//    ) {
+//        String phoneNumber = memberUpdateRequest.getPhoneNumber();
+//        if (phoneNumber != null && !phoneNumber.trim().isEmpty()) {
+//            String normalizedPhoneNumber = phoneNumber.replaceAll("-", "");
+//            String verified = redisTemplate.opsForValue().get(PHONE_VERIFICATION_STATUS_PREFIX + normalizedPhoneNumber);
+//            if (verified == null) {
+//                throw new ServiceException(ErrorCodes.PHONE_NUMBER_NOT_VERIFIED);
+//            }
+//        }
+//
+//        Member modifiedMember = memberService.updateInfo(loginUser, memberUpdateRequest);
+//        return new RsData<>(
+//            "200",
+//            "회원 정보 업데이트가 성공하였습니다.",
+//            new MemberDto(modifiedMember)
+//        );
+//    }
 
 
     // MEM01_MODIFY05 : 전화번호 인증코드 발송 (SMS 인증)
@@ -195,22 +195,22 @@ public class ApiV1MemberController {
 
 
     // MEM03_SOCIAL03 : 소셜 계정 연동 해제
-    @DeleteMapping("/me/social/{provider}")
-    public RsData<Void> disconnectSocialAccount(
-        @PathVariable String provider, @LoginUser Member loginUser
-    ) {
-        ProviderType type = ProviderType.of(provider);
-        if (!loginUser.hasOAuthProvider(type)) {   // 연동되지 않은 소셜 계정인 경우
-            throw new ServiceException(ErrorCodes.NOT_CONNECTED_SOCIAL_ACCOUNT);
-        }
-
-        if (loginUser.getPassword() == null && loginUser.getConnectedOAuthCount() == 1) {  // 마지막 로그인 수단인 경우
-            throw new ServiceException(ErrorCodes.CANNOT_DISCONNECT_LAST_LOGIN_METHOD);
-        }
-
-        oAuthService.disconnectProvider(loginUser, type);
-        return new RsData<>("200", "%s 소셜 계정 연동을 해제하였습니다.".formatted(type.name()));
-    }
+//    @DeleteMapping("/me/social/{provider}")
+//    public RsData<Void> disconnectSocialAccount(
+//        @PathVariable String provider, @LoginUser Member loginUser
+//    ) {
+//        ProviderType type = ProviderType.of(provider);
+//        if (!loginUser.hasOAuthProvider(type)) {   // 연동되지 않은 소셜 계정인 경우
+//            throw new ServiceException(ErrorCodes.NOT_CONNECTED_SOCIAL_ACCOUNT);
+//        }
+//
+//        if (loginUser.getPassword() == null && loginUser.getConnectedOAuthCount() == 1) {  // 마지막 로그인 수단인 경우
+//            throw new ServiceException(ErrorCodes.CANNOT_DISCONNECT_LAST_LOGIN_METHOD);
+//        }
+//
+//        oAuthService.disconnectProvider(loginUser, type);
+//        return new RsData<>("200", "%s 소셜 계정 연동을 해제하였습니다.".formatted(type.name()));
+//    }
 
 
 

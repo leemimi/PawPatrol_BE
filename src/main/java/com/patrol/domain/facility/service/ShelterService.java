@@ -55,6 +55,18 @@ public class ShelterService implements FacilityService {
         .collect(Collectors.toList());
   }
 
+  @Override
+  public List<FacilitiesResponse> getFacilitiesWithinRadius(
+          double latitude,
+          double longitude,
+          double radius
+  ) {
+    return shelterRepository.findSheltersWithinRadius(latitude, longitude, radius)
+            .stream()
+            .map(FacilitiesResponse::of)
+            .collect(Collectors.toList());
+  }
+
 
   private Shelter convertToEntity(ShelterApiResponse.Item item) {
     OperatingHours operatingHours = OperatingHours.builder()

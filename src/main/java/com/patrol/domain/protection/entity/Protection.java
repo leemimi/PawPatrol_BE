@@ -3,6 +3,7 @@ package com.patrol.domain.protection.entity;
 import com.patrol.domain.animalCase.entity.AnimalCase;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.protection.enums.ProtectionStatus;
+import com.patrol.domain.protection.enums.ProtectionType;
 import com.patrol.global.jpa.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -29,6 +30,10 @@ public class Protection extends BaseEntity {
   private String reason;   // 신청 사유
   private String rejectReason;   // 거절 사유
   private LocalDateTime deletedAt;
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private ProtectionType protectionType;   // TEMP_PROTECTION or ADOPTION
 
   // N : 1
   @ManyToOne(fetch = FetchType.LAZY)

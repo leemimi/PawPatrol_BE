@@ -24,6 +24,7 @@ public class HospitalService implements FacilityService {
   private final HospitalRepository hospitalRepository;
   private final CsvParser csvParser;
 
+  @PostConstruct
   @Transactional
   public void loadData() {
     try {
@@ -48,6 +49,19 @@ public class HospitalService implements FacilityService {
         .map(FacilitiesResponse::of)
         .collect(Collectors.toList());
   }
+
+  @Override
+  public List<FacilitiesResponse> getFacilitiesWithinRadius(
+          double latitude,
+          double longitude,
+          double radius
+  ) {
+    return hospitalRepository.findHospitalsWithinRadius(latitude, longitude, radius)
+            .stream()
+            .map(FacilitiesResponse::of)
+            .collect(Collectors.toList());
+  }
+
 
 
   private Hospital convertToEntity(CsvParser.HospitalData data) {

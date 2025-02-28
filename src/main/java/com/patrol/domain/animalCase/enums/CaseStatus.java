@@ -13,8 +13,8 @@ public enum CaseStatus {
   OWNER_FOUND("보호자 인계 완료"), // 원래 주인을 찾아 인계 완료된 상태
 
 
-  // 임시보호 관련
-  TEMP_PROTECT_WAITING("임시보호 대기"), // 임시보호자를 기다리는 상태
+  // 임시보호/입양 관련
+  PROTECT_WAITING("임시보호 대기"), // 임시보호자를 기다리는 상태
   TEMP_PROTECTING("임시보호 중"), // 임시보호자가 보호 중인 상태
   ADOPTED("입양 완료"); // 새로운 가정으로 입양 완료된 상태
 
@@ -22,6 +22,6 @@ public enum CaseStatus {
   private final String description;
 
   public boolean isTempProtectible() {
-    return this == TEMP_PROTECT_WAITING || this == TEMP_PROTECTING;
+    return this == PROTECT_WAITING || this == TEMP_PROTECTING;
   }
 }

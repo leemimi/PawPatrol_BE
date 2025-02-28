@@ -2,25 +2,33 @@ package com.patrol.domain.member.auth.service;
 
 import com.patrol.api.member.auth.dto.SocialTokenInfo;
 import com.patrol.api.member.auth.dto.request.SignupRequest;
+import com.patrol.api.member.auth.dto.requestV2.NewPasswordRequest;
 import com.patrol.api.member.auth.dto.requestV2.SocialConnectRequest;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.enums.ProviderType;
 import com.patrol.domain.member.member.repository.V2MemberRepository;
+import com.patrol.global.error.ErrorCode;
+import com.patrol.global.exception.CustomException;
 import com.patrol.global.exceptions.ErrorCodes;
 import com.patrol.global.exceptions.ServiceException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * packageName    : com.patrol.domain.member.auth.service
@@ -42,6 +50,9 @@ public class V2AuthService {
     private final OAuthService oAuthService;
     private final PasswordEncoder passwordEncoder;
     private final AuthTokenService authTokenService;
+    private final StringRedisTemplate redisTemplate;
+
+    private static final String KEY_PREFIX = "find:verification:";
 
     // 회원가입
     @Transactional
@@ -120,11 +131,92 @@ public class V2AuthService {
     public void connectOAuthProvider(
             Member loginUser, ProviderType loginType, String providerId, String providerEmail
     ) {
-        logger.info("기존 계정에 소셜 계정 정보 연동_connectOAuthProvider");
+        logger.info("기존 계정에 소셜 계정 정보 연동 : connectOAuthProvider");
         Member connectedMember = oAuthService.findByProviderId(loginType, providerId);
         if (connectedMember != null) {
             throw new ServiceException(ErrorCodes.SOCIAL_ACCOUNT_ALREADY_IN_USE);
         }
         oAuthService.connectProvider(loginUser, loginType, providerId, providerEmail);
+    }
+
+    // 엑세스 토큰 재발급을 위해 일치하는 apiKey 있는지 확인하는 메서드
+    @Transactional
+    public Optional<Member> findByApiKey(String apiKey) {
+        return v2MemberRepository.findByApiKey(apiKey);
+    }
+
+    // 비밀번호 찾기, 토큰 발행 (aka. 비찾토발)
+    // 비밀번호 재설정 과정에서 보안 토큰을 발행하여 권한이 없는 사용자가 우회하여 접근하지 못하게 막는 로직
+    @Transactional
+    public Map<String, String> resetToken(String email) {
+        logger.info("비밀번호 찾기, 토큰 발행 (aka. 비찾토발) : resetToken");
+        // 토큰 생성 (UUID 사용)
+        String continuationToken = UUID.randomUUID().toString();
+
+        _saveContinuationToken(email, continuationToken);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("continuationToken", continuationToken);
+
+        return response;
+    }
+
+    // 인증 토큰 저장 (Redis : 10분 유효, (aka. 비찾토발))
+    @Transactional
+    public void _saveContinuationToken(String email, String token) {
+        logger.info("인증 토큰 저장 (Redis : 10분 유효, (aka. 비찾토발)) : _saveContinuationToken");
+        String key = KEY_PREFIX + email;
+
+        redisTemplate.opsForValue()
+                .set(key, token, Duration.ofMinutes(10));  // TTL 설정 추가
+    }
+
+    // 인증 토큰 검증 (aka. 비찾토발)
+    @Transactional
+    public boolean _validateContinuationToken(String email, String continuationToken) {
+        String key = KEY_PREFIX + email;
+        String savedToken = redisTemplate.opsForValue().get(key);
+
+        if (savedToken == null) {
+            throw new CustomException(ErrorCode.VERIFICATION_NOT_FOUND);
+        }
+
+        if (!savedToken.equals(continuationToken)) {
+            throw new CustomException(ErrorCode.VERIFICATION_NOT_FOUND);
+        }
+
+        redisTemplate.delete(key);
+
+        // 인증 완료 상태 저장
+        redisTemplate.opsForValue()
+                .set("email:verify:" + email, "verified", 3, TimeUnit.MINUTES);
+
+        return true;
+    }
+
+    // 토큰 삭제
+    @Transactional
+    public void deleteToken(String email) {
+        String key = KEY_PREFIX + email;
+        redisTemplate.delete(key);
+    }
+
+    // 비밀번호 변경
+    @Transactional
+    public void resetPassword(NewPasswordRequest request) {
+        if (request.newPassword() != null
+                && request.confirmPassword() != null) {
+            logger.info("비밀번호찾기 - 비밀번호 재설정");
+
+            Member member = v2MemberRepository.findByEmail(request.email()).orElseThrow();
+
+            // 비밀번호 검증 로직
+            // 새 비밀번호와 비밀번호 확인이 일치하는지
+            if (!request.confirmPassword().equals(request.newPassword())) {
+                throw new ServiceException(ErrorCodes.INVALID_PASSWORD);
+            }
+
+            member.updatePassword(passwordEncoder.encode(request.newPassword()));
+        }
     }
 }
