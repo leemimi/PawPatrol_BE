@@ -10,6 +10,8 @@ import com.patrol.domain.animalCase.entity.AnimalCase;
 import com.patrol.domain.animalCase.enums.CaseStatus;
 import com.patrol.domain.animalCase.service.AnimalCaseEventPublisher;
 import com.patrol.domain.animalCase.service.AnimalCaseService;
+import com.patrol.domain.image.entity.Image;
+import com.patrol.domain.image.service.ImageService;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.service.MemberService;
 import com.patrol.domain.protection.entity.Protection;
@@ -18,12 +20,16 @@ import com.patrol.domain.protection.enums.ProtectionType;
 import com.patrol.domain.protection.repository.ProtectionRepository;
 import com.patrol.global.error.ErrorCode;
 import com.patrol.global.exception.CustomException;
+import com.patrol.global.storage.FileUploadRequest;
+import com.patrol.global.storage.FileUploadResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +44,8 @@ public class ProtectionService {
   private final MemberService memberService;
   private final AnimalCaseEventPublisher animalCaseEventPublisher;
   private final AnimalRepository animalRepository;
+  private final ImageService imageService;
+
 
 
   public AnimalCaseDetailResponse findPossibleAnimalCase(Long caseId, Long memberId) {
@@ -206,9 +214,18 @@ public class ProtectionService {
 
 
   @Transactional
-  public void createAnimalCase(CreateAnimalCaseRequest request, Member member) {
+  public void createAnimalCase(
+      CreateAnimalCaseRequest request, Member member, List<MultipartFile> images
+  ) {
     Animal animal = request.toAnimal();
     animalRepository.save(animal);
+
+    if (images != null && !images.isEmpty()) {
+      List<Image> imageList = imageService.uploadAnimalImages(images, animal.getId());
+      animal.setImageUrl(imageList.getFirst().getPath());
+    }
+
+
     animalCaseEventPublisher.createAnimalCase(member, animal, request.title(), request.description());
   }
 
@@ -219,5 +236,35 @@ public class ProtectionService {
         .stream()
         .map(PendingProtectionResponse::of)
         .toList();
+  }
+
+  @Transactional
+  public void updateAnimalCase(Long caseId, UpdateAnimalCaseRequest request, Member member, List<MultipartFile> images) {
+    Collection<CaseStatus> possibleStatuses = List.of(
+        CaseStatus.PROTECT_WAITING,
+        CaseStatus.TEMP_PROTECTING
+    );
+    AnimalCase animalCase = animalCaseService.findByIdAndStatusesWithHistories(caseId, possibleStatuses)
+        .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
+
+    if (!animalCase.getCurrentFoster().getId().equals(member.getId())) {
+      throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+    }
+
+    Animal animal = request.updateAnimal(animalCase);
+
+    if (images != null && !images.isEmpty()) {
+      List<Image> imageList = imageService.uploadAnimalImages(images, animal.getId());
+      animal.setImageUrl(imageList.getFirst().getPath());
+    }
+  }
+
+  @Transactional
+  public void deleteAnimalCase(Long caseId, Long memberId) {
+    AnimalCase animalCase = animalCaseService.findById(caseId);
+    if (!animalCase.getCurrentFoster().getId().equals(memberId)) {
+      throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+    }
+    animalCaseService.softDeleteAnimalCase(animalCase, memberId);
   }
 }

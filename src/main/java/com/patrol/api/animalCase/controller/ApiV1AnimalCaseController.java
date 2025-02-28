@@ -25,7 +25,7 @@ public class ApiV1AnimalCaseController {
 
 
   @GetMapping
-  @Operation(summary = "동물 케이스 목록 (전체이용)")
+  @Operation(summary = "동물 케이스 목록 (관리자)")
   public RsData<Page<AnimalCaseListResponse>> getAnimalCases(
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size
@@ -37,7 +37,7 @@ public class ApiV1AnimalCaseController {
 
 
   @GetMapping("/{caseId}")
-  @Operation(summary = "동물 케이스 상세조회 (전체이용)")
+  @Operation(summary = "동물 케이스 상세조회 (관리자)")
   public RsData<AnimalCaseDetailDto> getAnimalCase(@PathVariable Long caseId) {
     AnimalCaseDetailDto response = animalCaseService.findByIdWithHistories(caseId);
     return new RsData<>("200", "%d번 케이스를 성공적으로 호출했습니다.".formatted(caseId), response);

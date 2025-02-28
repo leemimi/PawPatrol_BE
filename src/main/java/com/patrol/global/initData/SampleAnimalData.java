@@ -585,47 +585,47 @@ public class SampleAnimalData {
   public static List<String> getSampleImageUrls() {
     List<String> imageUrls = new ArrayList<>();
 
-    imageUrls.add("sample07.jpeg");
-    imageUrls.add("sample08.jpg");
-    imageUrls.add("sample09.jpg");
-    imageUrls.add("sample10.jpg");
-    imageUrls.add("sample11.jpg");
-    imageUrls.add("sample12.jpg");
-    imageUrls.add("sample01.jpg");
-    imageUrls.add("sample02.jpg");
-    imageUrls.add("sample03.jpg");
-    imageUrls.add("sample04.jpg");
-    imageUrls.add("sample05.jpeg");
-    imageUrls.add("sample06.jpeg");
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample07.jpeg");
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample08.jpg");
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample09.jpg");
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample10.jpg");
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample11.jpg");
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample12.jpg");
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample01.jpg");
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample02.jpg");
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample03.jpg");
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample04.jpg");
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample05.jpeg");
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample06.jpeg");
 
-    imageUrls.add("sample24.jpg");  // 흑백 턱시도 고양이
-    imageUrls.add("sample13.jpg");  // 브라운 태비와 삼색 코숏 고양이 두 마리
-    imageUrls.add("sample14.jpg");  // 회색 태비 고양이
-    imageUrls.add("sample15.jpg");  // 회색 고양이
-    imageUrls.add("sample16.jpg");  // 흑백 고양이
-    imageUrls.add("sample17.jpg");  // 노란 고양이
-    imageUrls.add("sample18.jpg");  // 회색 고양이
-    imageUrls.add("sample19.jpg");  // 검정 고양이
-    imageUrls.add("sample20.jpg");  // 갈색 태비 고양이
-    imageUrls.add("sample21.jpg");  // 삼색 고양이
-    imageUrls.add("sample22.jpg");  // 흰 고양이
-    imageUrls.add("sample23.jpg");  // 흰색과 회색 고양이
-    imageUrls.add("sample33.jpg");  // 테디베어 같은 말티푸 강아지
-    imageUrls.add("sample34.jpg");  // 하얀 포메라니안
-    imageUrls.add("sample35.jpg");  // 갈색 닥스훈트
-    imageUrls.add("sample36.jpg");  // 진돗개
-    imageUrls.add("sample37.jpg");  // 하얀 진돗개
-    imageUrls.add("sample38.jpg");  // 크림색 믹스견
-    imageUrls.add("sample39.jpg");  // 래브라도 리트리버
-    imageUrls.add("sample40.jpg");  // 갈색 믹스견
-    imageUrls.add("sample25.jpg");  // 크림색 고양이
-    imageUrls.add("sample26.jpg");  // 하얀 고양이
-    imageUrls.add("sample27.jpg");  // 하얀 고양이
-    imageUrls.add("sample28.jpg");  // 회색 줄무늬 고양이
-    imageUrls.add("sample29.jpg");  // 크림색과 하얀색 고양이
-    imageUrls.add("sample30.jpg");  // 주황색 고양이
-    imageUrls.add("sample31.jpg");  // 하얀 포메라니안
-    imageUrls.add("sample32.jpg");  // 하얀 포메라니안
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample24.jpg");  // 흑백 턱시도 고양이
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample13.jpg");  // 브라운 태비와 삼색 코숏 고양이 두 마리
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample14.jpg");  // 회색 태비 고양이
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample15.jpg");  // 회색 고양이
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample16.jpg");  // 흑백 고양이
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample17.jpg");  // 노란 고양이
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample18.jpg");  // 회색 고양이
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample19.jpg");  // 검정 고양이
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample20.jpg");  // 갈색 태비 고양이
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample21.jpg");  // 삼색 고양이
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample22.jpg");  // 흰 고양이
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample23.jpg");  // 흰색과 회색 고양이
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample33.jpg");  // 테디베어 같은 말티푸 강아지
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample34.jpg");  // 하얀 포메라니안
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample35.jpg");  // 갈색 닥스훈트
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample36.jpg");  // 진돗개
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample37.jpg");  // 하얀 진돗개
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample38.jpg");  // 크림색 믹스견
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample39.jpg");  // 래브라도 리트리버
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample40.jpg");  // 갈색 믹스견
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample25.jpg");  // 크림색 고양이
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample26.jpg");  // 하얀 고양이
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample27.jpg");  // 하얀 고양이
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample28.jpg");  // 회색 줄무늬 고양이
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample29.jpg");  // 크림색과 하얀색 고양이
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample30.jpg");  // 주황색 고양이
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample31.jpg");  // 하얀 포메라니안
+    imageUrls.add("https://kr.object.ncloudstorage.com/paw-patrol/protection/sample32.jpg");  // 하얀 포메라니안
     return imageUrls;
   }
 

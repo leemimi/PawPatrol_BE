@@ -14,18 +14,19 @@ import java.util.Collection;
 import java.util.Optional;
 
 public interface AnimalCaseRepository extends JpaRepository<AnimalCase, Long> {
-  @Query("SELECT ac FROM AnimalCase ac LEFT JOIN FETCH ac.animal WHERE ac.animal = :animal")
+  @Query("SELECT ac FROM AnimalCase ac LEFT JOIN FETCH ac.animal WHERE ac.animal = :animal AND ac.deletedAt IS NULL")
   AnimalCase findByAnimal(@Param("animal") Animal animal);
 
   @Query("SELECT ac FROM AnimalCase ac " +
       "LEFT JOIN FETCH ac.animal " +
       "LEFT JOIN FETCH ac.currentFoster " +
-      "WHERE ac.id = :id AND ac.status = :status")
+      "WHERE ac.id = :id AND ac.status = :status AND ac.deletedAt IS NULL")
   Optional<AnimalCase> findByIdAndStatus(
       @Param("id") Long id,
       @Param("status") CaseStatus caseStatus
   );
 
+  // 관리자용 - deletedAt 조건 없음
   @Query("SELECT ac FROM AnimalCase ac " +
       "LEFT JOIN FETCH ac.animal " +
       "LEFT JOIN FETCH ac.currentFoster " +
@@ -37,18 +38,17 @@ public interface AnimalCaseRepository extends JpaRepository<AnimalCase, Long> {
       "LEFT JOIN FETCH ac.animal " +
       "LEFT JOIN FETCH ac.currentFoster " +
       "LEFT JOIN FETCH ac.histories " +
-      "WHERE ac.id = :id AND ac.status IN :statuses")
+      "WHERE ac.id = :id AND ac.status IN :statuses AND ac.deletedAt IS NULL")
   Optional<AnimalCase> findByIdAndStatusesWithHistories(
       @Param("id") Long id,
       @Param("statuses") Collection<CaseStatus> statuses
   );
 
-
   @Query(value = "SELECT ac FROM AnimalCase ac " +
       "LEFT JOIN FETCH ac.animal " +
       "LEFT JOIN FETCH ac.currentFoster " +
-      "WHERE ac.status IN :statuses",
-      countQuery = "SELECT COUNT(ac) FROM AnimalCase ac WHERE ac.status IN :statuses")
+      "WHERE ac.status IN :statuses AND ac.deletedAt IS NULL",
+      countQuery = "SELECT COUNT(ac) FROM AnimalCase ac WHERE ac.status IN :statuses AND ac.deletedAt IS NULL")
   Page<AnimalCase> findAllByStatusIn(
       @Param("statuses") Collection<CaseStatus> statuses,
       Pageable pageable
@@ -57,17 +57,17 @@ public interface AnimalCaseRepository extends JpaRepository<AnimalCase, Long> {
   @Query(value = "SELECT ac FROM AnimalCase ac " +
       "LEFT JOIN FETCH ac.animal " +
       "LEFT JOIN FETCH ac.currentFoster " +
-      "WHERE ac.currentFoster = :currentFoster",
-      countQuery = "SELECT COUNT(ac) FROM AnimalCase ac WHERE ac.currentFoster = :currentFoster")
+      "WHERE ac.currentFoster = :currentFoster AND ac.deletedAt IS NULL",
+      countQuery = "SELECT COUNT(ac) FROM AnimalCase ac WHERE ac.currentFoster = :currentFoster AND ac.deletedAt IS NULL")
   Page<AnimalCase> findAllByCurrentFoster(
       @Param("currentFoster") Member currentFoster,
       Pageable pageable
   );
 
-  // 기본 findById 오버라이딩
+  // 기본 findById 오버라이딩 - 소프트 삭제 필터링 추가
   @Query("SELECT ac FROM AnimalCase ac " +
       "LEFT JOIN FETCH ac.animal " +
       "LEFT JOIN FETCH ac.currentFoster " +
-      "WHERE ac.id = :id")
+      "WHERE ac.id = :id AND ac.deletedAt IS NULL")
   Optional<AnimalCase> findById(@Param("id") Long id);
 }
