@@ -90,10 +90,10 @@ public class LostFoundPostService {
                     );
 
                     if (uploadResult != null) {
-                        uploadedPaths.add(uploadResult.getFileName());
+                        uploadedPaths.add(uploadResult.getFullPath());
 
                         Image imageEntity = Image.builder()
-                                .path(uploadResult.getFileName())
+                                .path(uploadResult.getFullPath())
                                 .foundId(lostFoundPost.getId())
                                 .build();
 
@@ -162,10 +162,10 @@ public class LostFoundPostService {
                     );
 
                     if (uploadResult != null) {
-                        uploadedPaths.add(uploadResult.getFileName());
+                        uploadedPaths.add(uploadResult.getFullPath());
 
                         Image imageEntity = Image.builder()
-                                .path(uploadResult.getFileName())
+                                .path(uploadResult.getFullPath())
                                 .foundId(lostFoundPost.getId())
                                 .build();
 
