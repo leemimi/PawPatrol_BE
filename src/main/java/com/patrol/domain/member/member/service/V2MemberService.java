@@ -3,7 +3,10 @@ package com.patrol.domain.member.member.service;
 import com.patrol.api.member.auth.dto.ModifyProfileResponse;
 import com.patrol.api.member.auth.dto.MyPostsResponse;
 import com.patrol.api.member.auth.dto.requestV2.ModifyProfileRequest;
+import com.patrol.api.member.member.dto.OAuthConnectInfoResponse;
 import com.patrol.domain.lostFoundPost.service.LostFoundPostService;
+import com.patrol.domain.member.auth.entity.OAuthProvider;
+import com.patrol.domain.member.auth.repository.OAuthProviderRepository;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.repository.V2MemberRepository;
 import com.patrol.global.exceptions.ErrorCodes;
@@ -41,6 +44,7 @@ public class V2MemberService {
     private final FileStorageHandler fileStorageHandler;
     private final StorageConfig storageConfig;
     private final LostFoundPostService lostFoundPostService;
+    private final OAuthProviderRepository oAuthProviderRepository;
 
     private final Logger logger = LoggerFactory.getLogger(V2MemberService.class.getName());
 
@@ -160,5 +164,45 @@ public class V2MemberService {
     @Transactional
     public Page<MyPostsResponse> myWitnessPosts(Member member, Pageable pageable) {
         return lostFoundPostService.myWitnessPosts(member, pageable);
+    }
+
+    // 소셜 로그인 연결 확인
+    @Transactional
+    public OAuthConnectInfoResponse socialInfo(Member member) {
+        OAuthProvider authProvider = oAuthProviderRepository.findByMemberId(member.getId());
+
+        boolean isNaverConnected = false;
+        boolean isGoogleConnected = false;
+        boolean isKakaoConnected = false;
+
+        try {
+            if (authProvider.getNaver() != null) {
+                isNaverConnected = authProvider.getNaver().isConnected();
+            }
+        } catch (Exception e) {
+            logger.error("Naver OAuth 연결 확인 안됨" + e.getMessage());
+        }
+
+        try {
+            if (authProvider.getGoogle() != null) {
+                isGoogleConnected = authProvider.getGoogle().isConnected();
+            }
+        } catch (Exception e) {
+            logger.error("Google OAuth 연결 확인 안됨" + e.getMessage());
+        }
+
+        try {
+            if (authProvider.getKakao() != null) {
+                isKakaoConnected = authProvider.getKakao().isConnected();
+            }
+        } catch (Exception e) {
+            logger.error("Kakao OAuth 연결 확인 안됨" + e.getMessage());
+        }
+
+        return OAuthConnectInfoResponse.builder()
+                .naver(isNaverConnected)
+                .google(isGoogleConnected)
+                .kakao(isKakaoConnected)
+                .build();
     }
 }

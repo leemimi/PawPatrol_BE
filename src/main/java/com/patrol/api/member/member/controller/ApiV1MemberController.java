@@ -195,22 +195,22 @@ public class ApiV1MemberController {
 
 
     // MEM03_SOCIAL03 : 소셜 계정 연동 해제
-    @DeleteMapping("/me/social/{provider}")
-    public RsData<Void> disconnectSocialAccount(
-        @PathVariable String provider, @LoginUser Member loginUser
-    ) {
-        ProviderType type = ProviderType.of(provider);
-        if (!loginUser.hasOAuthProvider(type)) {   // 연동되지 않은 소셜 계정인 경우
-            throw new ServiceException(ErrorCodes.NOT_CONNECTED_SOCIAL_ACCOUNT);
-        }
-
-        if (loginUser.getPassword() == null && loginUser.getConnectedOAuthCount() == 1) {  // 마지막 로그인 수단인 경우
-            throw new ServiceException(ErrorCodes.CANNOT_DISCONNECT_LAST_LOGIN_METHOD);
-        }
-
-        oAuthService.disconnectProvider(loginUser, type);
-        return new RsData<>("200", "%s 소셜 계정 연동을 해제하였습니다.".formatted(type.name()));
-    }
+//    @DeleteMapping("/me/social/{provider}")
+//    public RsData<Void> disconnectSocialAccount(
+//        @PathVariable String provider, @LoginUser Member loginUser
+//    ) {
+//        ProviderType type = ProviderType.of(provider);
+//        if (!loginUser.hasOAuthProvider(type)) {   // 연동되지 않은 소셜 계정인 경우
+//            throw new ServiceException(ErrorCodes.NOT_CONNECTED_SOCIAL_ACCOUNT);
+//        }
+//
+//        if (loginUser.getPassword() == null && loginUser.getConnectedOAuthCount() == 1) {  // 마지막 로그인 수단인 경우
+//            throw new ServiceException(ErrorCodes.CANNOT_DISCONNECT_LAST_LOGIN_METHOD);
+//        }
+//
+//        oAuthService.disconnectProvider(loginUser, type);
+//        return new RsData<>("200", "%s 소셜 계정 연동을 해제하였습니다.".formatted(type.name()));
+//    }
 
 
 

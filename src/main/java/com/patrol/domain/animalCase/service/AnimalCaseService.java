@@ -1,7 +1,7 @@
 package com.patrol.domain.animalCase.service;
 
 
-import com.patrol.api.animalCase.dto.AnimalCaseDetailResponse;
+import com.patrol.api.animalCase.dto.AnimalCaseDetailDto;
 import com.patrol.api.animalCase.dto.AnimalCaseListResponse;
 import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.animalCase.entity.AnimalCase;
@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -48,18 +49,15 @@ public class AnimalCaseService {
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
   }
 
-  public AnimalCaseDetailResponse findByIdWithHistories(Long caseId) {
+  // 관리자용
+  public AnimalCaseDetailDto findByIdWithHistories(Long caseId) {
     AnimalCase animalCase = animalCaseRepository.findByIdWithHistories(caseId)
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
-    return AnimalCaseDetailResponse.of(animalCase);
+    return AnimalCaseDetailDto.of(animalCase);
   }
 
-  public AnimalCaseDetailResponse findByIdAndStatusesWithHistories(
-      Long caseId, Collection<CaseStatus> statuses
-  ) {
-    AnimalCase animalCase = animalCaseRepository.findByIdAndStatusesWithHistories(caseId, statuses)
-        .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
-    return AnimalCaseDetailResponse.of(animalCase);
+  public Optional<AnimalCase> findByIdAndStatusesWithHistories(Long caseId, Collection<CaseStatus> statuses) {
+    return animalCaseRepository.findByIdAndStatusesWithHistories(caseId, statuses);
   }
 
   public Page<AnimalCaseListResponse> findAllByStatuses(Collection<CaseStatus> statuses, Pageable pageable) {
@@ -67,13 +65,21 @@ public class AnimalCaseService {
         .map(AnimalCaseListResponse::of);
   }
 
+  // 관리자용
   public Page<AnimalCaseListResponse> findAll(Pageable pageable) {
     return animalCaseRepository.findAll(pageable)
         .map(AnimalCaseListResponse::of);
   }
 
-  public Page<AnimalCaseListResponse> findAllByCurrentFoster(Member currentFoster, Pageable pageable) {
-    return animalCaseRepository.findAllByCurrentFoster(currentFoster, pageable)
-        .map(AnimalCaseListResponse::of);
+  public Page<AnimalCase> findAllByCurrentFoster(Member currentFoster, Pageable pageable) {
+    return animalCaseRepository.findAllByCurrentFoster(currentFoster, pageable);
+  }
+
+  @Transactional
+  public void softDeleteAnimalCase(AnimalCase animalCase, Long memberId) {
+    if (!animalCase.getCurrentFoster().getId().equals(memberId)) {
+      throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+    }
+    animalCase.setDeletedAt(LocalDateTime.now());
   }
 }
