@@ -175,28 +175,14 @@ public class V2MemberService {
         boolean isGoogleConnected = false;
         boolean isKakaoConnected = false;
 
-        try {
-            if (authProvider.getNaver() != null) {
-                isNaverConnected = authProvider.getNaver().isConnected();
-            }
-        } catch (Exception e) {
-            logger.error("Naver OAuth 연결 확인 안됨" + e.getMessage());
+        if (authProvider.getNaver() != null) {
+            isNaverConnected = authProvider.getNaver().isConnected();
         }
-
-        try {
-            if (authProvider.getGoogle() != null) {
-                isGoogleConnected = authProvider.getGoogle().isConnected();
-            }
-        } catch (Exception e) {
-            logger.error("Google OAuth 연결 확인 안됨" + e.getMessage());
+        if (authProvider.getGoogle() != null) {
+            isGoogleConnected = authProvider.getGoogle().isConnected();
         }
-
-        try {
-            if (authProvider.getKakao() != null) {
-                isKakaoConnected = authProvider.getKakao().isConnected();
-            }
-        } catch (Exception e) {
-            logger.error("Kakao OAuth 연결 확인 안됨" + e.getMessage());
+        if (authProvider.getKakao() != null) {
+            isKakaoConnected = authProvider.getKakao().isConnected();
         }
 
         return OAuthConnectInfoResponse.builder()
