@@ -19,23 +19,23 @@ public class PasswordService {
   private final MemberRepository memberRepository;
 
 
-  @Transactional
-  public void changePassword(String email, String currentPassword, String newPassword) {
-    Member member = memberRepository.findByEmail(email)
-        .orElseThrow(() -> new ServiceException(ErrorCodes.INVALID_EMAIL));
-
-    if (!passwordEncoder.matches(currentPassword, member.getPassword())) {
-      throw new ServiceException(ErrorCodes.INVALID_PASSWORD);
-    }
-    member.setPassword(passwordEncoder.encode(newPassword));
-  }
-
-
-  @Transactional
-  public void resetPassword(String email, String newPassword) {
-    Member member = memberRepository.findByEmail(email)
-        .orElseThrow(() -> new ServiceException(ErrorCodes.INVALID_EMAIL));
-
-    member.setPassword(passwordEncoder.encode(newPassword));
-  }
+//  @Transactional
+//  public void changePassword(String email, String currentPassword, String newPassword) {
+//    Member member = memberRepository.findByEmail(email)
+//        .orElseThrow(() -> new ServiceException(ErrorCodes.INVALID_EMAIL));
+//
+//    if (!passwordEncoder.matches(currentPassword, member.getPassword())) {
+//      throw new ServiceException(ErrorCodes.INVALID_PASSWORD);
+//    }
+//    member.setPassword(passwordEncoder.encode(newPassword));
+//  }
+//
+//
+//  @Transactional
+//  public void resetPassword(String email, String newPassword) {
+//    Member member = memberRepository.findByEmail(email)
+//        .orElseThrow(() -> new ServiceException(ErrorCodes.INVALID_EMAIL));
+//
+//    member.setPassword(passwordEncoder.encode(newPassword));
+//  }
 }
