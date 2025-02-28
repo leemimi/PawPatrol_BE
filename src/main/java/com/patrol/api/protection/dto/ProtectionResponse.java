@@ -3,6 +3,7 @@ package com.patrol.api.protection.dto;
 
 import com.patrol.domain.protection.entity.Protection;
 import com.patrol.domain.protection.enums.ProtectionStatus;
+import com.patrol.domain.protection.enums.ProtectionType;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
@@ -11,7 +12,7 @@ import java.time.LocalDateTime;
 public record ProtectionResponse(
     Long protectionId, Long animalCaseId,
     String applicantName, String animalName, String imageUrl, String reason,
-    ProtectionStatus protectionStatus, LocalDateTime createdAt,
+    ProtectionType protectionType, ProtectionStatus protectionStatus, LocalDateTime createdAt,
     String rejectReason
 ) {
 
@@ -24,6 +25,7 @@ public record ProtectionResponse(
         .imageUrl(protection.getAnimalCase().getAnimal().getImageUrl())
         .reason(protection.getReason())
         .createdAt(protection.getCreatedAt())
+        .protectionType(protection.getProtectionType())
         .protectionStatus(protection.getProtectionStatus())
         .rejectReason(protection.getRejectReason())
         .build();
