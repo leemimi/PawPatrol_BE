@@ -1,5 +1,6 @@
 package com.patrol.domain.lostFoundPost.service;
 
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.patrol.api.lostFoundPost.dto.LostFoundPostRequestDto;
 import com.patrol.api.lostFoundPost.dto.LostFoundPostResponseDto;
 import com.patrol.api.member.auth.dto.MyPostsResponse;
@@ -48,13 +49,15 @@ public class LostFoundPostService {
     @Transactional
     public LostFoundPostResponseDto createLostFoundPost(LostFoundPostRequestDto requestDto, Long petId, Member author, List<MultipartFile> images) {
 
-        // Animal 조회 (petId가 null이면 null을 할당, 아니면 실제 Animal 객체 가져오기)
+        // Animal 조회 (petId가 null이면 pet을 null로 설정)
         Animal pet = null;
         if (requestDto.getPetId() != null) {
-            pet = animalRepository.findById(requestDto.getPetId())
-                    .orElseThrow(() -> new IllegalArgumentException("Pet not found"));
+            // petId가 null이 아니면 실제 Animal 객체를 가져옵니다.
+            pet = animalRepository.findById(requestDto.getPetId()).orElseThrow(() -> new IllegalArgumentException("Pet not found"));
         }
+        // petId가 null일 경우 pet은 null로 유지됩니다. 이후 로직에서 이를 무시하고 진행합니다.
 
+        // AnimalType 처리
         AnimalType animalType = requestDto.getAnimalType() != null
                 ? AnimalType.valueOf(requestDto.getAnimalType())
                 : null;
@@ -64,7 +67,7 @@ public class LostFoundPostService {
         System.out.println("Received petId: " + requestDto.getPetId());
         System.out.println("📌 LostFoundPost created with pet: " + lostFoundPost.getPet());
 
-
+        // LostFoundPost 저장
         lostFoundPostRepository.save(lostFoundPost);
         System.out.println("💾 LostFoundPost saved with pet: " + lostFoundPost.getPet());
 
@@ -74,6 +77,11 @@ public class LostFoundPostService {
 
             try {
                 for (MultipartFile image : images) {
+                    // Create metadata with content length to avoid the warning
+                    ObjectMetadata metadata = new ObjectMetadata();
+                    metadata.setContentLength(image.getSize());
+                    metadata.setContentType(image.getContentType());
+
                     FileUploadResult uploadResult = fileStorageHandler.handleFileUpload(
                             FileUploadRequest.builder()
                                     .folderPath("lostfoundpost/")
@@ -102,6 +110,7 @@ public class LostFoundPostService {
                 throw new CustomException(ErrorCode.DATABASE_ERROR);
             }
         }
+
         System.out.println("Received petId: " + requestDto.getPetId());
         // 웹소켓을 통해 알림 전송
         notificationService.sendLostFoundPostNotification(lostFoundPost);
@@ -140,6 +149,11 @@ public class LostFoundPostService {
 
             try {
                 for (MultipartFile image : images) {
+                    // Create metadata with content length to avoid the warning
+                    ObjectMetadata metadata = new ObjectMetadata();
+                    metadata.setContentLength(image.getSize());
+                    metadata.setContentType(image.getContentType());
+
                     FileUploadResult uploadResult = fileStorageHandler.handleFileUpload(
                             FileUploadRequest.builder()
                                     .folderPath("lostfoundpost/")
@@ -155,6 +169,7 @@ public class LostFoundPostService {
                                 .foundId(lostFoundPost.getId())
                                 .build();
 
+                        lostFoundPost.addImage(imageEntity);
                         imageRepository.save(imageEntity);
                     }
                 }

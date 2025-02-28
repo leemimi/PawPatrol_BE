@@ -10,7 +10,8 @@ import lombok.Builder;
 @Builder
 public record AnimalInfo(
     String name, String age, String breed, AnimalGender gender,
-    AnimalSize size, String feature, String healthCondition, AnimalType animalType
+    AnimalSize size, String feature, String healthCondition, AnimalType animalType,
+    String imageUrl, String registrationNo
 ) {
 
   public static AnimalInfo of(Animal animal) {
@@ -23,6 +24,8 @@ public record AnimalInfo(
         .feature(animal.getFeature())
         .healthCondition(animal.getHealthCondition())
         .animalType(animal.getAnimalType())
+        .imageUrl(animal.getImageUrl())
+        .registrationNo(animal.getRegistrationNo())
         .build();
   }
 }
