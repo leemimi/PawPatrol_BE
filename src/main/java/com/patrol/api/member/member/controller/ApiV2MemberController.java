@@ -8,7 +8,6 @@ import com.patrol.api.member.auth.dto.MyPostsResponse;
 import com.patrol.api.member.auth.dto.requestV2.ModifyProfileRequest;
 import com.patrol.api.member.member.dto.OAuthConnectInfoResponse;
 import com.patrol.api.member.member.dto.request.PetRegisterRequest;
-import com.patrol.api.member.member.dto.request.SocialDisconnectRequest;
 import com.patrol.domain.animal.service.AnimalService;
 import com.patrol.domain.member.auth.service.OAuthService;
 import com.patrol.domain.member.member.entity.Member;
