@@ -1,9 +1,7 @@
 package com.patrol.api.facility.controller;
 
 import com.patrol.api.facility.dto.FacilitiesResponse;
-import com.patrol.api.lostFoundPost.dto.LostFoundPostResponseDto;
 import com.patrol.domain.facility.service.FacilityService;
-import com.patrol.global.globalDto.GlobalResponse;
 import com.patrol.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,11 +24,12 @@ public class ApiV1FacilityController {
 
   @GetMapping
   @Operation(summary = "보호소/병원 목록")
-  public GlobalResponse<List<FacilitiesResponse>> createPost() {
+  public RsData<List<FacilitiesResponse>> getFacilities() {
     List<FacilitiesResponse> facilitiesResponseList = facilityServices.stream()
         .flatMap(service -> service.findAll().stream())
         .collect(Collectors.toList());
-    return GlobalResponse.success(facilitiesResponseList);
+
+    return new RsData<>("200", "보호소/병원 목록 가져오기 성공", facilitiesResponseList);
   }
 
   @GetMapping("/map")
