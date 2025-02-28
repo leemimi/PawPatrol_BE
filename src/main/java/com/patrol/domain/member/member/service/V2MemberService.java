@@ -8,6 +8,7 @@ import com.patrol.domain.lostFoundPost.service.LostFoundPostService;
 import com.patrol.domain.member.auth.entity.OAuthProvider;
 import com.patrol.domain.member.auth.repository.OAuthProviderRepository;
 import com.patrol.domain.member.member.entity.Member;
+import com.patrol.domain.member.member.enums.MemberStatus;
 import com.patrol.domain.member.member.repository.V2MemberRepository;
 import com.patrol.global.exceptions.ErrorCodes;
 import com.patrol.global.exceptions.ServiceException;
@@ -190,5 +191,14 @@ public class V2MemberService {
                 .google(isGoogleConnected)
                 .kakao(isKakaoConnected)
                 .build();
+    }
+
+    // 회원 탈퇴
+    @Transactional
+    public void memberWithdraw(Member member) {
+        logger.info("회원 탈퇴 : memberWithdraw");
+        Member inActiveMember = v2MemberRepository.findById(member.getId()).orElseThrow();
+
+        inActiveMember.setStatus(MemberStatus.WITHDRAWN);
     }
 }
