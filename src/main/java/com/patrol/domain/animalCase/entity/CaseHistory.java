@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDateTime;
+
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
@@ -32,6 +34,8 @@ public class CaseHistory extends BaseEntity {
 
   @Column(nullable = false)
   private Long memberId;  // 행위 주체자 ID
+
+  private LocalDateTime deletedAt;
 
   // 1 : N
   @ManyToOne(fetch = FetchType.LAZY)
