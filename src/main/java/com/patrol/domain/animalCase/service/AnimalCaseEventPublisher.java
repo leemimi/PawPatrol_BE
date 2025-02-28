@@ -29,7 +29,7 @@ public class AnimalCaseEventPublisher {
     ContentType contentType;
     if (status == PostStatus.FINDING) {
       contentType = ContentType.LOSTPOST;
-    } else if (status == PostStatus.SIGHTING) {
+    } else if (status == PostStatus.SIGHTED) {
       contentType = ContentType.FINDPOST;
     } else {
       return;
