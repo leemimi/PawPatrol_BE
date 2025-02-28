@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 public class OAuthService {
 
   private final Map<ProviderType, OAuthProviderStrategy> strategies;
@@ -49,6 +49,7 @@ public class OAuthService {
 
 
   // ProviderId를 통해 연동 정보 찾기
+  @Transactional
   public Member findByProviderId(ProviderType type, String providerId) {
     // 전략 객체 조회 type 에 해당하는 전략 객체를 찾는다.
     OAuthProviderStrategy strategy = strategies.get(type);
