@@ -111,6 +111,7 @@ public class ApiV2AuthController {
                 .email(member.getEmail())
                 .nickname(member.getNickname())
                 .profileImage(member.getProfileImageUrl())
+                .role(member.getRole())
                 .build();
         return GlobalResponse.success(userInfo);
     }
