@@ -2,6 +2,7 @@ package com.patrol.domain.member.auth.strategy;
 
 
 import com.patrol.domain.member.auth.entity.OAuthProvider;
+import com.patrol.domain.member.auth.repository.OAuthProviderRepository;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.enums.ProviderType;
 import com.patrol.domain.member.member.repository.MemberRepository;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Component;
 public class KakaoProviderStrategy implements OAuthProviderStrategy {
 
   private final MemberRepository memberRepository;
-
+  private final OAuthProviderRepository oAuthProviderRepository;
   @Override
   public ProviderType getProviderType() {
     return ProviderType.KAKAO;
@@ -32,7 +33,8 @@ public class KakaoProviderStrategy implements OAuthProviderStrategy {
 
   @Override
   public void disconnect(Member member) {
-    OAuthProvider oAuthProvider = member.getOAuthProviderOrCreate();
+    OAuthProvider oAuthProvider = member.getOAuthProvider();
     oAuthProvider.removeKakaoProvider();
+    oAuthProviderRepository.save(oAuthProvider);
   }
 }

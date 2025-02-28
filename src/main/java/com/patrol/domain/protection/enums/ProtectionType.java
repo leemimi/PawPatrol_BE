@@ -5,12 +5,11 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum ProtectionStatus {
+public enum ProtectionType {
 
-  PENDING("승인 대기"),
-  CANCELED("취소됨"),
-  APPROVED("임시 보호 승인"),
-  REJECTED("임시 보호 거절됨");
+  TEMP_PROTECTION("임시보호"),
+  ADOPTION("입양");
 
   private final String description;
+
 }

@@ -43,6 +43,12 @@ public class NcpObjectStorageService implements StorageService {
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setContentType((String) options.get(CONTENT_TYPE));
 
+        // Add content length to metadata if provided
+        if (options.containsKey("contentLength")) {
+            Long contentLength = (Long) options.get("contentLength");
+            objectMetadata.setContentLength(contentLength);
+        }
+
         PutObjectRequest putObjectRequest = new PutObjectRequest(
                 bucketName,
                 filePath, // 업로드 파일의 경로(폴더 경로 포함)

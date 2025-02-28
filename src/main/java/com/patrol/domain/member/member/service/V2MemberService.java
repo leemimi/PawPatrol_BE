@@ -1,7 +1,12 @@
 package com.patrol.domain.member.member.service;
 
 import com.patrol.api.member.auth.dto.ModifyProfileResponse;
+import com.patrol.api.member.auth.dto.MyPostsResponse;
 import com.patrol.api.member.auth.dto.requestV2.ModifyProfileRequest;
+import com.patrol.api.member.member.dto.OAuthConnectInfoResponse;
+import com.patrol.domain.lostFoundPost.service.LostFoundPostService;
+import com.patrol.domain.member.auth.entity.OAuthProvider;
+import com.patrol.domain.member.auth.repository.OAuthProviderRepository;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.repository.V2MemberRepository;
 import com.patrol.global.exceptions.ErrorCodes;
@@ -13,6 +18,8 @@ import com.patrol.global.storage.StorageConfig;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +43,8 @@ public class V2MemberService {
     private final PasswordEncoder passwordEncoder;
     private final FileStorageHandler fileStorageHandler;
     private final StorageConfig storageConfig;
+    private final LostFoundPostService lostFoundPostService;
+    private final OAuthProviderRepository oAuthProviderRepository;
 
     private final Logger logger = LoggerFactory.getLogger(V2MemberService.class.getName());
 
@@ -46,6 +55,21 @@ public class V2MemberService {
         return v2MemberRepository.findByEmail(email)
                 // 이거 어떻게 바꿔야 하는지
                 .orElseThrow(() -> new ServiceException(ErrorCodes.INVALID_EMAIL));
+    }
+
+    // 마이페이지 > 프로필 이미지 삭제
+    @Transactional
+    public void resetProfileImage(Member member, ModifyProfileRequest modifyProfileRequest) {
+        logger.info("마이페이지 > 프로필 이미지 삭제 : resetProfileImage");
+        Member modifyMem = v2MemberRepository.findByEmail(member.getEmail()).orElseThrow();
+
+        // 기존 파일 삭제
+        fileStorageHandler.handleFileDelete(modifyProfileRequest.imageUrl());
+        
+        // 프로필을 디폴트 이미지로 변경
+        if(modifyProfileRequest.file() == null && !modifyProfileRequest.imageUrl().isEmpty()) {
+            modifyMem.setProfileImageUrl("default.png");
+        }
     }
 
     // 회원 정보 수정 > 전화번호 수정 시 인증 필요함
@@ -83,7 +107,13 @@ public class V2MemberService {
             logger.info("회원 정보 수정 - 프로필 이미지 변경");
 
             // 기본 이미지가 아닐때
-            if(!modifyProfileRequest.imageUrl().equals("default.png")) {
+            String fileName = modifyProfileRequest.imageUrl();
+            int lastSlashIndex = fileName.lastIndexOf('/');
+            if (lastSlashIndex != -1) {
+                fileName = fileName.substring(lastSlashIndex + 1);
+            }
+
+            if (!fileName.equals("default.png")) {
                 // 기존 파일 삭제
                 fileStorageHandler.handleFileDelete(modifyProfileRequest.imageUrl());
             }
@@ -125,4 +155,54 @@ public class V2MemberService {
         return v2MemberRepository.findByEmail(email).isPresent();
     }
 
+    // 마이페이지 나의 신고글 리스트 불러오기
+    @Transactional
+    public Page<MyPostsResponse> myReportPosts(Member member, Pageable pageable) {
+        return lostFoundPostService.myReportPosts(member, pageable);
+    }
+    // 마이페이지 나의 제보글 리스트 불러오기
+    @Transactional
+    public Page<MyPostsResponse> myWitnessPosts(Member member, Pageable pageable) {
+        return lostFoundPostService.myWitnessPosts(member, pageable);
+    }
+
+    // 소셜 로그인 연결 확인
+    @Transactional
+    public OAuthConnectInfoResponse socialInfo(Member member) {
+        OAuthProvider authProvider = oAuthProviderRepository.findByMemberId(member.getId());
+
+        boolean isNaverConnected = false;
+        boolean isGoogleConnected = false;
+        boolean isKakaoConnected = false;
+
+        try {
+            if (authProvider.getNaver() != null) {
+                isNaverConnected = authProvider.getNaver().isConnected();
+            }
+        } catch (Exception e) {
+            logger.error("Naver OAuth 연결 확인 안됨" + e.getMessage());
+        }
+
+        try {
+            if (authProvider.getGoogle() != null) {
+                isGoogleConnected = authProvider.getGoogle().isConnected();
+            }
+        } catch (Exception e) {
+            logger.error("Google OAuth 연결 확인 안됨" + e.getMessage());
+        }
+
+        try {
+            if (authProvider.getKakao() != null) {
+                isKakaoConnected = authProvider.getKakao().isConnected();
+            }
+        } catch (Exception e) {
+            logger.error("Kakao OAuth 연결 확인 안됨" + e.getMessage());
+        }
+
+        return OAuthConnectInfoResponse.builder()
+                .naver(isNaverConnected)
+                .google(isGoogleConnected)
+                .kakao(isKakaoConnected)
+                .build();
+    }
 }

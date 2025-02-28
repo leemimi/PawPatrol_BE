@@ -31,9 +31,18 @@ public enum ErrorCode {
 
 
     // BAD_REQUEST : 요청이 잘못되었어요, FORBIDDEN : 요청은 이해했는데 당신한테 권한이 없어요
+    // Protection
+    ALREADY_FOSTER(HttpStatus.BAD_REQUEST, "이미 보호자입니다."),
+    ALREADY_APPLIED(HttpStatus.BAD_REQUEST, "이미 신청하였습니다."),
+
+
     // Member
     MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST,"사용자를 찾을 수 없습니다."),
     DUPLICATE_EMAIL(HttpStatus.FORBIDDEN, "이미 사용중인 이메일 입니다."),
+
+    // File
+    INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "유효하지 않은 파일 형식입니다."),
+    FILE_SIZE_EXCEEDED(HttpStatus.BAD_REQUEST, "파일 크기는 5MB를 넘을 수 없습니다."),
 
     // Auth
     EMAIL_NOT_FOUND(HttpStatus.FORBIDDEN, "등록되지 않은 이메일 입니다."),

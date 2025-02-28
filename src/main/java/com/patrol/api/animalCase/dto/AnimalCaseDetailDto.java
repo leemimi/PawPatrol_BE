@@ -9,21 +9,23 @@ import java.util.List;
 
 
 @Builder
-public record AnimalCaseDetailResponse(
-    AnimalInfo animalInfo, String currentFosterName,
-    LocalDateTime createdAt, LocalDateTime modifiedAt,
+public record AnimalCaseDetailDto(
+    AnimalInfo animalInfo, String currentFosterName, String title,
+    String description, LocalDateTime createdAt, LocalDateTime modifiedAt,
     CaseStatus caseStatus, List<CaseHistoryResponse> caseHistoryList
 ) {
 
-  public static AnimalCaseDetailResponse of(AnimalCase animalCase) {
+  public static AnimalCaseDetailDto of(AnimalCase animalCase) {
     List<CaseHistoryResponse> caseHistoryResponseList =
         animalCase.getHistories().stream()
             .map(CaseHistoryResponse::of)
             .toList();
 
-    return AnimalCaseDetailResponse.builder()
+    return AnimalCaseDetailDto.builder()
         .animalInfo(AnimalInfo.of(animalCase.getAnimal()))
         .currentFosterName(animalCase.getCurrentFoster().getNickname())
+        .title(animalCase.getTitle())
+        .description(animalCase.getDescription())
         .createdAt(animalCase.getCreatedAt())
         .modifiedAt(animalCase.getModifiedAt())
         .caseStatus(animalCase.getStatus())

@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 public class LostFoundPostResponseDto {
     private Long foundId;
     private MemberResponseDto author;
+    private Long userId;  // ✅ 추가된 필드 (작성자의 ID)
     private String nickname;  // ✅ 추가된 필드 (작성자 닉네임)
     private String content;
     private Double latitude;
@@ -40,6 +41,7 @@ public class LostFoundPostResponseDto {
     public LostFoundPostResponseDto(LostFoundPost lostFoundPost) {
         this.foundId = lostFoundPost.getId();
         this.author = new MemberResponseDto(lostFoundPost.getAuthor());
+        this.userId = lostFoundPost.getAuthor().getId();  // ✅ 유저 ID 추가
         this.nickname = lostFoundPost.getAuthor().getNickname();  // ✅ Member에서 nickname 가져오기
         this.content = lostFoundPost.getContent();
         this.latitude = lostFoundPost.getLatitude();

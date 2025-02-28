@@ -11,6 +11,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +32,10 @@ public class AnimalCase extends BaseEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "animal_id")
   private Animal animal;
+
+  private String title;
+  private String description;
+  private LocalDateTime deletedAt;
 
   @JsonIgnore
   @OneToMany(mappedBy = "animalCase", cascade = CascadeType.ALL, orphanRemoval = true)
