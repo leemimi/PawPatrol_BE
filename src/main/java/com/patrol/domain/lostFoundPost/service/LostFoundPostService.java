@@ -57,7 +57,7 @@ public class LostFoundPostService {
             if (petImage != null) {
                 petImage.setFoundId(lostFoundPost.getId());
                 imageHandlerService.registerImage(petImage.getPath(), petImage.getAnimalId(), lostFoundPost.getId());
-            } // 일반 saveImage 메소드 사용
+            }
         }
 
         return getImageSave(images, lostFoundPost);
@@ -116,11 +116,8 @@ public class LostFoundPostService {
     @NotNull
     private LostFoundPostResponseDto getImageSave(List<MultipartFile> images, LostFoundPost lostFoundPost) {
         if (images != null && !images.isEmpty()) {
-            // 새로운 uploadAndRegisterImages 메소드 사용
-            // (animalId는 null, foundId는 게시글 ID)
             List<Image> savedImages = imageHandlerService.uploadAndRegisterImages(images, FOLDER_PATH, null, lostFoundPost.getId());
 
-            // 게시글에 이미지 추가
             for (Image image : savedImages) {
                 lostFoundPost.addImage(image);
             }

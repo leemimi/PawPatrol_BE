@@ -23,26 +23,24 @@ public class ImageEventConsumer {
     private final ObjectMapper objectMapper;
 
     @KafkaListener(topics = "image-events", groupId = "image-processor-group")
-    public void listenImageEvent(@Payload String message) {
-        log.info("📩 Kafka 메시지 수신: {}", message);
-    }
-
-    @KafkaListener(topics = "image-events", groupId = "image-processor-group")
     @Transactional
-    public void processImageEvent(String message) {
+    public void processImageEvent(@Payload String message) {
+        log.info("📩 Kafka 메시지 수신: {}", message);
+
         try {
             // Kafka 메시지 파싱
             Map<String, String> event = objectMapper.readValue(message, new TypeReference<>() {});
             Long imageId = Long.parseLong(event.get("imageId"));
             String imageUrl = event.get("imageUrl");
 
-            log.info("🔵 Kafka 이벤트 수신: imageId={}, imageUrl={}", imageId, imageUrl);
+            log.info("🔵 Kafka 이벤트 처리 시작: imageId={}, imageUrl={}", imageId, imageUrl);
 
             // DB에서 이미지 조회
             Image image = imageRepository.findById(imageId)
                     .orElseThrow(() -> new RuntimeException("이미지 ID " + imageId + "를 찾을 수 없음"));
 
             // 임베딩 및 피처 추출
+            log.info("🔍 AI 서버에 이미지 분석 요청: imageId={}", imageId);
             Map<String, String> embeddingData = aiClient.extractEmbeddingAndFeaturesFromUrl(imageUrl);
             String embedding = embeddingData.get("embedding");
             String features = embeddingData.get("features");
@@ -52,6 +50,7 @@ public class ImageEventConsumer {
                 return;
             }
 
+            log.info("💾 임베딩 데이터 저장 시작: imageId={}", imageId);
             // DB에 저장
             image.setEmbedding(embedding);
             image.setFeatures(features);

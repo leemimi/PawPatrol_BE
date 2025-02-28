@@ -41,6 +41,8 @@ public class ImageHandlerServiceImpl implements ImageHandlerService {
     @Override
     @Transactional
     public Image registerImage(String imageUrl, Long animalId, Long foundId) {
+        log.info("이미지 등록 시작: animalId={}, foundId={}, Path={}", animalId, foundId, imageUrl);
+
         Image image = Image.builder()
                 .path(imageUrl)
                 .animalId(animalId)
@@ -48,10 +50,23 @@ public class ImageHandlerServiceImpl implements ImageHandlerService {
                 .build();
 
         Image savedImage = imageRepository.save(image);
-        imageService.sendImageEvent(savedImage.getId(), savedImage.getPath());
+
+        log.info("이미지 저장 완료: ID={}, animalId={}, foundId={}, Path={}",
+                savedImage.getId(), savedImage.getAnimalId(), savedImage.getFoundId(), savedImage.getPath());
+
+        // Kafka 이벤트 발행
+        try {
+            log.info("Kafka 이벤트 발행 시작: imageId={}, path={}", savedImage.getId(), savedImage.getPath());
+            imageService.sendImageEvent(savedImage.getId(), savedImage.getPath());
+            log.info("Kafka 이벤트 발행 완료: imageId={}", savedImage.getId());
+        } catch (Exception e) {
+            log.error("Kafka 이벤트 발행 중 오류 발생: imageId={}, 오류={}", savedImage.getId(), e.getMessage(), e);
+            // 오류가 발생해도 이미지 등록은 정상적으로 처리됨
+            // 필요한 경우 재시도 로직 또는 다른 처리를 여기에 추가할 수 있음
+        }
+
         return savedImage;
     }
-
     @Override
     @Transactional
     public List<Image> uploadAndRegisterImages(List<MultipartFile> files, String folderPath, Long animalId, Long foundId) {
