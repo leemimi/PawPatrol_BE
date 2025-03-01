@@ -6,7 +6,6 @@ import com.patrol.api.member.auth.dto.MyPostsResponse;
 import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.animal.repository.AnimalRepository;
 import com.patrol.domain.image.service.ImageHandlerService;
-import com.patrol.domain.image.service.ImageService;
 import com.patrol.domain.lostFoundPost.entity.LostFoundPost;
 import com.patrol.domain.lostFoundPost.entity.PostStatus;
 import com.patrol.domain.lostFoundPost.repository.LostFoundPostRepository;
@@ -15,26 +14,22 @@ import com.patrol.domain.image.repository.ImageRepository;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.global.error.ErrorCode;
 import com.patrol.global.exception.CustomException;
-import com.patrol.global.storage.FileStorageHandler;
-import com.patrol.global.storage.FileUploadRequest;
-import com.patrol.global.storage.FileUploadResult;
-import com.patrol.global.storage.NcpObjectStorageService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class LostFoundPostService {
     private final LostFoundPostRepository lostFoundPostRepository;
     private final AnimalRepository animalRepository;
@@ -45,6 +40,8 @@ public class LostFoundPostService {
 
     @Transactional
     public LostFoundPostResponseDto createLostFoundPost(LostFoundPostRequestDto requestDto, Long petId, Member author, List<MultipartFile> images) {
+        log.info("분실/발견 게시글 생성 시작: petId={}", petId);
+
         Animal pet = null;
         if (petId != null) {
             pet = animalRepository.findById(petId)
@@ -53,25 +50,29 @@ public class LostFoundPostService {
 
         LostFoundPost lostFoundPost = new LostFoundPost(requestDto, author, pet);
         lostFoundPostRepository.save(lostFoundPost);
+        log.info("분실/발견 게시글 저장 완료: postId={}", lostFoundPost.getId());
 
+        // 반려동물 이미지가 있는 경우 해당 이미지를 게시글에도 연결
         if (petId != null) {
             Image petImage = imageRepository.findByAnimalId(petId);
             if (petImage != null) {
                 petImage.setFoundId(lostFoundPost.getId());
-                imageHandlerService.registerImage(petImage.getPath(), petImage.getAnimalId(), lostFoundPost.getId());
+                imageRepository.save(petImage);
+                log.info("반려동물 이미지를 게시글에 연결: imageId={}, postId={}", petImage.getId(), lostFoundPost.getId());
             }
         }
-
-        return getImageSave(images, lostFoundPost);
+        return getSavedImages(images, lostFoundPost);
     }
 
     @Transactional
     public LostFoundPostResponseDto updateLostFoundPost(Long postId, LostFoundPostResponseDto requestDto, List<MultipartFile> images, Member author) {
+        log.info("분실/발견 게시글 수정 시작: postId={}", postId);
+
         LostFoundPost lostFoundPost = lostFoundPostRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
 
         if (!lostFoundPost.getAuthor().equals(author)) {
-            throw new RuntimeException("게시글 수정 권한이 없습니다.");
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
         }
 
         // 요청한 내용으로 게시글 수정
@@ -83,42 +84,32 @@ public class LostFoundPostService {
         if (requestDto.getLostTime() != null) lostFoundPost.setLostTime(requestDto.getLostTime());
         // status가 null이 아니면 PostStatus enum으로 변환
         if (requestDto.getStatus() != null) {
-            lostFoundPost.setStatus(PostStatus.fromString(requestDto.getStatus()));  // fromString 사용
+            lostFoundPost.setStatus(PostStatus.fromString(requestDto.getStatus()));
         }
 
-
-        return getImageSave(images, lostFoundPost);
+        return getSavedImages(images, lostFoundPost);
     }
-
     @Transactional
     public void deleteLostFoundPost(Long postId, Member author) {
+
         LostFoundPost lostFoundPost = lostFoundPostRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
 
-        // 로그인한 사용자(author)가 게시글 작성자와 일치하는지 확인
         if (!lostFoundPost.getAuthor().equals(author)) {
-            throw new RuntimeException("게시글 수정 권한이 없습니다.");
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
         }
-
-        // 이미지 조회 및 삭제
         List<Image> images = imageRepository.findAllByFoundId(postId);
-        images.forEach(image -> {
-            System.out.println("Deleting file: " + image.getPath());  // 경로 확인용 로그
-            try {
-                // 파일 삭제 시, 예외 발생 시 무시하고 계속 진행
-                try {
-                    ncpObjectStorageService.delete(image.getPath());
-                    imageRepository.delete(image);
-                    System.out.println("File deleted successfully: " + image.getPath());
-                } catch (Exception e) {
-                    System.err.println("Error deleting file (ignored): " + image.getPath());  // 에러 로그
-                    // 파일이 없거나 삭제가 실패해도 예외를 던지지 않고 무시
-                }
-            } catch (Exception e) {
-                System.err.println("Unexpected error: " + e.getMessage());
-            }
-        });
 
+        for (Image image : images) {
+            if (image.getAnimalId() != null) {
+                // 반려동물 이미지인 경우 foundId만 null로 설정
+                image.setFoundId(null);
+                imageRepository.save(image);
+            } else {
+                // 게시글 전용 이미지인 경우 삭제
+                imageHandlerService.deleteImage(image);
+            }
+        }
         // 게시글 삭제
         lostFoundPostRepository.deleteById(postId);
     }
@@ -132,7 +123,7 @@ public class LostFoundPostService {
     @Transactional(readOnly = true)
     public LostFoundPostResponseDto getLostFoundPostById(Long postId) {
         LostFoundPost lostFoundPost = lostFoundPostRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
 
         return LostFoundPostResponseDto.from(lostFoundPost);
     }
@@ -152,7 +143,7 @@ public class LostFoundPostService {
     }
 
     // 내가 작성한 게시글 리스트 불러오기
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<MyPostsResponse> myPosts(Member member, Pageable pageable) {
         Page<LostFoundPost> postsPage = lostFoundPostRepository.findByAuthorId(member.getId(), pageable);
 
@@ -164,8 +155,9 @@ public class LostFoundPostService {
                 post.getCreatedAt().toString()
         ));
     }
+
     // 마이페이지 나의 신고글 리스트 불러오기
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<MyPostsResponse> myReportPosts(Member member, Pageable pageable) {
         Page<LostFoundPost> reportPosts = lostFoundPostRepository.findByAuthorIdAndStatusIn(
                 member.getId(),
@@ -181,8 +173,9 @@ public class LostFoundPostService {
                 post.getCreatedAt().toString()
         ));
     }
+
     // 마이페이지 나의 제보글 리스트 불러오기
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<MyPostsResponse> myWitnessPosts(Member member, Pageable pageable) {
         Page<LostFoundPost> witnessPosts = lostFoundPostRepository.findByAuthorIdAndStatusIn(
                 member.getId(),
@@ -200,22 +193,19 @@ public class LostFoundPostService {
     }
 
     @NotNull
-    private LostFoundPostResponseDto getImageSave(List<MultipartFile> images, LostFoundPost lostFoundPost) {
+    private LostFoundPostResponseDto getSavedImages (List<MultipartFile> images, LostFoundPost lostFoundPost) {
         if (images != null && !images.isEmpty()) {
-            List<Image> savedImages = imageHandlerService.uploadAndRegisterImages(images, FOLDER_PATH, null, lostFoundPost.getId());
-
+            List<Image> savedImages = imageHandlerService.uploadAndRegisterImages(
+                    images,
+                    FOLDER_PATH,
+                    null,
+                    lostFoundPost.getId()
+            );
             for (Image image : savedImages) {
                 lostFoundPost.addImage(image);
             }
         }
 
         return LostFoundPostResponseDto.from(lostFoundPost);
-    }
-
-    private void deletePostImages(Long postId) {
-        List<Image> images = imageRepository.findAllByFoundId(postId);
-        for (Image image : images) {
-            imageHandlerService.deleteImage(image); // 이미지 핸들러로 이미지 삭제
-        }
     }
 }

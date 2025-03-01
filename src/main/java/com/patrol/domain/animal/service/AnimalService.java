@@ -12,9 +12,6 @@ import com.patrol.domain.image.service.ImageHandlerService;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.global.error.ErrorCode;
 import com.patrol.global.exception.CustomException;
-import com.patrol.global.storage.FileStorageHandler;
-import com.patrol.global.storage.FileUploadRequest;
-import com.patrol.global.storage.FileUploadResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,92 +19,80 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 import java.util.Optional;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * packageName    : com.patrol.domain.animal.service
- * fileName       : AnimalService
- * author         : sungjun
- * date           : 2025-02-24
- * description    : 자동 주석 생성
- * ===========================================================
- * DATE              AUTHOR             NOTE
- * -----------------------------------------------------------
- * 2025-02-24        kyd54       최초 생성
- */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Slf4j
 public class AnimalService {
     private final AnimalRepository animalRepository;
-    private final FileStorageHandler fileStorageHandler;
     private final ImageHandlerService imageHandlerService;
-    private static final String FOLDER_PATH = "petRegister/homeless/";
+    private static final String HOMELESS_FOLDER_PATH = "petRegister/homeless/";
+    private static final String MEMBER_FOLDER_PATH_PREFIX = "petRegister/";
 
-
-    // 주인 없는 반려동물 등록
     @Transactional
     public void petRegister(PetRegisterRequest petRegisterRequest) {
-        log.info("주인 없는 반려동물 등록 시작");
         // 이미지 업로드
-        FileUploadResult uploadResult = fileStorageHandler.handleFileUpload(
-                FileUploadRequest.builder()
-                        .folderPath(FOLDER_PATH)
-                        .file(petRegisterRequest.imageFile())
-                        .build()
+        List<Image> savedImages = imageHandlerService.uploadAndRegisterImages(
+                List.of(petRegisterRequest.imageFile()),
+                HOMELESS_FOLDER_PATH,
+                null,
+                null
         );
 
-        if (uploadResult != null) {
-            // ImageHandlerService를 통해 이미지 URL 생성
-            String imageUrl = imageHandlerService.createImageUrl(FOLDER_PATH, uploadResult.getFileName());
-            log.info("이미지 URL 생성 완료: {}", imageUrl);
-
-            // 동물 등록
+        if (!savedImages.isEmpty()) {
+            String imageUrl = savedImages.get(0).getPath();
             Animal animal = petRegisterRequest.buildAnimal(imageUrl);
-            log.info("동물 객체 생성 완료: {}", animal);
-
             Animal savedAnimal = animalRepository.save(animal);
-            log.info("동물 저장 완료: ID={}", savedAnimal.getId());
 
-            // 중요: 이미지 등록 및 Kafka 이벤트 발행
-            try {
-                Image registeredImage = imageHandlerService.registerImage(imageUrl, savedAnimal.getId(), null);
-                log.info("동물 이미지 등록 완료: 동물 ID={}, 이미지 ID={}, 이미지 경로={}",
-                        savedAnimal.getId(), registeredImage.getId(), registeredImage.getPath());
-            } catch (Exception e) {
-                log.error("이미지 등록 중 오류 발생: {}", e.getMessage(), e);
-                // 필요한 경우 예외 처리 추가
-                throw e; // 트랜잭션 롤백을 위해 예외를 다시 throw
-            }
+            // 이미지에 동물 ID 업데이트
+            Image image = savedImages.get(0);
+            image.setAnimalId(savedAnimal.getId());
         } else {
-            log.warn("파일 업로드 결과가 null입니다.");
+            throw new CustomException(ErrorCode.FILE_UPLOAD_ERROR);
         }
-        log.info("주인 없는 반려동물 등록 완료");
     }
 
+    @Transactional
+    public void myPetRegister(Member member, PetRegisterRequest petRegisterRequest) {
+        String folderPath = MEMBER_FOLDER_PATH_PREFIX + member.getId() + "/";
+
+        // 이미지 업로드
+        List<Image> savedImages = imageHandlerService.uploadAndRegisterImages(
+                List.of(petRegisterRequest.imageFile()),
+                folderPath,
+                null,
+                null
+        );
+
+        if (!savedImages.isEmpty()) {
+            // 이미지 URL 가져오기
+            String imageUrl = savedImages.get(0).getPath();
+            // 동물 등록 (주인 정보 포함)
+            Animal animal = petRegisterRequest.buildAnimal(member, imageUrl);
+            Animal savedAnimal = animalRepository.save(animal);
+            Image image = savedImages.get(0);
+            image.setAnimalId(savedAnimal.getId());
+        } else {
+            throw new CustomException(ErrorCode.FILE_UPLOAD_ERROR);
+        }
+    }
 
     @Transactional
     public Animal registerWithImageUrl(PetRegisterRequest petRegisterRequest, String imageUrl) {
-        log.info("이미지 URL을 통한 반려동물 등록 시작: {}", imageUrl);
         // 동물 등록
         Animal animal = petRegisterRequest.buildAnimal(imageUrl);
         Animal savedAnimal = animalRepository.save(animal);
-        log.info("동물 저장 완료: ID={}", savedAnimal.getId());
 
         // 이미지 등록 및 Kafka 이벤트 발행
         try {
             Image registeredImage = imageHandlerService.registerImage(imageUrl, savedAnimal.getId(), null);
-            log.info("동물 이미지 등록 완료: 동물 ID={}, 이미지 ID={}, 이미지 경로={}",
-                    savedAnimal.getId(), registeredImage.getId(), registeredImage.getPath());
         } catch (Exception e) {
             log.error("이미지 등록 중 오류 발생: {}", e.getMessage(), e);
-            // 필요한 경우 예외 처리 추가
-            throw e; // 트랜잭션 롤백을 위해 예외를 다시 throw
+            throw e;
         }
-
         log.info("이미지 URL을 통한 반려동물 등록 완료: 동물 ID={}", savedAnimal.getId());
         return savedAnimal;
     }
@@ -119,7 +104,6 @@ public class AnimalService {
     // 등록된 나의 반려동물 리스트 가져오기 (마이페이지)
     @Transactional
     public List<MyPetListResponse> myPetList(Member member) {
-        logger.info("등록된 나의 반려동물 리스트 가져오기 (마이페이지)");
         return animalRepository.findByOwnerId(member.getId())
                 .stream()
                 .map(animal -> MyPetListResponse.builder()
@@ -137,12 +121,11 @@ public class AnimalService {
                 .collect(Collectors.toList());
     }
 
-
     // 내 반려동물 정보 수정 (마이페이지)
     @Transactional
     public void modifyMyPetInfo(Member member, ModiPetInfoRequest modiPetInfoRequest) {
-        logger.info("내 반려동물 정보 수정 (마이페이지)");
-        Animal animal = animalRepository.findById(modiPetInfoRequest.getId()).orElseThrow();
+        Animal animal = animalRepository.findById(modiPetInfoRequest.getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.ANIMAL_NOT_FOUND));
 
         // 반려동물 소유자 검증
         validateOwner(animal, member);
@@ -156,41 +139,41 @@ public class AnimalService {
 
         // 이미지 파일이 제공된 경우에만 처리
         if (modiPetInfoRequest.getImageFile() != null && !modiPetInfoRequest.getImageFile().isEmpty()) {
+            String folderPath = "petRegister/" + member.getId() + "/";
 
-            // 기존 파일 삭제
-            fileStorageHandler.handleFileDelete(modiPetInfoRequest.getImageUrl());
+            // 기존 이미지 삭제
+            if (animal.getImageUrl() != null && !animal.getImageUrl().isEmpty()) {
+                imageHandlerService.deleteImageByPath(animal.getImageUrl());
+            }
 
-            // 이미지 업로드
-            FileUploadResult uploadResult = fileStorageHandler.handleFileUpload(
-                    FileUploadRequest.builder()
-                            .folderPath("petRegister/" + member.getId())
-                            .file(modiPetInfoRequest.getImageFile())
-                            .build()
+            // 새 이미지 업로드 및 등록
+            List<Image> savedImages = imageHandlerService.uploadAndRegisterImages(
+                    List.of(modiPetInfoRequest.getImageFile()),
+                    folderPath,
+                    animal.getId(),
+                    null
             );
 
-            String imageUrl = storageConfig.getEndpoint()
-                    + "/"
-                    + storageConfig.getBucketname()
-                    + "/"
-                    + uploadResult.getFullPath();
-
-            // 이미지 URL 업데이트
-            animal.setImageUrl(imageUrl);
+            if (!savedImages.isEmpty()) {
+                // 이미지 URL 업데이트
+                animal.setImageUrl(savedImages.get(0).getPath());
+            }
         }
     }
 
     // 내 반려동물 정보 삭제 (마이페이지)
     @Transactional
-    public void deleteMyPetInfo(Member member,
-                                DeleteMyPetInfoRequest deleteMyPetInfoRequest) {
-        logger.info("내 반려동물 정보 삭제 (마이페이지)");
-        Animal animal = animalRepository.findById(deleteMyPetInfoRequest.id()).orElseThrow();
-
-        // S3에 있는 반려동물 이미지 삭제
-        fileStorageHandler.handleFileDelete(animal.getImageUrl());
+    public void deleteMyPetInfo(Member member, DeleteMyPetInfoRequest deleteMyPetInfoRequest) {
+        Animal animal = animalRepository.findById(deleteMyPetInfoRequest.id())
+                .orElseThrow(() -> new CustomException(ErrorCode.ANIMAL_NOT_FOUND));
 
         // 반려동물 소유자 검증
         validateOwner(animal, member);
+
+        // 반려동물 이미지 삭제
+        if (animal.getImageUrl() != null && !animal.getImageUrl().isEmpty()) {
+            imageHandlerService.deleteImageByPath(animal.getImageUrl());
+        }
 
         animalRepository.delete(animal);
     }
@@ -198,17 +181,15 @@ public class AnimalService {
     // 반려동물 소유자 검증
     public void validateOwner(Animal animal, Member member) {
         if (!Objects.equals(animal.getOwner().getId(), member.getId())) {
-            logger.error("해당 반려동물의 소유자가 아닙니다. 본인이 등록한 반려동물만 수정할 수 있습니다.");
             throw new CustomException(ErrorCode.PET_OWNER_MISMATCH);
         }
     }
-
 
     public List<PetResponseDto> getAllAnimals() {
         // Fetch all animals from the repository and convert to PetResponseDto
         return animalRepository.findAll().stream()
                 .map(PetResponseDto::new)  // Convert Animal to PetResponseDto using the constructor
                 .collect(Collectors.toList());  // Collect them into a List
-
     }
+
 }

@@ -93,6 +93,11 @@ public class LostFoundPost extends BaseEntity {
 
     }
 
+    public LostFoundPost (LostFoundPostRequestDto requestDto, Member author, Animal pet) {
+        this(requestDto, author);
+        this.pet = pet;
+    }
+
 
     public void addImage(Image image) {
         if (this.images == null) {
