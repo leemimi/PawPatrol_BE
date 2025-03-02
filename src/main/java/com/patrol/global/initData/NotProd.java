@@ -36,9 +36,9 @@ public class NotProd {
       public void run(ApplicationArguments args) throws Exception {
         // Member1,2,3 생성
         // Member1,2,3 생성
-        SignupRequest request1 = new SignupRequest("test1@test.com", "1234", "강남");
-        SignupRequest request2 = new SignupRequest("test2@test.com", "1234", "홍길동");
-        SignupRequest request3 = new SignupRequest("test3@test.com", "1234", "제펫토");
+        SignupRequest request1 = new SignupRequest("test1@test.com", "1234", "강남", "서울");
+        SignupRequest request2 = new SignupRequest("test2@test.com", "1234", "홍길동", "경기도");
+        SignupRequest request3 = new SignupRequest("test3@test.com", "1234", "제펫토", "강원도");
 
         Member member1 = authService.signUp(request1);
         Member member2 = authService.signUp(request2);

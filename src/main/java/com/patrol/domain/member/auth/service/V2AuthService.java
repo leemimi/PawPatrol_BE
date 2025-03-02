@@ -69,6 +69,7 @@ public class V2AuthService {
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
                 .nickname(request.nickname())
+                .address(request.address())
                 .apiKey(UUID.randomUUID().toString())
                 .createdAt(LocalDateTime.now())
                 .build();
