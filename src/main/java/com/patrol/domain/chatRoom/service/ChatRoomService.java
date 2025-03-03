@@ -52,15 +52,16 @@ public class ChatRoomService {
                         ChatMessage latestMessage = roomToLatestMessage.get(room.getId());
                         ResponseMessage messageDto = null;
                         if (latestMessage != null) {
-                            messageDto = new ResponseMessage(
-                                    latestMessage.getId(),
-                                    latestMessage.getContent(),
-                                    new MemberResponseDto(latestMessage.getSender()),
-                                    new MemberResponseDto(latestMessage.getReceiver()),
-                                    room.getPost().getId(),
-                                    latestMessage.getCreatedAt(),
-                                    latestMessage.isRead()
-                            );
+                            messageDto = ResponseMessage.builder()
+                                    .id(latestMessage.getId())
+                                    .content(latestMessage.getContent())
+                                    .sender(new MemberResponseDto(latestMessage.getSender()))
+                                    .receiver(new MemberResponseDto(latestMessage.getReceiver()))
+                                    .postId(room.getPost().getId())
+                                    .timestamp(latestMessage.getCreatedAt())
+                                    .isRead(latestMessage.isRead())
+                                    .messageType(latestMessage.getMessageType()) // ChatMessage에 이 필드가 없다면 조정 필요
+                                    .build();
                         }
                         int unreadCount = roomToUnreadCount.getOrDefault(room.getId(), 0);
                         return new ChatRoomResponseDto(room, messageDto, unreadCount);

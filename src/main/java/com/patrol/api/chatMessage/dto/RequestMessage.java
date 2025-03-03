@@ -13,5 +13,4 @@ public class RequestMessage {
     private Long receiverId;
     private Long senderId;
     private String content;
-
 }

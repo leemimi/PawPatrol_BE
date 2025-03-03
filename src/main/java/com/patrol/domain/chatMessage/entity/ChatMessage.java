@@ -35,4 +35,7 @@ public class ChatMessage extends BaseEntity {
 
     private boolean isRead;
 
+    @Enumerated(EnumType.STRING)
+    private MessageType messageType;
+
 }

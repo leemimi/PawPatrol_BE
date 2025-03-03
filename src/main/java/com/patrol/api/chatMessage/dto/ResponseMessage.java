@@ -1,16 +1,14 @@
 package com.patrol.api.chatMessage.dto;
 
-import com.patrol.api.member.member.dto.MemberDto;
 import com.patrol.api.member.member.dto.MemberResponseDto;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.patrol.domain.chatMessage.entity.MessageType;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ResponseMessage {
@@ -21,4 +19,5 @@ public class ResponseMessage {
     private Long postId;
     private LocalDateTime timestamp;
     private boolean isRead;
+    private MessageType messageType;
 }
