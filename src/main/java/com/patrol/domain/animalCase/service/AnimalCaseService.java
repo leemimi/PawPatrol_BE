@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -81,5 +82,10 @@ public class AnimalCaseService {
       throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
     }
     animalCase.setDeletedAt(LocalDateTime.now());
+  }
+
+  @Transactional
+  public void saveAll(List<AnimalCase> animalCases) {
+    animalCaseRepository.saveAll(animalCases);
   }
 }

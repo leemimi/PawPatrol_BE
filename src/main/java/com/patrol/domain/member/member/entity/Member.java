@@ -138,8 +138,7 @@ public class Member extends BaseEntity {
 
 
     @JsonIgnore
-    @OneToOne
-    @JoinColumn(name = "shelter_id")
+    @OneToOne(mappedBy = "shelterMember")
     private Shelter shelter;
 
 

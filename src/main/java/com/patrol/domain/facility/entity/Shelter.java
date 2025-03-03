@@ -4,10 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.patrol.domain.animalCase.entity.AnimalCase;
 import com.patrol.domain.member.member.entity.Member;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
@@ -17,6 +14,7 @@ import static jakarta.persistence.CascadeType.ALL;
 
 @Entity
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
@@ -27,7 +25,8 @@ public class Shelter extends Facility {
   private String saveTargetAnimal; // 구조대상동물
 
   @JsonIgnore
-  @OneToOne(mappedBy = "shelter", cascade = ALL, orphanRemoval = true)
+  @OneToOne
+  @JoinColumn(name = "member_id")  // 외래 키 이름
   private Member shelterMember;
 
   @JsonIgnore

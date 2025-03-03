@@ -68,6 +68,7 @@ public class ShelterService implements FacilityService {
   }
 
 
+
   private Shelter convertToEntity(ShelterApiResponse.Item item) {
     OperatingHours operatingHours = OperatingHours.builder()
         .weekdayTime(formatOperatingHours(item.getWeekOprStime(), item.getWeekOprEtime()))

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 
 public interface ShelterRepository extends JpaRepository<Shelter, Long> {
@@ -20,6 +21,9 @@ public interface ShelterRepository extends JpaRepository<Shelter, Long> {
             @Param("longitude") double longitude,
             @Param("radius") double radius
     );
+
+
+    Optional<Shelter> findByName(String centerName);
 }
 
 
