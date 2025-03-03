@@ -1,5 +1,6 @@
 package com.patrol.domain.image.service;
 
+import com.patrol.domain.animal.repository.AnimalRepository;
 import com.patrol.domain.image.entity.Image;
 import com.patrol.domain.image.repository.ImageRepository;
 import com.patrol.global.error.ErrorCode;
@@ -25,6 +26,7 @@ public class ImageService {
   private final FileStorageHandler fileStorageHandler;
   private final ImageRepository imageRepository;
   private final NcpObjectStorageService ncpObjectStorageService;
+  private final AnimalRepository animalRepository;
 
   @Value("${ncp.storage.endpoint}")
   private String endPoint;
@@ -98,5 +100,9 @@ public class ImageService {
     } catch (Exception e) {
       throw new CustomException(ErrorCode.DATABASE_ERROR);
     }
+  }
+
+  public List<Image> findAllByAnimalId(Long animalId) {
+    return imageRepository.findAllByAnimalId(animalId);
   }
 }

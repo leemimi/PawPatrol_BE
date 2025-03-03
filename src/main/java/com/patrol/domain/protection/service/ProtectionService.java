@@ -59,13 +59,15 @@ public class ProtectionService {
     boolean isOwner = animalCase.getCurrentFoster() != null &&
         animalCase.getCurrentFoster().getId().equals(memberId);
 
+    List<Image> images = imageService.findAllByAnimalId(animalCase.getAnimal().getId());
+
     if (isOwner) {
       return AnimalCaseDetailResponse.create(
-          AnimalCaseDetailDto.of(animalCase), isOwner, getPendingProtections(animalCase.getId())
+          AnimalCaseDetailDto.of(animalCase), isOwner, getPendingProtections(animalCase.getId()), images
       );
     } else {
       return AnimalCaseDetailResponse.create(
-          AnimalCaseDetailDto.of(animalCase), isOwner, null
+          AnimalCaseDetailDto.of(animalCase), isOwner, null, images
       );
     }
   }

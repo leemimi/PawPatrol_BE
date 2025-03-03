@@ -46,7 +46,7 @@ public class FetchAdoptionAnimalScheduler {
         String jsonResponse = fetchAdoptionAnimalsData();
         String jsonImageResponse = fetchAdoptionAnimalImagesData();
         log.info(jsonImageResponse);
-        adoptionAnimalService.saveApiResponse(jsonResponse);
+        adoptionAnimalService.saveApiResponse(jsonResponse, jsonImageResponse);
 
       } catch (Exception e) {
         log.error("입양대기동물 API 호출 에러 발생", e);

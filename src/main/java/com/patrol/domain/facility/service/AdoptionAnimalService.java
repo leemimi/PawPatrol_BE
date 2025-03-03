@@ -2,6 +2,7 @@ package com.patrol.domain.facility.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.patrol.api.facility.dto.AdoptionAnimalApiResponse;
+import com.patrol.api.facility.dto.AdoptionAnimalImageApiResponse;
 import com.patrol.api.member.auth.dto.request.SignupRequest;
 import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.animal.enums.AnimalGender;
@@ -14,6 +15,8 @@ import com.patrol.domain.animalCase.service.AnimalCaseService;
 import com.patrol.domain.facility.entity.OperatingHours;
 import com.patrol.domain.facility.entity.Shelter;
 import com.patrol.domain.facility.repository.ShelterRepository;
+import com.patrol.domain.image.entity.Image;
+import com.patrol.domain.image.repository.ImageRepository;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.enums.MemberRole;
 import com.patrol.domain.member.member.enums.MemberStatus;
@@ -27,10 +30,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+
+import java.util.*;
 
 
 @Service
@@ -45,6 +46,7 @@ public class AdoptionAnimalService {
   private final ObjectMapper objectMapper;
   private final MemberRepository memberRepository;
   private final PasswordEncoder passwordEncoder;
+  private final ImageRepository imageRepository;
 
 
   @Transactional
@@ -150,18 +152,60 @@ public class AdoptionAnimalService {
     }
   }
 
+  private Map<String, List<Image>> handleImages(String jsonImageResponse) {
+    try {
+      AdoptionAnimalImageApiResponse response =
+          objectMapper.readValue(jsonImageResponse, AdoptionAnimalImageApiResponse.class);
+
+      Map<String, List<Image>> animalImagesMap = new HashMap<>();
+      if (response.getTbAdpWaitAnimalPhotoView() != null) {
+        List<Image> allImages = new ArrayList<>();
+
+        for (AdoptionAnimalImageApiResponse.Row row : response.getTbAdpWaitAnimalPhotoView().getRow()) {
+          String animalNo = row.getAnimalNo();
+
+          Image image = Image.builder()
+              .path("https://" + row.getPhotoUrl())
+              .build();
+
+          allImages.add(image);
+
+          if (!animalImagesMap.containsKey(animalNo)) {
+            animalImagesMap.put(animalNo, new ArrayList<>());
+          }
+          animalImagesMap.get(animalNo).add(image);
+        }
+
+        if (!allImages.isEmpty()) {
+          imageRepository.saveAll(allImages);
+        }
+
+        log.info("저장된 입양대기 이미지 수: {}", response.getTbAdpWaitAnimalPhotoView().getRow().size());
+      } else {
+        log.warn("이미지 API에서 받은 데이터가 없거나 비어있습니다.");
+      }
+
+      return animalImagesMap;
+
+    } catch (Exception e) {
+      log.error("이미지 데이터 저장 중 에러 발생: {}", e.getMessage(), e);
+      throw new RuntimeException("이미지 데이터 저장 실패", e);
+    }
+  }
+
 
   @Transactional
-  public void saveApiResponse(String jsonResponse) {
+  public void saveApiResponse(String jsonResponse, String jsonImageResponse) {
     try {
       initCenters();
+
+      Map<String, List<Image>> animalImagesMap = handleImages(jsonImageResponse);
 
       AdoptionAnimalApiResponse response = objectMapper.readValue(jsonResponse, AdoptionAnimalApiResponse.class);
       log.info("API 응답 파싱 결과: TbAdpWaitAnimalView={}",
           response.getTbAdpWaitAnimalView() != null ? "not null" : "null");
 
       if (response.getTbAdpWaitAnimalView() != null) {
-        List<Animal> animals = new ArrayList<>();
         List<AnimalCase> animalCases = new ArrayList<>();
 
         for (AdoptionAnimalApiResponse.Row row : response.getTbAdpWaitAnimalView().getRow()) {
@@ -179,11 +223,16 @@ public class AdoptionAnimalService {
             animal = updateAnimalFromRow(existingAnimal.get(), row);
           } else {
             animal = createAnimalFromRow(row);
-            animals.add(animal);
+            animalRepository.save(animal);
           }
 
-          if (!animals.isEmpty()) {
-            animalRepository.saveAll(animals);
+          List<Image> animalImages = animalImagesMap.get(row.getAnimalNo());
+          if (animalImages != null && !animalImages.isEmpty()) {
+            for (Image image : animalImages) {
+              image.setAnimalId(animal.getId());
+            }
+            Image representativeImage = animalImages.getFirst();
+            animal.setImageUrl(representativeImage.getPath());
           }
 
 
