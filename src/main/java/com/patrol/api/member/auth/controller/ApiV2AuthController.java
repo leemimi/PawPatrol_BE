@@ -98,6 +98,7 @@ public class ApiV2AuthController {
     public GlobalResponse<LoginUserInfoResponse> loginUserInfo(@LoginUser Member member) {
 
         LoginUserInfoResponse userInfo = LoginUserInfoResponse.builder()
+                .id(member.getId())
                 .email(member.getEmail())
                 .nickname(member.getNickname())
                 .profileImage(member.getProfileImageUrl())

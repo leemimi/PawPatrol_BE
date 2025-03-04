@@ -48,8 +48,10 @@ public class ApiSecurityConfig {
   public UrlBasedCorsConfigurationSource corsConfigurationSource() {
     // 위에서 설정한 CORS 설정 코드와 동일
     CorsConfiguration corsConfig = new CorsConfiguration();
+
     corsConfig.addAllowedOrigin(AppConfig.getSiteFrontUrl());
     corsConfig.addAllowedOrigin(AppConfig.getDevFrontUrl());
+
     corsConfig.addAllowedMethod("*");
     corsConfig.addAllowedHeader("*");
 
@@ -60,6 +62,7 @@ public class ApiSecurityConfig {
     source.registerCorsConfiguration("/oauth2/**", corsConfig);
     source.registerCorsConfiguration("/login/oauth2/**", corsConfig);
     source.registerCorsConfiguration("/login/**", corsConfig);
+    source.registerCorsConfiguration("/ws/**", corsConfig);
 
     return source;
   }
@@ -70,7 +73,7 @@ public class ApiSecurityConfig {
     http
         .securityMatcher("/api/**", "/oauth2/**",
                 "/login/oauth2/**", "/login/**",
-                "/login-pet/**")
+                "/login-pet/**",  "/ws/**")
         .authorizeHttpRequests(
             authorizeRequests -> authorizeRequests
                     .requestMatchers(HttpMethod.GET, "/api/lost-found/find/{postId}").permitAll()  // ✅ 신고 연계 제보 게시글 상세 조회 허용
@@ -108,6 +111,7 @@ public class ApiSecurityConfig {
                 .requestMatchers("/oauth2/**").permitAll()
                 .requestMatchers("/login/oauth2/**").permitAll()
                 .requestMatchers("/login/**").permitAll()
+                    .requestMatchers("/ws/**").permitAll()
                     // v2 회원가입
                 .requestMatchers(HttpMethod.POST, "/api/*/auth/sign-up").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/*/auth/**").permitAll()
