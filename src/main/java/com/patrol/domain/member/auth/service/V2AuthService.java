@@ -2,6 +2,7 @@ package com.patrol.domain.member.auth.service;
 
 import com.patrol.api.member.auth.dto.SocialTokenInfo;
 import com.patrol.api.member.auth.dto.request.SignupRequest;
+import com.patrol.api.member.auth.dto.requestV2.BusinessNumberRequest;
 import com.patrol.api.member.auth.dto.requestV2.LoginRequest;
 import com.patrol.api.member.auth.dto.requestV2.NewPasswordRequest;
 import com.patrol.api.member.auth.dto.requestV2.SocialConnectRequest;
@@ -20,12 +21,16 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -57,6 +62,7 @@ public class V2AuthService {
     private final AuthTokenService authTokenService;
     private final StringRedisTemplate redisTemplate;
     private final Rq rq;
+    private final RestTemplate restTemplate;
 
     private static final String KEY_PREFIX = "find:verification:";
 
@@ -247,4 +253,30 @@ public class V2AuthService {
             member.updatePassword(passwordEncoder.encode(request.newPassword()));
         }
     }
+
+    // 사업자 등록번호 검증
+    public String validateBusinessNumber(BusinessNumberRequest request) {
+        String baseUrl = "https://api.odcloud.kr/api/nts-businessman/v1/validate";
+        String decodedKey = "7AzcA/MmIG7YEpb8rxSZHoey2XmkaIRBFl7Sg7eqLP8WGhhw+rC2i/a+D2HnnFhgcsM20DxCksamp76jQQCaVg==";
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl)
+                .queryParam("serviceKey", decodedKey);
+
+        String fullUrl = builder.toUriString();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<BusinessNumberRequest> entity = new HttpEntity<>(request, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                URI.create(fullUrl),
+                HttpMethod.POST,
+                entity,
+                String.class
+        );
+
+        return response.getBody();
+    }
+
 }
