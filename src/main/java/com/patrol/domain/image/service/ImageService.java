@@ -278,4 +278,8 @@ public class ImageService {
         }
         return embeddings;
     }
+
+    public List<Image> findAllByAnimalId(Long animalId) {
+      return imageRepository.findAllByAnimalId(animalId);
+    }
 }

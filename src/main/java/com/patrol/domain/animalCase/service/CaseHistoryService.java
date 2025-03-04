@@ -44,7 +44,6 @@ public class CaseHistoryService {
   }
 
 
-
   public void addHistory(
       AnimalCase animalCase, CaseHistoryStatus historyStatus,
       ContentType contentType, Long contentId, Long memberId
