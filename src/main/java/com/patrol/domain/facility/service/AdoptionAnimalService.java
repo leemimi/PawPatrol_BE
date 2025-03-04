@@ -3,7 +3,6 @@ package com.patrol.domain.facility.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.patrol.api.facility.dto.AdoptionAnimalApiResponse;
 import com.patrol.api.facility.dto.AdoptionAnimalImageApiResponse;
-import com.patrol.api.member.auth.dto.request.SignupRequest;
 import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.animal.enums.AnimalGender;
 import com.patrol.domain.animal.enums.AnimalSize;
@@ -11,7 +10,9 @@ import com.patrol.domain.animal.enums.AnimalType;
 import com.patrol.domain.animal.repository.AnimalRepository;
 import com.patrol.domain.animalCase.entity.AnimalCase;
 import com.patrol.domain.animalCase.enums.CaseStatus;
+import com.patrol.domain.animalCase.enums.ContentType;
 import com.patrol.domain.animalCase.service.AnimalCaseService;
+import com.patrol.domain.animalCase.service.CaseHistoryService;
 import com.patrol.domain.facility.entity.OperatingHours;
 import com.patrol.domain.facility.entity.Shelter;
 import com.patrol.domain.facility.repository.ShelterRepository;
@@ -22,7 +23,6 @@ import com.patrol.domain.member.member.enums.MemberRole;
 import com.patrol.domain.member.member.enums.MemberStatus;
 import com.patrol.domain.member.member.enums.ProviderType;
 import com.patrol.domain.member.member.repository.MemberRepository;
-import com.patrol.domain.member.member.service.MemberService;
 import com.patrol.global.error.ErrorCode;
 import com.patrol.global.exception.CustomException;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +47,7 @@ public class AdoptionAnimalService {
   private final MemberRepository memberRepository;
   private final PasswordEncoder passwordEncoder;
   private final ImageRepository imageRepository;
+  private final CaseHistoryService caseHistoryService;
 
 
   @Transactional
@@ -249,6 +250,10 @@ public class AdoptionAnimalService {
           } else {
             AnimalCase animalCase = createAnimalCaseFromRow(row, animal, shelter);
             animalCases.add(animalCase);
+
+            caseHistoryService.addAnimalCase(
+                animalCase, ContentType.ANIMAL_CASE, animalCase.getId(), shelter.getShelterMember().getId()
+            );
           }
         }
 
