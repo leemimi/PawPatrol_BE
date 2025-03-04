@@ -6,26 +6,25 @@ import com.patrol.domain.protection.enums.ProtectionStatus;
 import com.patrol.domain.protection.enums.ProtectionType;
 import com.patrol.global.jpa.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
 @Entity
-@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
+@SuperBuilder
 @Table(name = "protections")
 public class Protection extends BaseEntity {
 
+  @Builder.Default
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private ProtectionStatus protectionStatus = ProtectionStatus.PENDING;  // 신청 상태 (승인전, 승인, 거절)
+
   private LocalDateTime approvedDate;  // 신청 승인일
   private String reason;   // 신청 사유
   private String rejectReason;   // 거절 사유

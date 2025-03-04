@@ -80,18 +80,8 @@ public class ApiV2AuthController {
     // 로그인
     @PostMapping("/login")
     public GlobalResponse<String> login(@Valid @RequestBody LoginRequest loginRequest) {
-        Member member = v2MemberService.getMember(loginRequest.email());
-
-        // 비밀번호 검증 로직
-        if (!passwordEncoder.matches(loginRequest.password(), member.getPassword())) {
-            throw new ServiceException(ErrorCodes.INVALID_PASSWORD);
-        }
-
-        // 엑세스 토큰 발급
-        String accessToken = rq.makeAuthCookies(member);
-
         logger.info("로그인");
-        return GlobalResponse.success(accessToken);
+        return GlobalResponse.success(v2AuthService.login(loginRequest));
     }
 
     // 로그아웃
@@ -108,9 +98,11 @@ public class ApiV2AuthController {
     public GlobalResponse<LoginUserInfoResponse> loginUserInfo(@LoginUser Member member) {
 
         LoginUserInfoResponse userInfo = LoginUserInfoResponse.builder()
+                .id(member.getId())
                 .email(member.getEmail())
                 .nickname(member.getNickname())
                 .profileImage(member.getProfileImageUrl())
+                .role(member.getRole())
                 .build();
         return GlobalResponse.success(userInfo);
     }

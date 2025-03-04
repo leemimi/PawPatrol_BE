@@ -4,6 +4,7 @@ package com.patrol.global.initData;
 import com.patrol.api.member.auth.dto.request.SignupRequest;
 import com.patrol.api.member.member.dto.request.PetRegisterRequest;
 import com.patrol.domain.animal.entity.Animal;
+import com.patrol.domain.animal.repository.AnimalRepository;
 import com.patrol.domain.animal.service.AnimalService;
 import com.patrol.domain.animalCase.service.AnimalCaseEventPublisher;
 import com.patrol.domain.member.auth.service.AuthService;
@@ -27,7 +28,8 @@ public class NotProd {
   public ApplicationRunner applicationRunner(
       V2AuthService authService,
       AnimalService animalService,
-      AnimalCaseEventPublisher animalCaseEventPublisher
+      AnimalCaseEventPublisher animalCaseEventPublisher,
+      AnimalRepository animalRepository
 
   ) {
     return new ApplicationRunner() {
@@ -36,9 +38,9 @@ public class NotProd {
       public void run(ApplicationArguments args) throws Exception {
         // Member1,2,3 생성
         // Member1,2,3 생성
-        SignupRequest request1 = new SignupRequest("test1@test.com", "1234", "강남");
-        SignupRequest request2 = new SignupRequest("test2@test.com", "1234", "홍길동");
-        SignupRequest request3 = new SignupRequest("test3@test.com", "1234", "제펫토");
+        SignupRequest request1 = new SignupRequest("test1@test.com", "1234", "강남", "서울");
+        SignupRequest request2 = new SignupRequest("test2@test.com", "1234", "홍길동", "경기도");
+        SignupRequest request3 = new SignupRequest("test3@test.com", "1234", "제펫토", "강원도");
 
         Member member1 = authService.signUp(request1);
         Member member2 = authService.signUp(request2);
@@ -102,6 +104,38 @@ public class NotProd {
             );
             System.out.println("Member3의 동물 케이스 생성: " + animalList.get(index).getBreed());
           }
+        }
+
+// ==================== 내 반려동물 데이터 추가 ====================
+// 반려동물 샘플 데이터 가져오기
+        List<PetRegisterRequest> myPets = SampleMyPetData.getSamplePets();
+        List<String> myPetImageUrls = SampleMyPetData.getSampleImageUrls();
+
+// 각 회원별로 2마리씩 반려동물 등록
+        for (int i = 0; i < myPets.size(); i++) {
+          // 회원 할당 (0,1번 동물은 member1, 2,3번 동물은 member2, 4,5번 동물은 member3)
+          Member owner = (i < 2) ? member1 : (i < 4) ? member2 : member3;
+
+          // Animal 객체 생성
+          Animal pet = Animal.builder()
+                  .owner(owner)
+                  .name(myPets.get(i).name())
+                  .registrationNo(myPets.get(i).registrationNo())
+                  .animalType(myPets.get(i).animalType())
+                  .breed(myPets.get(i).breed())
+                  .gender(myPets.get(i).gender())
+                  .size(myPets.get(i).size())
+                  .imageUrl(myPetImageUrls.get(i))
+                  .estimatedAge(myPets.get(i).estimatedAge())
+                  .healthCondition(myPets.get(i).healthCondition())
+                  .feature(myPets.get(i).feature())
+                  .build();
+
+          // Animal 객체 저장
+          animalRepository.save(pet);
+
+          System.out.println("반려동물 등록: " + owner.getNickname() + "의 " +
+                  pet.getName() + " - " + pet.getBreed() + " (" + pet.getImageUrl() + ")");
         }
       }
     };

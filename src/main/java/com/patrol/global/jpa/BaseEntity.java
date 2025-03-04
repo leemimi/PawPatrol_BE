@@ -37,7 +37,4 @@ public abstract class BaseEntity {
 
   @LastModifiedDate
   private LocalDateTime modifiedAt;
-  public Long getId() {
-    return id;
-  }
 }

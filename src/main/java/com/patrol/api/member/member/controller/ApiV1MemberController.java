@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/members")
+//@RequestMapping("/api/v1/members")
 public class ApiV1MemberController {
 
     private final MemberService memberService;
@@ -53,60 +53,60 @@ public class ApiV1MemberController {
 
     // [1. 회원 정보 관리]
     // MEM01_MODIFY01 : 회원정보 수정 전 비밀번호 인증
-    @PostMapping("/me/password")
-    public RsData<VerifyResponse> checkPassword(
-        @Valid @RequestBody CheckPasswordRequest request,
-        @LoginUser Member loginUser
-    ) {
-        if (!passwordEncoder.matches(request.password(), loginUser.getPassword())) {
-            throw new ServiceException(ErrorCodes.INVALID_PASSWORD);
-        }
-
-        String token = UUID.randomUUID().toString();
-        redisTemplate.opsForValue().set(
-            "password-verify:" + loginUser.getEmail(),
-            token,
-            30,
-            TimeUnit.MINUTES
-        );
-
-        return new RsData<>("200-1", "비밀번호가 확인되었습니다.", new VerifyResponse(token));
-    }
+//    @PostMapping("/me/password")
+//    public RsData<VerifyResponse> checkPassword(
+//        @Valid @RequestBody CheckPasswordRequest request,
+//        @LoginUser Member loginUser
+//    ) {
+//        if (!passwordEncoder.matches(request.password(), loginUser.getPassword())) {
+//            throw new ServiceException(ErrorCodes.INVALID_PASSWORD);
+//        }
+//
+//        String token = UUID.randomUUID().toString();
+//        redisTemplate.opsForValue().set(
+//            "password-verify:" + loginUser.getEmail(),
+//            token,
+//            30,
+//            TimeUnit.MINUTES
+//        );
+//
+//        return new RsData<>("200-1", "비밀번호가 확인되었습니다.", new VerifyResponse(token));
+//    }
 
 
     // MEM01_MODIFY02 : 비밀번호 인증 정보 확인
-    @PostMapping("/me/password/validate")
-    public RsData<Void> validatePassword(
-        @LoginUser Member loginUser,
-        @RequestBody VerifyTokenRequest request
-    ) {
-        String storedToken = redisTemplate.opsForValue() .get("password-verify:" + loginUser.getEmail());
-
-        if (storedToken == null || !storedToken.equals(request.token())) {
-            throw new ServiceException(ErrorCodes.PASSWORD_VERIFICATION_REQUIRED);
-        }
-
-        redisTemplate.expire("password-verify:" + loginUser.getEmail(), 30, TimeUnit.MINUTES);
-
-        return new RsData<>("200-1", "비밀번호 확인이 유효합니다.");
-    }
+//    @PostMapping("/me/password/validate")
+//    public RsData<Void> validatePassword(
+//        @LoginUser Member loginUser,
+//        @RequestBody VerifyTokenRequest request
+//    ) {
+//        String storedToken = redisTemplate.opsForValue() .get("password-verify:" + loginUser.getEmail());
+//
+//        if (storedToken == null || !storedToken.equals(request.token())) {
+//            throw new ServiceException(ErrorCodes.PASSWORD_VERIFICATION_REQUIRED);
+//        }
+//
+//        redisTemplate.expire("password-verify:" + loginUser.getEmail(), 30, TimeUnit.MINUTES);
+//
+//        return new RsData<>("200-1", "비밀번호 확인이 유효합니다.");
+//    }
 
 
 
 
     // MEM01_MODIFY03 - 비밀번호 변경
-    @PatchMapping("/me/password")
-    public RsData<Void> changePassword(
-        @Valid @RequestBody ChangePasswordRequest request,
-        @LoginUser Member loginUser
-    ) {
-        passwordService.changePassword(
-            loginUser.getEmail(),
-            request.currentPassword(),
-            request.newPassword()
-        );
-        return new RsData<>("200-1", "비밀번호가 변경되었습니다.");
-    }
+//    @PatchMapping("/me/password")
+//    public RsData<Void> changePassword(
+//        @Valid @RequestBody ChangePasswordRequest request,
+//        @LoginUser Member loginUser
+//    ) {
+//        passwordService.changePassword(
+//            loginUser.getEmail(),
+//            request.currentPassword(),
+//            request.newPassword()
+//        );
+//        return new RsData<>("200-1", "비밀번호가 변경되었습니다.");
+//    }
 
 
     // MEM01_MODIFY04 : 회원정보 수정  (성별, 전화번호, 주소, 마케팅 수신여부 ...)
@@ -134,64 +134,64 @@ public class ApiV1MemberController {
 
 
     // MEM01_MODIFY05 : 전화번호 인증코드 발송 (SMS 인증)
-    @PostMapping("/me/phone/verification-code")
-    public RsData<Void> sendVerificationCode(@Valid @RequestBody PhoneNumberRequest request) {
-        String verificationKey = PHONE_VERIFICATION_STATUS_PREFIX + request.phoneNumber();
-        String verified = redisTemplate.opsForValue().get(verificationKey);
-        if (verified != null) {
-            throw new ServiceException(ErrorCodes.ALREADY_VERIFIED_PHONE_NUMBER);
-        }
-
-        phoneVerificationService.sendVerificationCode(request.phoneNumber());
-        return new RsData<>("200", "입력하신 번호로 인증 코드 발송이 성공하였습니다.");
-    }
-
-    // MEM01_MODIFY06 : 전화번호 인증코드 확인 (SMS 인증)
-    @PostMapping("/me/phone/verify")
-    public RsData<Void> verifyPhoneNumber(@Valid @RequestBody PhoneVerificationRequest request) {
-        if (!phoneVerificationService.verifyCode(request.phoneNumber(), request.code())) {
-            throw new ServiceException(ErrorCodes.INVALID_SNS_VERIFICATION_CODE);
-        }
-
-        redisTemplate.opsForValue().set(
-            PHONE_VERIFICATION_STATUS_PREFIX + request.phoneNumber(),
-            "verified",
-            MAX_VERIFICATION_ATTEMPTS,
-            TimeUnit.MINUTES
-        );
-        return new RsData<>("200", "전화번호 인증이 성공하였습니다.");
-    }
+//    @PostMapping("/me/phone/verification-code")
+//    public RsData<Void> sendVerificationCode(@Valid @RequestBody PhoneNumberRequest request) {
+//        String verificationKey = PHONE_VERIFICATION_STATUS_PREFIX + request.phoneNumber();
+//        String verified = redisTemplate.opsForValue().get(verificationKey);
+//        if (verified != null) {
+//            throw new ServiceException(ErrorCodes.ALREADY_VERIFIED_PHONE_NUMBER);
+//        }
+//
+//        phoneVerificationService.sendVerificationCode(request.phoneNumber());
+//        return new RsData<>("200", "입력하신 번호로 인증 코드 발송이 성공하였습니다.");
+//    }
+//
+//    // MEM01_MODIFY06 : 전화번호 인증코드 확인 (SMS 인증)
+//    @PostMapping("/me/phone/verify")
+//    public RsData<Void> verifyPhoneNumber(@Valid @RequestBody PhoneVerificationRequest request) {
+//        if (!phoneVerificationService.verifyCode(request.phoneNumber(), request.code())) {
+//            throw new ServiceException(ErrorCodes.INVALID_SNS_VERIFICATION_CODE);
+//        }
+//
+//        redisTemplate.opsForValue().set(
+//            PHONE_VERIFICATION_STATUS_PREFIX + request.phoneNumber(),
+//            "verified",
+//            MAX_VERIFICATION_ATTEMPTS,
+//            TimeUnit.MINUTES
+//        );
+//        return new RsData<>("200", "전화번호 인증이 성공하였습니다.");
+//    }
 
 
     // [3. 소셜 계정 연동 관리]
     // MEM03_SOCIAL01 : 소셜전용 계정 비번 추가
-    @PostMapping("/me/social/password")
-    public RsData<Void> addPasswordToSocialAccount(
-        @Valid @RequestBody AddPasswordRequest request,
-        @LoginUser Member loginUser
-    ) {
-        if (loginUser.getPassword() != null) {
-            throw new ServiceException(ErrorCodes.ALREADY_HAS_PASSWORD);
-        }
-
-        memberService.addPassword(loginUser.getId(), request.password());
-        return new RsData<>("200", "소셜 계정에 비밀번호가 추가되었습니다.");
-    }
+//    @PostMapping("/me/social/password")
+//    public RsData<Void> addPasswordToSocialAccount(
+//        @Valid @RequestBody AddPasswordRequest request,
+//        @LoginUser Member loginUser
+//    ) {
+//        if (loginUser.getPassword() != null) {
+//            throw new ServiceException(ErrorCodes.ALREADY_HAS_PASSWORD);
+//        }
+//
+//        memberService.addPassword(loginUser.getId(), request.password());
+//        return new RsData<>("200", "소셜 계정에 비밀번호가 추가되었습니다.");
+//    }
 
 
     // MEM03_SOCIAL02 : 소셜 계정 연동 가능 여부 검증 후 로그인 유저 정보 저장 => 프론트에서 확인 후 처리
-    @GetMapping("/me/social/{provider}/validate")
-    public RsData<Void> validateSocialConnection(
-        @PathVariable String provider, @LoginUser Member loginUser
-    ) {
-        ProviderType type = ProviderType.of(provider);
-        if (loginUser.hasOAuthProvider(type)) {   // 이미 해당 소셜 계정으로 연동된 경우
-            throw new ServiceException(ErrorCodes.ALREADY_CONNECTED_SOCIAL_ACCOUNT);
-        }
-
-        socialConnectService.storeOrigin(loginUser.getId());
-        return new RsData<>("200", "%s 소셜 계정 연동이 가능합니다.".formatted(provider));
-    }
+//    @GetMapping("/me/social/{provider}/validate")
+//    public RsData<Void> validateSocialConnection(
+//        @PathVariable String provider, @LoginUser Member loginUser
+//    ) {
+//        ProviderType type = ProviderType.of(provider);
+//        if (loginUser.hasOAuthProvider(type)) {   // 이미 해당 소셜 계정으로 연동된 경우
+//            throw new ServiceException(ErrorCodes.ALREADY_CONNECTED_SOCIAL_ACCOUNT);
+//        }
+//
+//        socialConnectService.storeOrigin(loginUser.getId());
+//        return new RsData<>("200", "%s 소셜 계정 연동이 가능합니다.".formatted(provider));
+//    }
 
 
     // MEM03_SOCIAL03 : 소셜 계정 연동 해제

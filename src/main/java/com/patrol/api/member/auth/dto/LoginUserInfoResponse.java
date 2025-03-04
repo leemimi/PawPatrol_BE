@@ -1,6 +1,8 @@
 package com.patrol.api.member.auth.dto;
 
 import com.patrol.domain.member.member.entity.Member;
+import com.patrol.domain.member.member.enums.MemberRole;
+import com.patrol.domain.member.member.enums.MemberStatus;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
@@ -17,9 +19,12 @@ import lombok.Builder;
  */
 @Builder
 public record LoginUserInfoResponse(
+        Long id,
         @NotNull String email,
         @NotNull String nickname,
-        String profileImage) {
+        String profileImage,
+        MemberRole role
+) {
     public static LoginUserInfoResponse of(Member member) {
         return LoginUserInfoResponse.builder()
                 .email(member.getEmail())

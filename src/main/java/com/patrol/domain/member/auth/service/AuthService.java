@@ -66,9 +66,9 @@ public class AuthService {
 //    }
 
 
-    public Optional<Member> findByEmail(String email) {
-        return memberRepository.findByEmail(email);
-    }
+//    public Optional<Member> findByEmail(String email) {
+//        return memberRepository.findByEmail(email);
+//    }
 
 //    public Optional<Member> findByApiKey(String apiKey) {
 //        return memberRepository.findByApiKey(apiKey);
@@ -97,21 +97,21 @@ public class AuthService {
     }
 
 
-    public FindEmailsResponse findEmailsByPhoneNumber(String phoneNumber) {
-        List<Member> members = memberRepository.findAllByPhoneNumber(phoneNumber);
-        if (members.isEmpty()) {
-            throw new ServiceException(ErrorCodes.INVALID_PHONE_NUMBER);
-        }
-
-        List<EmailResponse> emailResponses = members.stream()
-            .map(member -> new EmailResponse(
-                Ut.str.maskEmail(member.getEmail()),
-                member.getCreatedAt()
-            ))
-            .toList();
-
-        return new FindEmailsResponse(emailResponses);
-    }
+//    public FindEmailsResponse findEmailsByPhoneNumber(String phoneNumber) {
+//        List<Member> members = memberRepository.findAllByPhoneNumber(phoneNumber);
+//        if (members.isEmpty()) {
+//            throw new ServiceException(ErrorCodes.INVALID_PHONE_NUMBER);
+//        }
+//
+//        List<EmailResponse> emailResponses = members.stream()
+//            .map(member -> new EmailResponse(
+//                Ut.str.maskEmail(member.getEmail()),
+//                member.getCreatedAt()
+//            ))
+//            .toList();
+//
+//        return new FindEmailsResponse(emailResponses);
+//    }
 
     
 //    @Transactional
@@ -136,26 +136,26 @@ public class AuthService {
 //    }
 
 
-    @Transactional
-    public void connectOAuthProvider(
-        Member loginUser, ProviderType loginType, String providerId, String providerEmail
-    ) {
-        Member connectedMember = oAuthService.findByProviderId(loginType, providerId);
-        if (connectedMember != null) {
-            throw new ServiceException(ErrorCodes.SOCIAL_ACCOUNT_ALREADY_IN_USE);
-        }
-        oAuthService.connectProvider(loginUser, loginType, providerId, providerEmail);
-    }
+//    @Transactional
+//    public void connectOAuthProvider(
+//        Member loginUser, ProviderType loginType, String providerId, String providerEmail
+//    ) {
+//        Member connectedMember = oAuthService.findByProviderId(loginType, providerId);
+//        if (connectedMember != null) {
+//            throw new ServiceException(ErrorCodes.SOCIAL_ACCOUNT_ALREADY_IN_USE);
+//        }
+//        oAuthService.connectProvider(loginUser, loginType, providerId, providerEmail);
+//    }
 
 
-    private void _validateEmailAndPassword(String email, String password, ProviderType loginType) {
-        if (email == null || email.trim().isEmpty()) {
-            throw new ServiceException(ErrorCodes.EMAIL_REQUIRED);
-        }
-
-        if (ProviderType.SELF.equals(loginType) && (password == null || password.trim().isEmpty())) {
-            throw new ServiceException(ErrorCodes.PASSWORD_REQUIRED);
-        }
-    }
+//    private void _validateEmailAndPassword(String email, String password, ProviderType loginType) {
+//        if (email == null || email.trim().isEmpty()) {
+//            throw new ServiceException(ErrorCodes.EMAIL_REQUIRED);
+//        }
+//
+//        if (ProviderType.SELF.equals(loginType) && (password == null || password.trim().isEmpty())) {
+//            throw new ServiceException(ErrorCodes.PASSWORD_REQUIRED);
+//        }
+//    }
 
 }

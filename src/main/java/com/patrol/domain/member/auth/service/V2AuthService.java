@@ -2,15 +2,19 @@ package com.patrol.domain.member.auth.service;
 
 import com.patrol.api.member.auth.dto.SocialTokenInfo;
 import com.patrol.api.member.auth.dto.request.SignupRequest;
+import com.patrol.api.member.auth.dto.requestV2.LoginRequest;
 import com.patrol.api.member.auth.dto.requestV2.NewPasswordRequest;
 import com.patrol.api.member.auth.dto.requestV2.SocialConnectRequest;
 import com.patrol.domain.member.member.entity.Member;
+import com.patrol.domain.member.member.enums.MemberStatus;
 import com.patrol.domain.member.member.enums.ProviderType;
 import com.patrol.domain.member.member.repository.V2MemberRepository;
+import com.patrol.domain.member.member.service.V2MemberService;
 import com.patrol.global.error.ErrorCode;
 import com.patrol.global.exception.CustomException;
 import com.patrol.global.exceptions.ErrorCodes;
 import com.patrol.global.exceptions.ServiceException;
+import com.patrol.global.rq.Rq;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -47,10 +51,12 @@ import java.util.concurrent.TimeUnit;
 public class V2AuthService {
     private final Logger logger = LoggerFactory.getLogger(V2AuthService.class.getName());
     private final V2MemberRepository v2MemberRepository;
+    private final V2MemberService v2MemberService;
     private final OAuthService oAuthService;
     private final PasswordEncoder passwordEncoder;
     private final AuthTokenService authTokenService;
     private final StringRedisTemplate redisTemplate;
+    private final Rq rq;
 
     private static final String KEY_PREFIX = "find:verification:";
 
@@ -63,6 +69,7 @@ public class V2AuthService {
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
                 .nickname(request.nickname())
+                .address(request.address())
                 .apiKey(UUID.randomUUID().toString())
                 .createdAt(LocalDateTime.now())
                 .build();
@@ -70,6 +77,27 @@ public class V2AuthService {
         v2MemberRepository.save(member);
 
         return member;
+    }
+
+    // 로그인
+    @Transactional
+    public String login(LoginRequest loginRequest) {
+        // 회원 정보 가져오기
+        Member member = v2MemberService.getMember(loginRequest.email());
+
+        // 유저 상태 검증 (ACTIVE 상태만 로그인 가능)
+        if (member.getStatus() == MemberStatus.ACTIVE) {
+            // 비밀번호 검증 로직
+            if (!passwordEncoder.matches(loginRequest.password(), member.getPassword())) {
+                throw new ServiceException(ErrorCodes.INVALID_PASSWORD);
+            }
+
+            // 엑세스 토큰 발급
+            return rq.makeAuthCookies(member);
+        }
+
+        // 접근이 제한된 회원임을 알리는 에러 (탈퇴, 정지, 휴면 등)
+        throw new CustomException(ErrorCode.RESTRICTED_ACCOUNT_ACCESS);
     }
 
     @Transactional
