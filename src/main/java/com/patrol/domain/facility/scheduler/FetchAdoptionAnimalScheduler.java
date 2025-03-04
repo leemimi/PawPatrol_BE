@@ -35,6 +35,7 @@ public class FetchAdoptionAnimalScheduler {
   @Value("${apis.adoptionimage.url}")
   private String imageApiUrl;
 
+
   private final AdoptionAnimalService adoptionAnimalService;
 
   @Scheduled(cron = "${schedule.cron_for_adoption_animals}")
@@ -45,7 +46,6 @@ public class FetchAdoptionAnimalScheduler {
         log.info("입양대기동물 API 스케줄러 실행");
         String jsonResponse = fetchAdoptionAnimalsData();
         String jsonImageResponse = fetchAdoptionAnimalImagesData();
-        log.info(jsonImageResponse);
         adoptionAnimalService.saveApiResponse(jsonResponse, jsonImageResponse);
 
       } catch (Exception e) {

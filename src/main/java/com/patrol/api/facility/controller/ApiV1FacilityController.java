@@ -1,7 +1,10 @@
 package com.patrol.api.facility.controller;
 
 import com.patrol.api.facility.dto.FacilitiesResponse;
+import com.patrol.api.facility.dto.ShelterListResponse;
 import com.patrol.domain.facility.service.FacilityService;
+import com.patrol.domain.facility.service.HospitalService;
+import com.patrol.domain.facility.service.ShelterService;
 import com.patrol.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,6 +24,9 @@ import java.util.stream.Collectors;
 public class ApiV1FacilityController {
 
   private final List<FacilityService> facilityServices;
+  private final ShelterService shelterService;
+  private final HospitalService hospitalService;
+
 
   @GetMapping
   @Operation(summary = "보호소/병원 목록")
@@ -32,6 +38,21 @@ public class ApiV1FacilityController {
     return new RsData<>("200", "보호소/병원 목록 가져오기 성공", facilitiesResponseList);
   }
 
+  @GetMapping("/shelters")
+  @Operation(summary = "보호소 목록")
+  public RsData<List<ShelterListResponse>> getShelters() {
+    List<ShelterListResponse> shelterResponseList = shelterService.findAllWithAnimals();
+    return new RsData<>("200", "보호소 목록 가져오기 성공", shelterResponseList);
+  }
+
+  @GetMapping("/hospitals")
+  @Operation(summary = "병원 목록")
+  public RsData<List<FacilitiesResponse>> getHospitals() {
+    List<FacilitiesResponse> hospitalResponseList = hospitalService.findAll();
+    return new RsData<>("200", "병원 목록 가져오기 성공", hospitalResponseList);
+  }
+
+
   @GetMapping("/map")
   @Operation(summary = "반경 내의 모든 보호소/병원 게시글 조회")
   public RsData<List<FacilitiesResponse>> getAllPosts(
@@ -42,5 +63,26 @@ public class ApiV1FacilityController {
             .flatMap(service -> service.getFacilitiesWithinRadius(latitude, longitude, radius).stream())
             .collect(Collectors.toList());
     return new RsData<>("200", "반경 내의 제보 게시글을 성공적으로 호출했습니다.", posts);
+  }
+
+  @GetMapping("/shelters/map")
+  @Operation(summary = "반경 내의 모든 보호소 게시글 조회")
+  public RsData<List<ShelterListResponse>> getSheltersWithinRadius(
+      @RequestParam(name = "latitude") double latitude,
+      @RequestParam(name = "longitude") double longitude,
+      @RequestParam(name = "radius") double radius
+  ) {
+    List<ShelterListResponse> shelters = shelterService.getSheltersWithinRadius(latitude, longitude, radius);
+    return new RsData<>("200", "반경 내의 보호소를 성공적으로 호출했습니다.", shelters);
+  }
+
+  @GetMapping("/hospitals/map")
+  @Operation(summary = "반경 내의 병원만 조회")
+  public RsData<List<FacilitiesResponse>> getHospitalsWithinRadius(
+      @RequestParam(name = "latitude") double latitude,
+      @RequestParam(name = "longitude") double longitude,
+      @RequestParam(name = "radius") double radius) {
+    List<FacilitiesResponse> hospitals = hospitalService.getFacilitiesWithinRadius(latitude, longitude, radius);
+    return new RsData<>("200", "반경 내의 병원을 성공적으로 호출했습니다.", hospitals);
   }
 }

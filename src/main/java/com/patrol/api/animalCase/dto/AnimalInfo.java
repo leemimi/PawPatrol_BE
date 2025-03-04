@@ -9,6 +9,7 @@ import lombok.Builder;
 
 @Builder
 public record AnimalInfo(
+    Long animalId,
     String name, String age, String breed, AnimalGender gender,
     AnimalSize size, String feature, String healthCondition, AnimalType animalType,
     String imageUrl, String registrationNo
@@ -16,6 +17,7 @@ public record AnimalInfo(
 
   public static AnimalInfo of(Animal animal) {
     return AnimalInfo.builder()
+        .animalId(animal.getId())
         .name(animal.getName())
         .age(animal.getEstimatedAge())
         .breed(animal.getBreed())

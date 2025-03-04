@@ -3,6 +3,7 @@ package com.patrol.domain.facility.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.patrol.api.facility.dto.FacilitiesResponse;
 import com.patrol.api.facility.dto.ShelterApiResponse;
+import com.patrol.api.facility.dto.ShelterListResponse;
 import com.patrol.domain.facility.entity.OperatingHours;
 import com.patrol.domain.facility.entity.Shelter;
 import com.patrol.domain.facility.repository.ShelterRepository;
@@ -55,6 +56,14 @@ public class ShelterService implements FacilityService {
         .collect(Collectors.toList());
   }
 
+
+  public List<ShelterListResponse> findAllWithAnimals() {
+    List<Shelter> shelters = shelterRepository.findAllWithAnimalCasesAndAnimals();
+    return shelters.stream()
+        .map(ShelterListResponse::of)
+        .collect(Collectors.toList());
+  }
+
   @Override
   public List<FacilitiesResponse> getFacilitiesWithinRadius(
           double latitude,
@@ -67,6 +76,14 @@ public class ShelterService implements FacilityService {
             .collect(Collectors.toList());
   }
 
+  public List<ShelterListResponse> getSheltersWithinRadius(
+      double latitude, double longitude, double radius
+  ) {
+    return shelterRepository.findSheltersWithinRadius(latitude, longitude, radius)
+        .stream()
+        .map(ShelterListResponse::of)
+        .collect(Collectors.toList());
+  }
 
 
   private Shelter convertToEntity(ShelterApiResponse.Item item) {
@@ -94,5 +111,6 @@ public class ShelterService implements FacilityService {
     }
     return startTime + " - " + endTime;
   }
+
 
 }
