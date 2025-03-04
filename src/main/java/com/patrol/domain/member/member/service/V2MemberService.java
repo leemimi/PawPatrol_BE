@@ -8,6 +8,7 @@ import com.patrol.domain.lostFoundPost.service.LostFoundPostService;
 import com.patrol.domain.member.auth.entity.OAuthProvider;
 import com.patrol.domain.member.auth.repository.OAuthProviderRepository;
 import com.patrol.domain.member.member.entity.Member;
+import com.patrol.domain.member.member.enums.MemberStatus;
 import com.patrol.domain.member.member.repository.V2MemberRepository;
 import com.patrol.global.exceptions.ErrorCodes;
 import com.patrol.global.exceptions.ServiceException;
@@ -175,28 +176,14 @@ public class V2MemberService {
         boolean isGoogleConnected = false;
         boolean isKakaoConnected = false;
 
-        try {
-            if (authProvider.getNaver() != null) {
-                isNaverConnected = authProvider.getNaver().isConnected();
-            }
-        } catch (Exception e) {
-            logger.error("Naver OAuth 연결 확인 안됨" + e.getMessage());
+        if (authProvider.getNaver() != null) {
+            isNaverConnected = authProvider.getNaver().isConnected();
         }
-
-        try {
-            if (authProvider.getGoogle() != null) {
-                isGoogleConnected = authProvider.getGoogle().isConnected();
-            }
-        } catch (Exception e) {
-            logger.error("Google OAuth 연결 확인 안됨" + e.getMessage());
+        if (authProvider.getGoogle() != null) {
+            isGoogleConnected = authProvider.getGoogle().isConnected();
         }
-
-        try {
-            if (authProvider.getKakao() != null) {
-                isKakaoConnected = authProvider.getKakao().isConnected();
-            }
-        } catch (Exception e) {
-            logger.error("Kakao OAuth 연결 확인 안됨" + e.getMessage());
+        if (authProvider.getKakao() != null) {
+            isKakaoConnected = authProvider.getKakao().isConnected();
         }
 
         return OAuthConnectInfoResponse.builder()
@@ -204,5 +191,14 @@ public class V2MemberService {
                 .google(isGoogleConnected)
                 .kakao(isKakaoConnected)
                 .build();
+    }
+
+    // 회원 탈퇴
+    @Transactional
+    public void memberWithdraw(Member member) {
+        logger.info("회원 탈퇴 : memberWithdraw");
+        Member inActiveMember = v2MemberRepository.findById(member.getId()).orElseThrow();
+
+        inActiveMember.setStatus(MemberStatus.WITHDRAWN);
     }
 }
