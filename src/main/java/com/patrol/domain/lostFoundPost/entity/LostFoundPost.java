@@ -98,13 +98,10 @@ public class LostFoundPost extends BaseEntity {
         this.pet = pet;
     }
 
-
     public void addImage(Image image) {
         if (this.images == null) {
             this.images = new ArrayList<>();
         }
         this.images.add(image);
     }
-
-
 }

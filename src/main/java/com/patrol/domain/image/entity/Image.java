@@ -31,6 +31,8 @@ public class Image {
     @Column(columnDefinition = "TEXT")
     private String features;
 
+    private String status;
+
     @Builder
     public Image(String path, Long animalId, Long foundId, String embedding, String features) {
         this.path = path;
