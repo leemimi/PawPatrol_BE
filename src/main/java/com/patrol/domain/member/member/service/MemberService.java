@@ -34,9 +34,9 @@ public class MemberService {
         return memberRepository.findAll();
     }
 
-    public List<Member> findAllByStatus(MemberStatus status) {
-        return memberRepository.findAllByStatus(status);
-    }
+//    public List<Member> findAllByStatus(MemberStatus status) {
+//        return memberRepository.findAllByStatus(status);
+//    }
 
     public Optional<Member> findById(Long id) {
         return memberRepository.findById(id);
@@ -81,10 +81,10 @@ public class MemberService {
             .restore();
     }
 
-    @Transactional
-    public void addPassword(Long memberId, @NotBlank String password) {
-        memberRepository.findById(memberId)
-            .orElseThrow(() -> new ServiceException(ErrorCodes.MEMBER_NOT_FOUND))
-            .setPassword(passwordEncoder.encode(password));
-    }
+//    @Transactional
+//    public void addPassword(Long memberId, @NotBlank String password) {
+//        memberRepository.findById(memberId)
+//            .orElseThrow(() -> new ServiceException(ErrorCodes.MEMBER_NOT_FOUND))
+//            .setPassword(passwordEncoder.encode(password));
+//    }
 }

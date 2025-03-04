@@ -39,6 +39,7 @@ public enum ErrorCode {
     // Member
     MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST,"사용자를 찾을 수 없습니다."),
     DUPLICATE_EMAIL(HttpStatus.FORBIDDEN, "이미 사용중인 이메일 입니다."),
+    RESTRICTED_ACCOUNT_ACCESS(HttpStatus.BAD_REQUEST, "이 계정은 현재 접근이 제한되어 있습니다. 계정이 휴면, 정지 또는 탈퇴 처리되었을 수 있으니, 자세한 내용은 고객센터로 문의해 주세요."),
 
     // File
     INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "유효하지 않은 파일 형식입니다."),

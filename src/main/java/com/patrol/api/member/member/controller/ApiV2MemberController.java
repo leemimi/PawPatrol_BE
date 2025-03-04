@@ -130,4 +130,11 @@ public class ApiV2MemberController {
         oAuthService.disconnectProvider(member, type);
         return GlobalResponse.success();
     }
+
+    // 회원 탈퇴
+    @PatchMapping("/withdraw")
+    public GlobalResponse<Void> memberWithdraw(@LoginUser Member member) {
+        v2MemberService.memberWithdraw(member);
+        return GlobalResponse.success();
+    }
 }
