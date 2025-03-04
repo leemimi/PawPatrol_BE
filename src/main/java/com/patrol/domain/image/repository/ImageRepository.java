@@ -14,4 +14,14 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     void delete(Image image);
 
     Image findByAnimalId(Long petId);
+
+    List<Image> findAllByAnimalIdIsNotNull ();
+
+    List<Image> findByEmbeddingIsNull ();
+
+    List<Image> findByFoundIdIsNotNullAndEmbeddingIsNotNull ();
+
+    List<Image> findAllByAnimalIdIsNotNullAndEmbeddingIsNotNull ();
+
+    Image findByPath (String path);
 }
