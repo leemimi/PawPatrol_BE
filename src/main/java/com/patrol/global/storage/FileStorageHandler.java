@@ -20,39 +20,35 @@ public class FileStorageHandler {
     private String bucketName;
     private final StorageService storageService;
 
-    // Update your FileStorageHandler.handleFileUpload method
+    // 파일 업로드 처리
     public FileUploadResult handleFileUpload(FileUploadRequest request) {
         try {
-            // 파일 확장자 검증
             String contentType = request.getFile().getContentType();
             List<String> allowedTypes = Arrays.asList("image/jpeg", "image/png", "image/gif", "image/jpg");
             if (!allowedTypes.contains(contentType)) {
                 throw new CustomException(ErrorCode.INVALID_FILE_TYPE);
             }
 
-            // 파일 크기 검증 (5MB 제한)
-            long maxSize = 5 * 1024 * 1024; // 5MB
+            long maxSize = 5 * 1024 * 1024; // 5MB 제한
             if (request.getFile().getSize() > maxSize) {
                 throw new CustomException(ErrorCode.FILE_SIZE_EXCEEDED);
             }
 
-            // 새 파일 업로드
-            String filename = UUID.randomUUID().toString();
+            String extension = getFileExtension(contentType);
+            String filename = UUID.randomUUID().toString() + extension;
+
             HashMap<String, Object> options = new HashMap<>();
-            options.put(StorageService.CONTENT_TYPE, request.getFile().getContentType());
+            options.put(StorageService.CONTENT_TYPE, contentType);
 
-            // Add content length to options - THIS IS THE KEY CHANGE
-            options.put("contentLength", request.getFile().getSize());
+            String filePath = request.getFolderPath() + filename;
+            storageService.upload(filePath, request.getFile().getInputStream(), options);
 
-            storageService.upload(
-                    request.getFolderPath() + filename,
-                    request.getFile().getInputStream(),
-                    options
-            );
+            // ✅ 절대 URL 반환하도록 수정
+            String fullUrl = "https://kr.object.ncloudstorage.com/" + bucketName + "/" + filePath;
 
             return FileUploadResult.builder()
                     .fileName(filename)
-                    .fullPath(request.getFolderPath() + filename)
+                    .fullPath(fullUrl)  // 절대경로 반환
                     .build();
 
         } catch (Exception e) {
@@ -60,19 +56,30 @@ public class FileStorageHandler {
         }
     }
 
-    // 파일 삭제
+
+    // MIME type을 기반으로 확장자 추출
+    private String getFileExtension(String contentType) {
+        if (contentType.equals("image/jpeg") || contentType.equals("image/jpg")) {
+            return ".jpg";
+        } else if (contentType.equals("image/png")) {
+            return ".png";
+        } else if (contentType.equals("image/gif")) {
+            return ".gif";
+        }
+        return "";
+    }
+
+    // 파일 삭제 처리
     public void handleFileDelete(String url) {
         try {
-            // URL이 null이거나 비어있는 경우 처리
             if (url == null || url.isEmpty()) {
                 throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
             }
 
-            // 버킷 이름은 @Value로 주입받은 값 사용
-            // 버킷 이름 이후의 경로를 fileName으로 사용
+            // 버킷 이름 이후의 경로를 파일 이름으로 사용
             String fileName = url.substring(url.indexOf(bucketName) + bucketName.length() + 1);
 
-            // StorageService를 통해 파일 삭제
+            // 파일 삭제
             storageService.delete(fileName);
         } catch (Exception e) {
             throw new RuntimeException("파일 삭제에 실패했습니다.", e);
