@@ -19,6 +19,7 @@ import lombok.Builder;
  */
 @Builder
 public record LoginUserInfoResponse(
+        Long id,
         @NotNull String email,
         @NotNull String nickname,
         String profileImage,

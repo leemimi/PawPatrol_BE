@@ -9,11 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ImageResponseDto {
-    private Long id;
     private String path;
 
     public ImageResponseDto(Image image) {
-        this.id = image.getId();
         this.path = image.getPath();
     }
 }

@@ -22,7 +22,7 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     properties:
       hibernate:
         default_batch_fetch_size: 100
@@ -81,6 +81,7 @@ spring:
 logging:
   level:
     com.patrol: DEBUG
+    org.hibernate.SQL: DEBUG
 
 springdoc:
   api-docs:
@@ -88,7 +89,6 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
 
-#    org.hibernate.SQL: DEBUG
 #    org.hibernate.orm.jdbc.bind: TRACE
 #    org.hibernate.orm.jdbc.extract: TRACE
 #    org.springframework.transaction.interceptor: TRACE
