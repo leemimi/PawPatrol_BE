@@ -1,66 +1,153 @@
 import os
 import cv2
-import dlib
 import torch
 import numpy as np
 from PIL import Image
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, HTTPException, Form
+from fastapi.middleware.cors import CORSMiddleware
 from torchvision import transforms
 import clip
-from imutils import face_utils
 import io
 import uvicorn
+import json
+import requests  # 추가: URL에서 이미지 다운로드용
+from typing import List, Dict, Any, Optional
+from pydantic import BaseModel
+from detector import detector
+import detector
 
 app = FastAPI()
 
-# 모델 경로 설정
-detector_path = os.path.join('models', 'dogHeadDetector.dat')
-predictor_path = os.path.join('models', 'landmarkDetector.dat')
+# CORS 설정 추가
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-# dlib 모델 로드
-detector = dlib.cnn_face_detection_model_v1(detector_path)
-predictor = dlib.shape_predictor(predictor_path)
 
-# Device 설정
-device = "cuda" if torch.cuda.is_available() else "cpu"
+class SimilarityResponse(BaseModel):
+    similarity: float
+    result: str
 
-# CLIP 모델 로드
-clip_model, clip_preprocess = clip.load("ViT-B/16", device=device)
-clip_model.eval()
+class EmbeddingResponse(BaseModel):
+    embedding: List[float]
+    success: bool
 
-def extract_face_embedding(image):
-    """CLIP을 이용해 강아지 얼굴 임베딩을 추출"""
-    image = Image.open(io.BytesIO(image))
-    image = clip_preprocess(image).unsqueeze(0).to(device)
+def extract_embedding_from_url_directly(url: str):
+    """URL에서 직접 이미지를 읽어 임베딩 추출"""
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
 
-    with torch.no_grad():
-        embedding = clip_model.encode_image(image)
+        # 이미지 데이터를 바로 PIL 이미지로 변환
+        image_pil = Image.open(io.BytesIO(response.content))
+        image_cv = np.array(image_pil)
+        if image_cv.ndim == 2:  # 흑백 이미지라면 RGB로 변환
+            image_cv = cv2.cvtColor(image_cv, cv2.COLOR_GRAY2RGB)
 
-    embedding = embedding / embedding.norm(dim=-1, keepdim=True)
-    return embedding.cpu().numpy()
+        # 이미지 크기 확인 및 조정
+        if max(image_pil.size) > 1000:
+            ratio = 1000.0 / max(image_pil.size)
+            new_size = (int(image_pil.size[0] * ratio), int(image_pil.size[1] * ratio))
+            image_pil = image_pil.resize(new_size, Image.LANCZOS)
 
-@app.post("/compare")
-async def compare_faces(file1: UploadFile = File(...), file2: UploadFile = File(...)):
-    """두 이미지 파일을 받아 강아지 얼굴 비교"""
-    image1 = await file1.read()
-    image2 = await file2.read()
+        # 얼굴 특징 및 임베딩 추출
+        feature1, embedding1 = detector.image_vector(image_cv)
 
-    emb1 = extract_face_embedding(image1)
-    emb2 = extract_face_embedding(image2)
+        # embedding1은 torch 텐서, feature1은 numpy 배열
+        if embedding1 is None:
+            print("임베딩 추출 실패")
+            return {"embedding": [], "features": [], "success": False}
 
-    similarity = float(np.dot(emb1, emb2.T))  # 코사인 유사도
+        # torch 텐서에서 numpy 배열로 변환 후 리스트로 변환
+        embedding_list = embedding1.cpu().numpy().flatten().tolist()
 
-    result = "같은 동물" if similarity >= 0.9 else "다른 동물"
-    return {"similarity": similarity, "result": result}
+        # feature1이 비어있을 수 있음 (얼굴이 감지되지 않은 경우)
+        features_list = feature1.tolist() if feature1.size > 0 else []
+
+        return {
+            "embedding": embedding_list,
+            "features": features_list,
+            "success": True
+        }
+
+    except Exception as e:
+        print(f"URL 임베딩 추출 중 오류 발생: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"URL 임베딩 추출 중 오류 발생: {str(e)}")
+
+
+
+@app.post("/extract-embedding-from-url", response_model=dict)
+async def extract_embedding_from_url(url: str = Form(...)):
+    """URL에서 이미지를 직접 임베딩 추출"""
+    try:
+        result = extract_embedding_from_url_directly(url)
+        return result
+    except Exception as e:
+        print(f"현재 URL 임베딩 추출 중 오류 발생: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"현재 URL 임베딩 추출 중 오류 발생: {str(e)}")
+
+
+@app.post("/compare-urls")
+async def compare_urls(url1: str = Form(...), url2: str = Form(...)):
+    """두 URL의 이미지를 비교"""
+    try:
+        emb1 = extract_embedding_from_url_directly(url1)
+        emb2 = extract_embedding_from_url_directly(url2)
+
+        if emb1 is None or emb2 is None:
+            raise HTTPException(status_code=400, detail="이미지에서 특징을 추출할 수 없습니다.")
+
+        similarity = float(np.dot(emb1, emb2))
+        similarity = max(-1, min(similarity, 1))
+
+        result = "같은 동물" if similarity >= 0.85 else "다른 동물"
+        return {"similarity": similarity, "result": result}
+    except Exception as e:
+        print(f"URL 비교 중 오류 발생: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"URL 비교 중 오류 발생: {str(e)}")
+
+@app.post("/batch-compare-url")
+async def batch_compare_url(
+        url: str = Form(...),
+        embeddings_json: str = Form(...)
+):
+    """URL 이미지와 저장된 여러 임베딩을 비교"""
+    try:
+        embeddings = json.loads(embeddings_json)
+
+        new_embedding = extract_embedding_from_url_directly(url)
+
+        if new_embedding is None:
+            raise HTTPException(status_code=400, detail="이미지에서 특징을 추출할 수 없습니다.")
+
+        # 기존 배치 비교 로직과 동일
+        results = []
+        for animal_id, stored_embedding in embeddings.items():
+            try:
+                stored_embedding_np = np.array(stored_embedding)
+                similarity = float(np.dot(new_embedding, stored_embedding_np))
+                similarity = max(-1, min(similarity, 1))
+
+                results.append({
+                    "animal_id": animal_id,
+                    "similarity": similarity,
+                    "is_match": similarity >= 0.85
+                })
+            except Exception as e:
+                print(f"동물 ID {animal_id} 처리 중 오류: {str(e)}")
+
+        results = sorted(results, key=lambda x: x["similarity"], reverse=True)
+        return {"results": results}
+    except Exception as e:
+        print(f"URL 배치 비교 중 오류 발생: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"URL 배치 비교 중 오류 발생: {str(e)}")
 
 # 앱 실행을 위한 코드 추가
 if __name__ == "__main__":
-    # 모델 디렉토리 확인
-    os.makedirs('models', exist_ok=True)
-
-    # 모델 파일 존재 여부 확인
-    if not os.path.exists(detector_path) or not os.path.exists(predictor_path):
-        print(f"경고: 모델 파일이 없습니다. {detector_path}와 {predictor_path}를 다운로드하세요.")
-
     # FastAPI 앱 실행
+    print("API 서버 시작 중...")
     uvicorn.run(app, host="0.0.0.0", port=8000)

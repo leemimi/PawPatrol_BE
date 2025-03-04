@@ -338,3 +338,38 @@ if __name__ == '__main__':
             
             plt.suptitle(f'Combined Similarity: {similarity:.2f}', fontsize=16)
             plt.show()
+
+
+def image_vector(img1):
+    """
+    이미지에서 얼굴(강아지 머리)을 감지하고 임베딩 및 특징을 추출합니다.
+    얼굴이 감지되지 않을 경우 이미지 전체에 대한 임베딩을 생성합니다.
+    """
+    gray1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
+    faces1 = face_locations(gray1)
+
+    if len(faces1) == 0:
+        # 얼굴이 감지되지 않으면 이미지 전체를 사용
+        print("얼굴을 감지하지 못했습니다. 이미지 전체를 사용합니다.")
+
+        # 이미지 전체에 대한 CLIP 임베딩 추출
+        img_pil = Image.fromarray(cv2.cvtColor(img1, cv2.COLOR_BGR2RGB))
+        img_tensor = transform(img_pil).unsqueeze(0).to(device)
+
+        with torch.no_grad():
+            embedding1 = clip_model.encode_image(img_tensor)
+
+        # 코사인 유사도 계산을 위해 정규화
+        embedding1 = embedding1 / embedding1.norm(dim=-1, keepdim=True)
+
+        # 임베딩만 반환하고 랜드마크 특징은 빈 배열로 설정
+        return np.array([]), embedding1
+
+    # 얼굴이 감지된 경우 기존 코드 실행
+    face1 = faces1[0]
+    face1_rect = dlib.rectangle(face1[3], face1[0], face1[1], face1[2])
+    shape1 = predictor(gray1, face1_rect)
+    lmk_features1 = extract_landmark_features(shape1, img1, gray1)
+    embedding1 = extract_face_embedding(img1, face1)
+
+    return lmk_features1, embedding1

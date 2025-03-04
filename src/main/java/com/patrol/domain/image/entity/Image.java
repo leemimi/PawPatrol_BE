@@ -25,11 +25,19 @@ public class Image {
     @Column(name= "animal_id", nullable= true)
     private Long animalId;
 
+    @Column(columnDefinition = "TEXT")
+    private String embedding;
+
+    @Column(columnDefinition = "TEXT")
+    private String features;
+
     @Builder
-    public Image(String path, Long animalId, Long foundId) {
+    public Image(String path, Long animalId, Long foundId, String embedding, String features) {
         this.path = path;
         this.animalId=animalId;
         this.foundId = foundId;
+        this.embedding = embedding;
+        this.features = features;
         this.createdAt = LocalDateTime.now();
     }
 }
