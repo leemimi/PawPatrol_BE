@@ -39,13 +39,17 @@ public class AdminService {
     @Transactional
     public Page<GetAllMembersResponse> getAllMembers(Pageable pageable) {
         logger.info("모든 회원 정보 가져오기 : getAllMembers");
-        Page<Member> memberPage = v2MemberRepository.findAllByRole(MemberRole.ROLE_USER, pageable);
+
+        // ROLE_ADMIN이 아닌 회원만 조회
+        Page<Member> memberPage = v2MemberRepository.findByRoleNot(MemberRole.ROLE_ADMIN, pageable);
+
         return memberPage.map(member -> GetAllMembersResponse.builder()
                 .id(member.getId())
                 .email(member.getEmail())
                 .nickname(member.getNickname())
                 .createdAt(member.getCreatedAt())
                 .status(member.getStatus())
+                .role(member.getRole())
                 .build());
     }
 

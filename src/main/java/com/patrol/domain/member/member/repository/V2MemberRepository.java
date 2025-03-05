@@ -24,5 +24,5 @@ public interface V2MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByEmail(String email);
     Optional<Member> findByApiKey(String apiKey);
     Boolean existsByEmail(String email);
-    Page<Member> findAllByRole(MemberRole role, Pageable pageable);
+    Page<Member> findByRoleNot(MemberRole role, Pageable pageable);
 }

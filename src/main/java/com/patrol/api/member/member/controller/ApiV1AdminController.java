@@ -23,18 +23,22 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v2/members/admin")
+@RequestMapping("/api/v2/admin")
 public class ApiV1AdminController {
     private final AdminService adminService;
 
     // 관리자 > 회원 목록 조회
-    @GetMapping
+    @GetMapping("/members")
     public GlobalResponse<Page<GetAllMembersResponse>> getAllMembers(Pageable pageable) {
         return GlobalResponse.success(adminService.getAllMembers(pageable));
     }
 
+    // 관리자 > 보호소 회원 목록 조회
+//    @GetMapping("/shelter-members")
+//    public GlobalResponse<Page>
+
     // 관리자 > 회원 상태 변경
-    @PatchMapping("/status")
+    @PatchMapping("/members")
     public GlobalResponse<Void> changeMemberStatus(
             @RequestBody ChangeMemberStatusRequest changeMemberStatusRequest) {
         adminService.changeMemberStatus(changeMemberStatusRequest);

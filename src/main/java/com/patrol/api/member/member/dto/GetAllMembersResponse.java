@@ -1,5 +1,6 @@
 package com.patrol.api.member.member.dto;
 
+import com.patrol.domain.member.member.enums.MemberRole;
 import com.patrol.domain.member.member.enums.MemberStatus;
 import lombok.Builder;
 import lombok.Data;
@@ -25,4 +26,5 @@ public class GetAllMembersResponse {
     private String nickname;
     private LocalDateTime createdAt;
     private MemberStatus status;
+    private MemberRole role;
 }
