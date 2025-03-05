@@ -51,7 +51,11 @@ public enum ErrorCode {
     DUPLICATE_BUSINESS_NUMBER(HttpStatus.FORBIDDEN, "이미 등록된 사업자 등록번호 입니다."),
 
     // Animal
-    PET_OWNER_MISMATCH(HttpStatus.FORBIDDEN, "해당 반려동물의 소유자가 아닙니다. 본인이 등록한 반려동물만 수정할 수 있습니다.");
+    PET_OWNER_MISMATCH(HttpStatus.FORBIDDEN, "해당 반려동물의 소유자가 아닙니다. 본인이 등록한 반려동물만 수정할 수 있습니다."),
+
+    POST_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당 게시글을 찾을 수 없습니다."),
+    ANIMAL_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당 반려동물을 찾을 수 없습니다."),
+    FILE_UPLOAD_ERROR(HttpStatus.BAD_REQUEST, "파일 업로드 중 오류가 발생했습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

@@ -3,6 +3,7 @@ package com.patrol.domain.member.member.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.patrol.api.member.member.dto.OAuthProviderStatus;
 import com.patrol.api.member.member.dto.request.MemberUpdateRequest;
+import com.patrol.domain.facility.entity.Shelter;
 import com.patrol.domain.member.auth.entity.OAuthProvider;
 import com.patrol.domain.member.member.enums.Gender;
 import com.patrol.domain.member.member.enums.MemberRole;
@@ -99,7 +100,7 @@ public class Member extends BaseEntity {
 
     // 1대 1 관계 설정
     @OneToOne(mappedBy = "member", cascade = ALL, orphanRemoval = true)
-    private ShelterMember shelter;
+    private ShelterMember shelterMember;
     
     // 1대1 관계 설정
     @JsonIgnore
@@ -137,6 +138,9 @@ public class Member extends BaseEntity {
     }
 
 
+    @JsonIgnore
+    @OneToOne(mappedBy = "shelterMember")
+    private Shelter shelter;
 
 
     // 1:N 관계 설정

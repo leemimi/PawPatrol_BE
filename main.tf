@@ -120,10 +120,10 @@ resource "aws_iam_role_policy_attachment" "s3_full_access" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
 }
 
-# EC2 역할에 AmazonEC2RoleforSSM 정책을 부착
+# EC2 역할에 AmazonSSMManagedInstanceCore 정책을 부착 (추천 정책으로 변경)
 resource "aws_iam_role_policy_attachment" "ec2_ssm" {
   role       = aws_iam_role.ec2_role_1.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
 # IAM 인스턴스 프로파일 생성
@@ -135,6 +135,13 @@ resource "aws_iam_instance_profile" "instance_profile_1" {
 locals {
   ec2_user_data_base = <<-END_OF_FILE
 #!/bin/bash
+# SSM 에이전트 재설치 및 시작
+yum update -y
+yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+systemctl enable amazon-ssm-agent
+systemctl start amazon-ssm-agent
+
+# 기존 도커 설치 및 설정
 yum install docker -y
 systemctl enable docker
 systemctl start docker
@@ -150,24 +157,17 @@ sudo mkswap /swapfile
 sudo swapon /swapfile
 sudo swapon -s
 sudo sh -c 'echo "/swapfile swap swap defaults 0 0" >> /etc/fstab'
-
 END_OF_FILE
 }
 
 # EC2 인스턴스 생성
 resource "aws_instance" "ec2_1" {
-  # 사용할 AMI ID
+  # 기본 설정 유지
   ami = "ami-04c596dcf23eb98d8"
-  # EC2 인스턴스 유형
   instance_type = "t2.micro"
-  # 사용할 서브넷 ID
   subnet_id = aws_subnet.subnet_1.id
-  # 적용할 보안 그룹 ID
   vpc_security_group_ids = [aws_security_group.sg_1.id]
-  # 퍼블릭 IP 연결 설정
   associate_public_ip_address = true
-
-  # 인스턴스에 IAM 역할 연결
   iam_instance_profile = aws_iam_instance_profile.instance_profile_1.name
 
   # 인스턴스에 태그 설정
@@ -181,8 +181,17 @@ resource "aws_instance" "ec2_1" {
     volume_size = 30  # 볼륨 크기를 30GB로 설정
   }
 
-  # User data script for ec2_1
+  # User data script for ec2_1 - SSM 에이전트 설치 추가
   user_data = <<-EOF
 ${local.ec2_user_data_base}
 EOF
+
+  # 인스턴스 교체 방지 설정
+  lifecycle {
+    ignore_changes = [
+      ami,
+      user_data,
+      associate_public_ip_address
+    ]
+  }
 }

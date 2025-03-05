@@ -78,6 +78,9 @@ dependencies {
 
     // csv
     implementation("org.apache.commons:commons-csv:1.9.0")
+
+    implementation("org.springframework.kafka:spring-kafka")
+    testImplementation("org.springframework.kafka:spring-kafka-test")
 }
 
 tasks.withType<Test> {

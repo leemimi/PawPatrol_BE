@@ -251,3 +251,4 @@ application.yml
 src/main/generated
 
 src/main/generated/
+__pycache__

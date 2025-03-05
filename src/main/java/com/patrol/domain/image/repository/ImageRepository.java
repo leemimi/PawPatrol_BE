@@ -9,8 +9,19 @@ import java.util.Optional;
 public interface ImageRepository extends JpaRepository<Image, Long> {
     Optional<Image> findById(Long Id);
     List<Image> findAllByFoundId(Long postId);
+    List<Image> findAllByAnimalId(Long animalId);
 
     void delete(Image image);
 
     Image findByAnimalId(Long petId);
+
+    List<Image> findAllByAnimalIdIsNotNull ();
+
+    List<Image> findByEmbeddingIsNull ();
+
+    List<Image> findByFoundIdIsNotNullAndEmbeddingIsNotNull ();
+
+    List<Image> findAllByAnimalIdIsNotNullAndEmbeddingIsNotNull ();
+
+    Image findByPath (String path);
 }
