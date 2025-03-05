@@ -129,6 +129,7 @@ public class AnimalService {
                         .registrationNo(animal.getRegistrationNo())
                         .imageUrl(animal.getImageUrl())
                         .gender(animal.getGender())
+                        .animalType(animal.getAnimalType())
                         .build())
                 .collect(Collectors.toList());
     }
