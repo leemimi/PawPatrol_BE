@@ -74,7 +74,12 @@ public class V2AuthService {
     // 회원가입
     @Transactional
     public Member signUp(SignupRequest request) {
-        logger.info("회원가입_signUp");
+        logger.info("회원가입 : signUp");
+
+        // 이메일 중복 확인
+        if (v2MemberRepository.existsByEmail(request.email())) {
+            throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
+        }
 
         Member member = Member.builder()
                 .email(request.email())
@@ -299,55 +304,56 @@ public class V2AuthService {
     }
 
     // 보호소 회원가입
-//    public Member shelterSignUp(ShelterSignupRequest request) {
-//        logger.info("보호소 회원가입 : shelterSignUp");
-//
-//        // 이메일 중복 확인
-//        if (v2MemberRepository.existsByEmail(request.email())) {
-//            throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
-//        }
-//
-//        // 사업자등록번호 중복 확인
-//        if (shelterMemberRepository.existsByBusinessRegistrationNumber(request.businessRegistrationNumber())) {
-//            throw new CustomException(ErrorCode.DUPLICATE_BUSINESS_NUMBER);
-//        }
-//
-//        // 비밀번호 암호화
-//        String encodedPassword = passwordEncoder.encode(request.password());
-//
-//        // Member 엔티티 생성
-//        Member member = Member.builder()
-//                .email(request.email())
-//                .password(encodedPassword)
-//                .nickname(null) // 기본값
-//                .address(request.address())
-//                .status(MemberStatus.ACTIVE)
-//                .role(MemberRole.ROLE_SHELTER) // 보호소 역할 부여
-//                .loginType(ProviderType.SELF)
-//                .marketingAgree(false) // 기본값
-//                .build();
-//
-//        // Member 저장
-//        Member savedMember = v2MemberRepository.save(member);
-//
-//        // ShelterMember 엔티티 생성 및 연결
-//        ShelterMember shelterMember = ShelterMember.builder()
-//                .member(savedMember)
-//                .BusinessName(request.owner() + "의 보호소") // 기본 사업장명 설정
-//                .owner(request.owner())
-//                .address(request.address())
-//                .businessRegistrationNumber(request.businessRegistrationNumber())
-//                .build();
-//
-//        // ShelterMember 저장
-//        shelterMemberRepository.save(shelterMember);
-//
-//        // Member와 ShelterMember 연결
-//        savedMember.setShelter(shelterMember);
-//
-//        logger.info("보호소 회원가입 완료: {}", savedMember.getEmail());
-//
-//        return savedMember;
-//    }
+    public Member shelterSignUp(ShelterSignupRequest request) {
+        logger.info("보호소 회원가입 : shelterSignUp");
+
+        // 이메일 중복 확인
+        if (v2MemberRepository.existsByEmail(request.email())) {
+            throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
+        }
+
+        // 사업자등록번호 중복 확인
+        if (shelterMemberRepository.existsByBusinessRegistrationNumber(request.businessRegistrationNumber())) {
+            throw new CustomException(ErrorCode.DUPLICATE_BUSINESS_NUMBER);
+        }
+
+        // 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(request.password());
+
+        // Member 엔티티 생성
+        Member member = Member.builder()
+                .email(request.email())
+                .password(encodedPassword)
+                .nickname(request.nickname()) // 여기서 닉네임은 사업장명임
+                .address(request.address())
+                .status(MemberStatus.ACTIVE)
+                .role(MemberRole.ROLE_SHELTER) // 보호소 역할 부여
+                .loginType(ProviderType.SELF)
+                .apiKey(UUID.randomUUID().toString())
+                .marketingAgree(false) // 기본값
+                .build();
+
+        // Member 저장
+        Member savedMember = v2MemberRepository.save(member);
+
+        // ShelterMember 엔티티 생성 및 연결
+        ShelterMember shelterMember = ShelterMember.builder()
+                .member(savedMember)
+                .BusinessName(request.nickname()) // 기본 사업장명 설정
+                .owner(request.owner())
+                .address(request.address())
+                .businessRegistrationNumber(request.businessRegistrationNumber())
+                .build();
+
+        // ShelterMember 저장
+        shelterMemberRepository.save(shelterMember);
+
+        // Member와 ShelterMember 연결
+        savedMember.setShelter(shelterMember);
+
+        logger.info("보호소 회원가입 완료: {}", savedMember.getEmail());
+
+        return savedMember;
+    }
 
 }

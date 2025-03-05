@@ -4,6 +4,8 @@ import com.patrol.global.jpa.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToOne;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 /**
  * packageName    : com.patrol.domain.member.member.entity
@@ -17,6 +19,8 @@ import jakarta.persistence.OneToOne;
  * 2025-03-04        kyd54       최초 생성
  */
 @Entity
+@SuperBuilder
+@RequiredArgsConstructor
 public class ShelterMember extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY)
     private Member member;  // 회원과 연결

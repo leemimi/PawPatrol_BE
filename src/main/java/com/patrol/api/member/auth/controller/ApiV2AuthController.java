@@ -58,11 +58,11 @@ public class ApiV2AuthController {
     }
 
     // 보호소 회원가입 > request 보완 필요, 프론트에서 보내는 모든 데이터 추가해야됨
-//    @PostMapping("/shelter/sigh-up")
-//    public GlobalResponse<String> shelterSignUp(@Valid @RequestBody ShelterSignupRequest request) {
-//        Member member = v2AuthService.shelterSignUp(request);
-//        return GlobalResponse.success(member.getNickname());
-//    }
+    @PostMapping("/shelter/sigh-up")
+    public GlobalResponse<String> shelterSignUp(@Valid @RequestBody ShelterSignupRequest request) {
+        Member member = v2AuthService.shelterSignUp(request);
+        return GlobalResponse.success(member.getNickname());
+    }
 
     // 회원가입 - 이메일 인증 코드 발송
     @PostMapping("/email/verification-code")
