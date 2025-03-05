@@ -206,17 +206,4 @@ public class V2MemberService {
         inActiveMember.setStatus(MemberStatus.WITHDRAWN);
     }
 
-    // 모든 회원 정보 가져오기
-    @Transactional
-    public Page<GetAllMembersResponse> getAllMembers(Pageable pageable) {
-        logger.info("모든 회원 정보 가져오기 : getAllMembers");
-        Page<Member> memberPage = v2MemberRepository.findAllByRole(MemberRole.ROLE_USER, pageable);
-        return memberPage.map(member -> GetAllMembersResponse.builder()
-                .id(member.getId())
-                .email(member.getEmail())
-                .nickname(member.getNickname())
-                .createdAt(member.getCreatedAt())
-                .status(member.getStatus())
-                .build());
-    }
 }
