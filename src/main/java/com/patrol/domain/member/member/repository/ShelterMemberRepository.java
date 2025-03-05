@@ -1,23 +1,20 @@
 package com.patrol.domain.member.member.repository;
 
 import com.patrol.domain.member.member.entity.Member;
+import com.patrol.domain.member.member.entity.ShelterMember;
 import org.springframework.data.jpa.repository.JpaRepository;
-
-import java.util.Optional;
 
 /**
  * packageName    : com.patrol.domain.member.member.repository
- * fileName       : V2MemberRepository
+ * fileName       : ShelterMemberRepository
  * author         : sungjun
- * date           : 2025-02-19
+ * date           : 2025-03-05
  * description    : 자동 주석 생성
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 2025-02-19        kyd54       최초 생성
+ * 2025-03-05        kyd54       최초 생성
  */
-public interface V2MemberRepository extends JpaRepository<Member, Long> {
-    Optional<Member> findByEmail(String email);
-    Optional<Member> findByApiKey(String apiKey);
-    Boolean existsByEmail(String email);
+public interface ShelterMemberRepository extends JpaRepository<ShelterMember, Long> {
+    Boolean existsByBusinessRegistrationNumber(String businessRegistrationNumber);
 }

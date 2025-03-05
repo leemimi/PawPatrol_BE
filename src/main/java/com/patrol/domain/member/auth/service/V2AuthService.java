@@ -2,12 +2,13 @@ package com.patrol.domain.member.auth.service;
 
 import com.patrol.api.member.auth.dto.SocialTokenInfo;
 import com.patrol.api.member.auth.dto.request.SignupRequest;
-import com.patrol.api.member.auth.dto.requestV2.LoginRequest;
-import com.patrol.api.member.auth.dto.requestV2.NewPasswordRequest;
-import com.patrol.api.member.auth.dto.requestV2.SocialConnectRequest;
+import com.patrol.api.member.auth.dto.requestV2.*;
 import com.patrol.domain.member.member.entity.Member;
+import com.patrol.domain.member.member.entity.ShelterMember;
+import com.patrol.domain.member.member.enums.MemberRole;
 import com.patrol.domain.member.member.enums.MemberStatus;
 import com.patrol.domain.member.member.enums.ProviderType;
+import com.patrol.domain.member.member.repository.ShelterMemberRepository;
 import com.patrol.domain.member.member.repository.V2MemberRepository;
 import com.patrol.domain.member.member.service.V2MemberService;
 import com.patrol.global.error.ErrorCode;
@@ -19,19 +20,22 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestTemplate;
 
+import java.net.URI;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -49,6 +53,11 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 @Transactional
 public class V2AuthService {
+    @Value("${custom.shelter.baseUrl}")
+    private String baseUrl;
+    @Value("${custom.shelter.serviceKey}")
+    private String serviceKey;
+
     private final Logger logger = LoggerFactory.getLogger(V2AuthService.class.getName());
     private final V2MemberRepository v2MemberRepository;
     private final V2MemberService v2MemberService;
@@ -56,14 +65,21 @@ public class V2AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthTokenService authTokenService;
     private final StringRedisTemplate redisTemplate;
+    private final RestTemplate restTemplate;
     private final Rq rq;
+    private final ShelterMemberRepository shelterMemberRepository;
 
     private static final String KEY_PREFIX = "find:verification:";
 
     // 회원가입
     @Transactional
     public Member signUp(SignupRequest request) {
-        logger.info("회원가입_signUp");
+        logger.info("회원가입 : signUp");
+
+        // 이메일 중복 확인
+        if (v2MemberRepository.existsByEmail(request.email())) {
+            throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
+        }
 
         Member member = Member.builder()
                 .email(request.email())
@@ -247,4 +263,97 @@ public class V2AuthService {
             member.updatePassword(passwordEncoder.encode(request.newPassword()));
         }
     }
+
+    // 사업자 등록번호 검증
+    public String validateBusinessNumber(BusinessNumberRequest request) throws Exception {
+        String fullUrl = baseUrl + "?serviceKey=" + serviceKey;
+        URI uri = new URI(fullUrl);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("businesses", List.of(
+                Map.of(
+                        "b_no", request.businessNumber(),
+                        "start_dt", request.startDate(),
+                        "p_nm", request.owner()
+                )
+        ));
+
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    uri,
+                    HttpMethod.POST,
+                    entity,
+                    String.class
+            );
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                return response.getBody();
+            } else {
+                throw new RuntimeException("API call failed with status: " + response.getStatusCodeValue());
+            }
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            logger.error("API call failed. Status code: {}, Response body: {}", e.getRawStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException("API call failed", e);
+        }
+    }
+
+    // 보호소 회원가입
+    public Member shelterSignUp(ShelterSignupRequest request) {
+        logger.info("보호소 회원가입 : shelterSignUp");
+
+        // 이메일 중복 확인
+        if (v2MemberRepository.existsByEmail(request.email())) {
+            throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
+        }
+
+        // 사업자등록번호 중복 확인
+        if (shelterMemberRepository.existsByBusinessRegistrationNumber(request.businessRegistrationNumber())) {
+            throw new CustomException(ErrorCode.DUPLICATE_BUSINESS_NUMBER);
+        }
+
+        // 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(request.password());
+
+        // Member 엔티티 생성
+        Member member = Member.builder()
+                .email(request.email())
+                .password(encodedPassword)
+                .nickname(request.nickname()) // 여기서 닉네임은 사업장명임
+                .address(request.address())
+                .status(MemberStatus.ACTIVE)
+                .role(MemberRole.ROLE_SHELTER) // 보호소 역할 부여
+                .loginType(ProviderType.SELF)
+                .apiKey(UUID.randomUUID().toString())
+                .marketingAgree(false) // 기본값
+                .build();
+
+        // Member 저장
+        Member savedMember = v2MemberRepository.save(member);
+
+        // ShelterMember 엔티티 생성 및 연결
+        ShelterMember shelterMember = ShelterMember.builder()
+                .member(savedMember)
+                .BusinessName(request.nickname()) // 기본 사업장명 설정
+                .owner(request.owner())
+                .address(request.address())
+                .businessRegistrationNumber(request.businessRegistrationNumber())
+                .build();
+
+        // ShelterMember 저장
+        shelterMemberRepository.save(shelterMember);
+
+        // Member와 ShelterMember 연결
+        savedMember.setShelter(shelterMember);
+
+        logger.info("보호소 회원가입 완료: {}", savedMember.getEmail());
+
+        return savedMember;
+    }
+
 }
