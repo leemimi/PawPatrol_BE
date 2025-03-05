@@ -24,6 +24,7 @@ public class HospitalService implements FacilityService {
   private final HospitalRepository hospitalRepository;
   private final CsvParser csvParser;
 
+  @PostConstruct
   @Transactional
   public void loadData() {
     try {

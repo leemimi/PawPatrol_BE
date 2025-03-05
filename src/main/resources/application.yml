@@ -4,6 +4,22 @@ spring:
   output:
     ansi:
       enabled: ALWAYS
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+  threads:
+    virtual:
+      enabled: true
+  kafka:
+    bootstrap-servers: localhost:19092
+    consumer:
+      group-id: image-processor-group
+      auto-offset-reset: latest
+    producer:
+      retries: 3
+    listener:
+      concurrency: 3
+
 
   profiles:
     active: dev
@@ -82,12 +98,23 @@ logging:
   level:
     com.patrol: DEBUG
     org.hibernate.SQL: DEBUG
+    org.apache.kafka.clients: ERROR
+    kafka: ERROR
 
 springdoc:
   api-docs:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
+ai:
+  service:
+    url: http://localhost:8000
+
+app:
+  upload:
+    dir: ./uploads  # 업로드 디렉토리 경로 설정
+  similarity:
+    threshold: 0.85
 
 #    org.hibernate.orm.jdbc.bind: TRACE
 #    org.hibernate.orm.jdbc.extract: TRACE
