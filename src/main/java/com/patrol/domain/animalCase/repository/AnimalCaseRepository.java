@@ -81,4 +81,6 @@ public interface AnimalCaseRepository extends JpaRepository<AnimalCase, Long> {
       "LEFT JOIN FETCH ac.currentFoster " +
       "WHERE ac.id = :id AND ac.deletedAt IS NULL")
   Optional<AnimalCase> findById(@Param("id") Long id);
+
+  Optional<AnimalCase> findByAnimalId(Long animalId);
 }

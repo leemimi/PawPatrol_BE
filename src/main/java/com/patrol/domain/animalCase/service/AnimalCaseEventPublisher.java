@@ -87,7 +87,6 @@ public class AnimalCaseEventPublisher {
       return;
     }
 
-
     eventPublisher.publishEvent(new ProtectionStatusChangeEvent(
         protection.getId(), memberId,
         status, caseHistory

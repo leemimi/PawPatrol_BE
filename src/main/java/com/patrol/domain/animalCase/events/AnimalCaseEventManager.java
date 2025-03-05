@@ -83,6 +83,10 @@ public class AnimalCaseEventManager {
 
     animalCase.updateStatus(toStatus);
     caseHistoryService.addHistory(animalCase, historyStatus, ContentType.PROTECTION, protection.getId(), memberId);
+
+    if (toStatus == CaseStatus.ADOPTED) {
+      animalCase.updateStatus(CaseStatus.MY_PET);
+    }
   }
 
 

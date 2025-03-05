@@ -94,4 +94,10 @@ public class AnimalCaseService {
   public void saveAll(List<AnimalCase> animalCases) {
     animalCaseRepository.saveAll(animalCases);
   }
+
+  public Long findIdByAnimalId(Long animalId) {
+    AnimalCase animalCase = animalCaseRepository.findByAnimalId(animalId)
+        .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
+    return animalCase.getId();
+  }
 }

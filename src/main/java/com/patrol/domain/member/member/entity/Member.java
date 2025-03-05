@@ -138,6 +138,7 @@ public class Member extends BaseEntity {
     }
 
 
+
     // 1:N 관계 설정
 
 
