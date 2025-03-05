@@ -34,6 +34,7 @@ public enum ErrorCode {
     // Protection
     ALREADY_FOSTER(HttpStatus.BAD_REQUEST, "이미 보호자입니다."),
     ALREADY_APPLIED(HttpStatus.BAD_REQUEST, "이미 신청하였습니다."),
+    PROTECTION_TYPE_ERROR(HttpStatus.BAD_REQUEST, "유효하지 않는 보호 타입입니다."),
 
 
     // Member
@@ -48,6 +49,7 @@ public enum ErrorCode {
     // Auth
     EMAIL_NOT_FOUND(HttpStatus.FORBIDDEN, "등록되지 않은 이메일 입니다."),
     VERIFICATION_NOT_FOUND(HttpStatus.FORBIDDEN, "유효하지 않은 접근입니다."),
+    DUPLICATE_BUSINESS_NUMBER(HttpStatus.FORBIDDEN, "이미 등록된 사업자 등록번호 입니다."),
 
     // Animal
     PET_OWNER_MISMATCH(HttpStatus.FORBIDDEN, "해당 반려동물의 소유자가 아닙니다. 본인이 등록한 반려동물만 수정할 수 있습니다."),

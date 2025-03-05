@@ -42,4 +42,12 @@ public class ApiV1AnimalCaseController {
     AnimalCaseDetailDto response = animalCaseService.findByIdWithHistories(caseId);
     return new RsData<>("200", "%d번 케이스를 성공적으로 호출했습니다.".formatted(caseId), response);
   }
+
+  @GetMapping("/animals/{animalId}")
+  @Operation(summary = "동물 ID로 동물 케이스 ID 조회")
+  public RsData<Long> getAnimalCaseIdByAnimalId(@PathVariable Long animalId) {
+    Long animalCaseId = animalCaseService.findIdByAnimalId(animalId);
+    return new RsData<>("200", "케이스를 성공적으로 조회했습니다.", animalCaseId);
+  }
+
 }
