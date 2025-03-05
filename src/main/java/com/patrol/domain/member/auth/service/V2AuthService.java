@@ -349,7 +349,7 @@ public class V2AuthService {
         shelterMemberRepository.save(shelterMember);
 
         // Member와 ShelterMember 연결
-        savedMember.setShelter(shelterMember);
+        savedMember.setShelterMember(shelterMember);
 
         logger.info("보호소 회원가입 완료: {}", savedMember.getEmail());
 

@@ -100,7 +100,7 @@ public class Member extends BaseEntity {
 
     // 1대 1 관계 설정
     @OneToOne(mappedBy = "member", cascade = ALL, orphanRemoval = true)
-    private ShelterMember shelter;
+    private ShelterMember shelterMember;
     
     // 1대1 관계 설정
     @JsonIgnore
