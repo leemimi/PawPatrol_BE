@@ -9,6 +9,8 @@ import com.patrol.domain.facility.entity.Shelter;
 import com.patrol.domain.facility.repository.ShelterRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -112,5 +114,9 @@ public class ShelterService implements FacilityService {
     return startTime + " - " + endTime;
   }
 
-
+  // 관리자 페이지 보호소 목록 조회 (페이징 처리)
+  public Page<ShelterListResponse> getAllShelter(Pageable pageable) {
+    Page<Shelter> shelterPage = shelterRepository.findAllWithAnimalCasesAndAnimals(pageable);
+    return shelterPage.map(ShelterListResponse::of);
+  }
 }

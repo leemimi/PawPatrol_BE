@@ -2,11 +2,10 @@ package com.patrol.domain.member.auth.service;
 
 import com.patrol.api.member.member.dto.GetAllMembersResponse;
 import com.patrol.api.member.member.dto.request.ChangeMemberStatusRequest;
+import com.patrol.domain.facility.repository.ShelterRepository;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.enums.MemberRole;
-import com.patrol.domain.member.member.enums.MemberStatus;
 import com.patrol.domain.member.member.repository.V2MemberRepository;
-import com.patrol.domain.member.member.service.V2MemberService;
 import com.patrol.global.error.ErrorCode;
 import com.patrol.global.exception.CustomException;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AdminService {
     private final V2MemberRepository v2MemberRepository;
     private final Logger logger = LoggerFactory.getLogger(AdminService.class.getName());
+    private final ShelterRepository shelterRepository;
 
     // 모든 회원 정보 가져오기
     @Transactional
@@ -41,9 +41,9 @@ public class AdminService {
         logger.info("모든 회원 정보 가져오기 : getAllMembers");
 
         // ROLE_ADMIN이 아닌 회원만 조회
-        Page<Member> memberPage = v2MemberRepository.findByRoleNot(MemberRole.ROLE_ADMIN, pageable);
+        Page<Member> members = v2MemberRepository.findByRoleNot(MemberRole.ROLE_ADMIN, pageable);
 
-        return memberPage.map(member -> GetAllMembersResponse.builder()
+        return members.map(member -> GetAllMembersResponse.builder()
                 .id(member.getId())
                 .email(member.getEmail())
                 .nickname(member.getNickname())
