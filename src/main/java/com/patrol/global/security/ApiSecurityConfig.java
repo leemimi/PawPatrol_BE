@@ -150,6 +150,7 @@ public class ApiSecurityConfig {
                                 String redirectUrl = UriComponentsBuilder
                                         .fromUriString(domain)
                                         .queryParam("temp_token", tempToken)
+                                        .encode()
                                         .toUriString();
                                 response.sendRedirect(redirectUrl);
                                 return;
