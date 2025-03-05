@@ -8,9 +8,12 @@ import com.patrol.domain.animalCase.enums.ContentType;
 import com.patrol.domain.animalCase.events.PostCreatedEvent;
 import com.patrol.domain.animalCase.events.AnimalCaseCreatedEvent;
 import com.patrol.domain.animalCase.events.ProtectionStatusChangeEvent;
+import com.patrol.domain.animalCase.events.MyPetCreatedEvent;
 import com.patrol.domain.lostFoundPost.entity.LostFoundPost;
 import com.patrol.domain.lostFoundPost.entity.PostStatus;
 import com.patrol.domain.member.member.entity.Member;
+import com.patrol.domain.protection.entity.Protection;
+import com.patrol.domain.protection.enums.ProtectionType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -42,10 +45,20 @@ public class AnimalCaseEventPublisher {
   }
 
 
-  public void acceptProtection(Long protectionId, Long memberId, CaseStatus toStatus) {
+  public void acceptProtection(Protection protection, Long memberId, CaseStatus toStatus) {
+    ProtectionType protectionType = protection.getProtectionType();
+    CaseHistoryStatus caseHistory;
+    if (protectionType == ProtectionType.TEMP_PROTECTION) {
+      caseHistory = CaseHistoryStatus.TEMP_PROTECT_APPROVED;
+    } else if (protectionType == ProtectionType.ADOPTION) {
+      caseHistory = CaseHistoryStatus.ADOPTION_APPROVED;
+    } else {
+      return;
+    }
+
     eventPublisher.publishEvent(new ProtectionStatusChangeEvent(
-        protectionId, memberId,
-        toStatus, CaseHistoryStatus.TEMP_PROTECT_APPROVED
+        protection.getId(), memberId,
+        toStatus, caseHistory
     ));
   }
 
@@ -53,20 +66,37 @@ public class AnimalCaseEventPublisher {
   public void rejectProtection(Long protectionId, Long memberId, CaseStatus toStatus) {
     eventPublisher.publishEvent(new ProtectionStatusChangeEvent(
         protectionId, memberId,
-        toStatus, CaseHistoryStatus.TEMP_PROTECT_REJECTED
+        toStatus, CaseHistoryStatus.APPLICATION_REJECTED
     ));
   }
 
   public void createAnimalCase(Member member, Animal animal, String title, String description) {
     eventPublisher.publishEvent(new AnimalCaseCreatedEvent(
-        member, animal, title, description
+        member, animal, title, description, CaseStatus.PROTECT_WAITING
     ));
   }
 
-  public void applyProtection(Long protectionId, Long memberId, CaseStatus status) {
+  public void applyProtection(Protection protection, Long memberId, CaseStatus status) {
+    ProtectionType protectionType = protection.getProtectionType();
+    CaseHistoryStatus caseHistory;
+    if (protectionType == ProtectionType.TEMP_PROTECTION) {
+      caseHistory = CaseHistoryStatus.TEMP_PROTECT_REQUEST;
+    } else if (protectionType == ProtectionType.ADOPTION) {
+      caseHistory = CaseHistoryStatus.ADOPTION_REQUEST;
+    } else {
+      return;
+    }
+
+
     eventPublisher.publishEvent(new ProtectionStatusChangeEvent(
-        protectionId, memberId,
-        status, CaseHistoryStatus.TEMP_PROTECT_REQUEST
+        protection.getId(), memberId,
+        status, caseHistory
+    ));
+  }
+
+  public void createMyPet(Member member, Animal animal) {
+    eventPublisher.publishEvent(new AnimalCaseCreatedEvent(
+        member, animal, null, null, CaseStatus.MY_PET
     ));
   }
 }

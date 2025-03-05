@@ -76,6 +76,12 @@ public class AnimalCaseService {
     return animalCaseRepository.findAllByCurrentFoster(currentFoster, pageable);
   }
 
+  public Page<AnimalCase> findAllByCurrentFosterAndStatus(
+      Member currentFoster, Collection<CaseStatus> statuses, Pageable pageable
+  ) {
+    return animalCaseRepository.findAllByCurrentFosterAndStatusIn(currentFoster, statuses, pageable);
+  }
+
   @Transactional
   public void softDeleteAnimalCase(AnimalCase animalCase, Long memberId) {
     if (!animalCase.getCurrentFoster().getId().equals(memberId)) {
