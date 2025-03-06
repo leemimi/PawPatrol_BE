@@ -236,8 +236,9 @@ public class ProtectionService {
       animal.setImageUrl(imageList.getFirst().getPath());
     }
 
-
-    animalCaseEventPublisher.createAnimalCase(member, animal, request.title(), request.description());
+    animalCaseEventPublisher.createAnimalCase(
+        member, animal, request.title(), request.description(), request.location()
+    );
   }
 
 

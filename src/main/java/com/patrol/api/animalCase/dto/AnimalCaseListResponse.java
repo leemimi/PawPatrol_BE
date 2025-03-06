@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 public record AnimalCaseListResponse(
     Long animalCaseId,
     String title,
+    String location,
     AnimalType animalType,
     String breed,
     String animalName,
@@ -26,6 +27,7 @@ public record AnimalCaseListResponse(
     return AnimalCaseListResponse.builder()
         .animalCaseId(animalCase.getId())
         .title(animalCase.getTitle())
+        .location(animalCase.getLocation())
         .animalType(animalCase.getAnimal().getAnimalType())
         .breed(animalCase.getAnimal().getBreed())
         .animalName(animalCase.getAnimal().getName())

@@ -348,6 +348,7 @@ public class AdoptionAnimalService {
     animalCase.setShelter(shelter);
     animalCase.setCurrentFoster(shelter.getShelterMember());
     animalCase.setTitle(row.getName());
+    animalCase.setLocation(shelter.getName());
     animalCase.setDescription("영상 링크 : " + row.getVideoUrl());
     animalCase.getAnimal().setOwner(shelter.getShelterMember());
     return animalCase;
