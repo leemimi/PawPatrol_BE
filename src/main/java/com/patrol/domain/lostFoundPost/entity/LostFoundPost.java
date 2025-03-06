@@ -58,7 +58,7 @@ public class LostFoundPost extends BaseEntity {
     public LostFoundPost(LostFoundPostRequestDto requestDto, Member author, Animal pet,AnimalType animalType) {
         this(requestDto);
         this.author = author;
-        this.pet = pet != null ? pet : null;
+        this.pet = pet;  // null로 전달되면 null로 유지됨
         this.animalType = animalType != null ? animalType : null;
     }
 
