@@ -43,6 +43,10 @@ public class CaseHistoryService {
     addHistory(animalCase, CaseHistoryStatus.TEMP_PROTECT_REGISTERED, contentType, contentId, memberId);
   }
 
+  @Transactional
+  public void addMyPet(AnimalCase animalCase, ContentType contentType, Long contentId, Long memberId) {
+    addHistory(animalCase, CaseHistoryStatus.MY_PET_REGISTERED, contentType, contentId, memberId);
+  }
 
   public void addHistory(
       AnimalCase animalCase, CaseHistoryStatus historyStatus,

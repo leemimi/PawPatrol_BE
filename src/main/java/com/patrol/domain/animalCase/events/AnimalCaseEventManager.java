@@ -83,6 +83,10 @@ public class AnimalCaseEventManager {
 
     animalCase.updateStatus(toStatus);
     caseHistoryService.addHistory(animalCase, historyStatus, ContentType.PROTECTION, protection.getId(), memberId);
+
+    if (toStatus == CaseStatus.ADOPTED) {
+      animalCase.updateStatus(CaseStatus.MY_PET);
+    }
   }
 
 
@@ -105,14 +109,21 @@ public class AnimalCaseEventManager {
   // AnimalCaseCreated 이벤트 처리
   @Transactional
   public void handleAnimalCaseCreated(
-      Animal animal, Member member, String title, String description
+      Animal animal, Member member, String title, String description, CaseStatus caseStatus
   ) {
-    AnimalCase animalCase = animalCaseService.createNewCase(CaseStatus.PROTECT_WAITING, animal);
+    AnimalCase animalCase = animalCaseService.createNewCase(caseStatus, animal);
     animalCase.setCurrentFoster(member);
     animalCase.setTitle(title);
     animalCase.setDescription(description);
-    caseHistoryService.addAnimalCase(
-        animalCase, ContentType.ANIMAL_CASE, animalCase.getId(), member.getId()
-    );
+
+    if (caseStatus == CaseStatus.MY_PET) {
+      caseHistoryService.addMyPet(
+          animalCase, ContentType.ANIMAL_CASE, animalCase.getId(), member.getId()
+      );
+    } else {
+      caseHistoryService.addAnimalCase(
+          animalCase, ContentType.ANIMAL_CASE, animalCase.getId(), member.getId()
+      );
+    }
   }
 }

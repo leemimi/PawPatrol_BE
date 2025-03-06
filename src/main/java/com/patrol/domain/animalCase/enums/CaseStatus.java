@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum CaseStatus {
 
+  MY_PET("마이펫"),
   UNKNOWN("불명"), // 최초 제보 시점에서 정확한 상태를 알 수 없는 경우
   MISSING("실종"), // 등록된 반려동물 실종 신고 상태
   SHELTER_PROTECTING("보호소 보호 중"), // 보호소에서 보호 중인 상태

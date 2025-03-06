@@ -138,10 +138,6 @@ public class Member extends BaseEntity {
     }
 
 
-    @JsonIgnore
-    @OneToOne(mappedBy = "shelterMember")
-    private Shelter shelter;
-
 
     // 1:N 관계 설정
 
