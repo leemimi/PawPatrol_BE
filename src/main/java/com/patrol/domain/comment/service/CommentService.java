@@ -31,8 +31,8 @@ public class CommentService {
         comment.setAuthor(author);
 
         // FindPost 조회 후 설정
-        if (requestDto.getFindPostId() != null) {
-            LostFoundPost lostFoundPost = lostFoundPostRepository.findById(requestDto.getFindPostId())
+        if (requestDto.getLostFoundPostId() != null) {
+            LostFoundPost lostFoundPost = lostFoundPostRepository.findById(requestDto.getLostFoundPostId())
                 .orElseThrow(() -> new RuntimeException("해당 ID의 제보 게시글을 찾을 수 없습니다."));
             comment.setLostFoundPost(lostFoundPost);
         }
