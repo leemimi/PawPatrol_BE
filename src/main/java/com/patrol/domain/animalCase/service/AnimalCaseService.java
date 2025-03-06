@@ -76,6 +76,12 @@ public class AnimalCaseService {
     return animalCaseRepository.findAllByCurrentFoster(currentFoster, pageable);
   }
 
+  public Page<AnimalCase> findAllByCurrentFosterAndStatus(
+      Member currentFoster, Collection<CaseStatus> statuses, Pageable pageable
+  ) {
+    return animalCaseRepository.findAllByCurrentFosterAndStatusIn(currentFoster, statuses, pageable);
+  }
+
   @Transactional
   public void softDeleteAnimalCase(AnimalCase animalCase, Long memberId) {
     if (!animalCase.getCurrentFoster().getId().equals(memberId)) {
@@ -87,5 +93,11 @@ public class AnimalCaseService {
   @Transactional
   public void saveAll(List<AnimalCase> animalCases) {
     animalCaseRepository.saveAll(animalCases);
+  }
+
+  public Long findIdByAnimalId(Long animalId) {
+    AnimalCase animalCase = animalCaseRepository.findByAnimalId(animalId)
+        .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
+    return animalCase.getId();
   }
 }

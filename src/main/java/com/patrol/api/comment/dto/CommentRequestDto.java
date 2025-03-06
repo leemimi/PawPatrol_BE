@@ -8,6 +8,6 @@ import lombok.Setter;
 public class CommentRequestDto {
     private String content;
 
-    private Long lostPostId;
-    private Long findPostId;
+    private Long lostFoundPostId;
 }
+//수정

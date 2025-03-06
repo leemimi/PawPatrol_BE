@@ -34,6 +34,7 @@ public enum ErrorCode {
     // Protection
     ALREADY_FOSTER(HttpStatus.BAD_REQUEST, "이미 보호자입니다."),
     ALREADY_APPLIED(HttpStatus.BAD_REQUEST, "이미 신청하였습니다."),
+    PROTECTION_TYPE_ERROR(HttpStatus.BAD_REQUEST, "유효하지 않는 보호 타입입니다."),
 
 
     // Member
