@@ -3,12 +3,12 @@ package com.patrol.domain.member.auth.service;
 import com.patrol.api.member.auth.dto.SocialTokenInfo;
 import com.patrol.api.member.auth.dto.request.SignupRequest;
 import com.patrol.api.member.auth.dto.requestV2.*;
+import com.patrol.domain.facility.entity.Shelter;
+import com.patrol.domain.facility.repository.ShelterRepository;
 import com.patrol.domain.member.member.entity.Member;
-import com.patrol.domain.member.member.entity.ShelterMember;
 import com.patrol.domain.member.member.enums.MemberRole;
 import com.patrol.domain.member.member.enums.MemberStatus;
 import com.patrol.domain.member.member.enums.ProviderType;
-import com.patrol.domain.member.member.repository.ShelterMemberRepository;
 import com.patrol.domain.member.member.repository.V2MemberRepository;
 import com.patrol.domain.member.member.service.V2MemberService;
 import com.patrol.global.error.ErrorCode;
@@ -67,7 +67,7 @@ public class V2AuthService {
     private final StringRedisTemplate redisTemplate;
     private final RestTemplate restTemplate;
     private final Rq rq;
-    private final ShelterMemberRepository shelterMemberRepository;
+    private final ShelterRepository shelterRepository;
 
     private static final String KEY_PREFIX = "find:verification:";
 
@@ -313,7 +313,7 @@ public class V2AuthService {
         }
 
         // 사업자등록번호 중복 확인
-        if (shelterMemberRepository.existsByBusinessRegistrationNumber(request.businessRegistrationNumber())) {
+        if (shelterRepository.existsByBusinessRegistrationNumber(request.businessRegistrationNumber())) {
             throw new CustomException(ErrorCode.DUPLICATE_BUSINESS_NUMBER);
         }
 
@@ -336,23 +336,54 @@ public class V2AuthService {
         // Member 저장
         Member savedMember = v2MemberRepository.save(member);
 
-        // ShelterMember 엔티티 생성 및 연결
-        ShelterMember shelterMember = ShelterMember.builder()
-                .member(savedMember)
-                .BusinessName(request.nickname()) // 기본 사업장명 설정
-                .owner(request.owner())
-                .address(request.address())
-                .businessRegistrationNumber(request.businessRegistrationNumber())
-                .build();
+        try {
+            // request.shelterId가 null 일 경우 새로운 보호소 생성
+            if (request.shelterId() == null) {
+                // ShelterMember 엔티티 생성 및 연결
+                Shelter shelter = Shelter.builder()
+                        .shelterMember(savedMember)
+                        .name(request.nickname()) // 기본 사업장명 설정
+                        .owner(request.owner())
+                        .address(request.address())
+                        .businessRegistrationNumber(request.businessRegistrationNumber())
+                        .build();
 
-        // ShelterMember 저장
-        shelterMemberRepository.save(shelterMember);
+                // Shelter 저장
+                shelterRepository.save(shelter);
 
-        // Member와 ShelterMember 연결
-        savedMember.setShelter(shelterMember);
+                // Member와 ShelterMember 연결
+                savedMember.setShelter(shelter);
+            } else {
+                // shelterId가 null이 아닌 경우 기존 보호소 검색
+                Optional<Shelter> shelterOptional = shelterRepository.findById(request.shelterId());
+
+                if (shelterOptional.isPresent()) {
+                    // DB에 저장된 보호소 정보 가져오기
+                    Shelter isShelter = shelterOptional.get();
+
+                    // DB에 저장된 보호소가 이미 ShelterMember를 가지고 있는 경우
+                    if (isShelter.getShelterMember() != null) {
+                        throw new CustomException(ErrorCode.DUPLICATE_SHELTER_MEMBER);
+                    }
+
+                    // DB에 저장된 보호소가 이미 ShelterMember를 가지고 있지 않은 경우
+                    // Member와 ShelterMember 연결
+                    savedMember.setShelter(isShelter);
+                    isShelter.setShelterMember(savedMember);
+                } else {
+                    // 요청된 shelterId가 존재하지 않는 경우
+                    logger.error("존재하지 않는 보호소 ID: {}", request.shelterId());
+                    throw new CustomException(ErrorCode.SHELTER_NOT_FOUND);
+                }
+            }
+        } catch (CustomException e) {
+            // 이미 생성된 회원 삭제 (롤백)
+            v2MemberRepository.delete(savedMember);
+            // 원래 예외를 그대로 전파
+            throw e;
+        }
 
         logger.info("보호소 회원가입 완료: {}", savedMember.getEmail());
-
         return savedMember;
     }
 

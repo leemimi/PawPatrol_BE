@@ -3,11 +3,13 @@ package com.patrol.domain.member.member.service;
 import com.patrol.api.member.auth.dto.ModifyProfileResponse;
 import com.patrol.api.member.auth.dto.MyPostsResponse;
 import com.patrol.api.member.auth.dto.requestV2.ModifyProfileRequest;
+import com.patrol.api.member.member.dto.GetAllMembersResponse;
 import com.patrol.api.member.member.dto.OAuthConnectInfoResponse;
 import com.patrol.domain.lostFoundPost.service.LostFoundPostService;
 import com.patrol.domain.member.auth.entity.OAuthProvider;
 import com.patrol.domain.member.auth.repository.OAuthProviderRepository;
 import com.patrol.domain.member.member.entity.Member;
+import com.patrol.domain.member.member.enums.MemberRole;
 import com.patrol.domain.member.member.enums.MemberStatus;
 import com.patrol.domain.member.member.repository.V2MemberRepository;
 import com.patrol.global.exceptions.ErrorCodes;
@@ -24,6 +26,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * packageName    : com.patrol.domain.member.member.service
@@ -201,4 +205,5 @@ public class V2MemberService {
 
         inActiveMember.setStatus(MemberStatus.WITHDRAWN);
     }
+
 }
