@@ -50,6 +50,9 @@ public enum ErrorCode {
     EMAIL_NOT_FOUND(HttpStatus.FORBIDDEN, "등록되지 않은 이메일 입니다."),
     VERIFICATION_NOT_FOUND(HttpStatus.FORBIDDEN, "유효하지 않은 접근입니다."),
     DUPLICATE_BUSINESS_NUMBER(HttpStatus.FORBIDDEN, "이미 등록된 사업자 등록번호 입니다."),
+    DUPLICATE_SHELTER(HttpStatus.FORBIDDEN, "이미 등록된 보호소 입니다."),
+    DUPLICATE_SHELTER_MEMBER(HttpStatus.FORBIDDEN, "이미 계정이 존재하는 보호소 입니다."),
+    SHELTER_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당 보호소를 찾을 수 없습니다"),
 
     // Animal
     PET_OWNER_MISMATCH(HttpStatus.FORBIDDEN, "해당 반려동물의 소유자가 아닙니다. 본인이 등록한 반려동물만 수정할 수 있습니다."),
