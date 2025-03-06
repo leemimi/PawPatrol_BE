@@ -98,10 +98,6 @@ public class Member extends BaseEntity {
     @Column(nullable = false, columnDefinition = "VARCHAR(50) DEFAULT 'SELF'")
     private ProviderType loginType = ProviderType.SELF;  // 현재 로그인 방식
 
-    // 1대 1 관계 설정
-    @OneToOne(mappedBy = "member", cascade = ALL, orphanRemoval = true)
-    private ShelterMember shelterMember;
-    
     // 1대1 관계 설정
     @JsonIgnore
     @OneToOne(mappedBy = "member", cascade = ALL, orphanRemoval = true)
