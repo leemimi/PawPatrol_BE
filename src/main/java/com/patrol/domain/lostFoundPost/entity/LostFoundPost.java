@@ -5,6 +5,7 @@ import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.comment.entity.Comment;
 import com.patrol.domain.image.entity.Image;
 import com.patrol.domain.member.member.entity.Member;
+import com.patrol.domain.animal.enums.AnimalType;
 import com.patrol.global.jpa.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -32,7 +33,7 @@ public class LostFoundPost extends BaseEntity {
     @OneToMany(mappedBy = "lostFoundPost", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();  // Comments relationship
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)  // 즉시 로딩
     @JoinColumn(name = "pet_id", nullable = true)
     private Animal pet;
 
