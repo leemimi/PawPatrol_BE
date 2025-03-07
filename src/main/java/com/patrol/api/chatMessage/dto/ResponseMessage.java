@@ -1,6 +1,5 @@
 package com.patrol.api.chatMessage.dto;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.patrol.api.member.member.dto.MemberResponseDto;
 import com.patrol.domain.chatMessage.entity.MessageType;
 import lombok.*;
@@ -21,6 +20,4 @@ public class ResponseMessage {
     private LocalDateTime timestamp;
     private boolean isRead;
     private MessageType messageType;
-    private String roomIdentifier;
-
 }

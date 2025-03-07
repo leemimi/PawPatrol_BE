@@ -50,7 +50,7 @@ public class AuthTokenService {
   }
 
   // 엑세스 토큰 파싱
-  public Map<String, Object> payload(String accessToken) {
+  Map<String, Object> payload(String accessToken) {
     Map<String, Object> parsedPayload = Ut.jwt.payload(jwtSecretKey, accessToken);
     if (parsedPayload == null) {
       return null;

@@ -22,7 +22,6 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final MemberRepository memberRepository;
     private final LostFoundPostRepository lostFoundPostRepository;
-    private final NotificationService notificationService; // WebSocket service to send notificationss
 
     private final NotificationService notificationService; // WebSocket service to send notificationss
 
