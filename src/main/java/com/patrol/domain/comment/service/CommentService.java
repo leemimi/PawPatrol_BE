@@ -24,6 +24,8 @@ public class CommentService {
     private final LostFoundPostRepository lostFoundPostRepository;
     private final NotificationService notificationService; // WebSocket service to send notificationss
 
+    private final NotificationService notificationService; // WebSocket service to send notificationss
+
     @Transactional
     public CommentResponseDto createComment(CommentRequestDto requestDto, Member author) {
         Comment comment = new Comment();
@@ -35,7 +37,7 @@ public class CommentService {
         // FindPost 조회 후 설정
         if (requestDto.getLostFoundPostId() != null) {
             LostFoundPost lostFoundPost = lostFoundPostRepository.findById(requestDto.getLostFoundPostId())
-                .orElseThrow(() -> new RuntimeException("해당 ID의 제보 게시글을 찾을 수 없습니다."));
+                    .orElseThrow(() -> new RuntimeException("해당 ID의 제보 게시글을 찾을 수 없습니다."));
             comment.setLostFoundPost(lostFoundPost);
 
             // After saving the comment, send a notification via WebSocket

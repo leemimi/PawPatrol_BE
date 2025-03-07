@@ -114,11 +114,13 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
     String accessToken = authTokens.accessToken;
 
     Member member = authService.getMemberFromAccessToken(accessToken);
-    if (member == null) // 토큰이 만료되었을 때, 당연히 멤버 정보 못가져옴
+    if (member == null) { // 토큰이 만료되었을 때, 당연히 멤버 정보 못가져옴
       logger.info("토큰 만료됨, doFilterInternal");
       member = _refreshAccessTokenByApiKey(apiKey);
-    if (member != null) // 토큰이 만료되지 않았을 때
+    }
+    if (member != null) { // 토큰이 만료되지 않았을 때
       rq.setLogin(member);
+    }
     filterChain.doFilter(request, response);
   }
 }

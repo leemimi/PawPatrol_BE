@@ -251,6 +251,7 @@ application.yml
 src/main/generated
 
 src/main/generated/
-__pycache__
 
 src/main/resources/pawpatrol-2b0e3-firebase-adminsdk-fbsvc-d2a02ca142.json
+__pycache__/
+*.pyc

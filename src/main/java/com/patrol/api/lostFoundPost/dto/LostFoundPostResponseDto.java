@@ -4,6 +4,7 @@ import com.patrol.api.PostResponseDto.PostResponseDto;
 import com.patrol.api.animal.dto.PetResponseDto;
 import com.patrol.api.image.dto.ImageResponseDto;
 import com.patrol.api.member.member.dto.MemberResponseDto;
+import com.patrol.domain.image.entity.Image;
 import com.patrol.domain.lostFoundPost.entity.LostFoundPost;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,8 +22,8 @@ import java.util.stream.Collectors;
 public class LostFoundPostResponseDto implements PostResponseDto {
     private Long id;
     private MemberResponseDto author;
-    private Long userId;  // ✅ 추가된 필드 (작성자의 ID)
-    private String nickname;  // ✅ 추가된 필드 (작성자 닉네임)
+    private Long userId;
+    private String nickname;
     private String content;
     private Double latitude;
     private Double longitude;
@@ -42,8 +43,8 @@ public class LostFoundPostResponseDto implements PostResponseDto {
     public LostFoundPostResponseDto(LostFoundPost lostFoundPost) {
         this.id = lostFoundPost.getId();
         this.author = new MemberResponseDto(lostFoundPost.getAuthor());
-        this.userId = lostFoundPost.getAuthor().getId();  // ✅ 유저 ID 추가
-        this.nickname = lostFoundPost.getAuthor().getNickname();  // ✅ Member에서 nickname 가져오기
+        this.userId = lostFoundPost.getAuthor().getId();
+        this.nickname = lostFoundPost.getAuthor().getNickname();
         this.content = lostFoundPost.getContent();
         this.latitude = lostFoundPost.getLatitude();
         this.longitude = lostFoundPost.getLongitude();
@@ -62,7 +63,6 @@ public class LostFoundPostResponseDto implements PostResponseDto {
 
 
     }
-
     public static LostFoundPostResponseDto from(LostFoundPost lostFoundPost) {
         return new LostFoundPostResponseDto(lostFoundPost);
     }
@@ -83,4 +83,3 @@ public class LostFoundPostResponseDto implements PostResponseDto {
         return "LOSTFOUND";
     }
 }
-

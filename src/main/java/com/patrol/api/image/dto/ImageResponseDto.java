@@ -10,9 +10,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ImageResponseDto {
     private String path;
+    private String status;
 
     public ImageResponseDto(Image image) {
         this.path = image.getPath();
+        this.status = (image.getStatus() != null) ? image.getStatus().toString() : "UNKNOWN";
+    }
+
+    public ImageResponseDto (String fullPath) {
+        this.path = fullPath;
     }
 }
-
