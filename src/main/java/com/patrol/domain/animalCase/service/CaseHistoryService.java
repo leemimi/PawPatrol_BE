@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class CaseHistoryService {
-https://github.com/BackEndSchoolPlus3th/PawPatrol_BE/pull/52/conflict?name=src%252Fmain%252Fjava%252Fcom%252Fpatrol%252Fdomain%252FanimalCase%252Fservice%252FCaseHistoryService.java&ancestor_oid=e7a12655370ee4030ba41ef45fbf457e506c0314&base_oid=330e1f747d8261b90090033633aa0a8007fcb962&head_oid=238a47ed050e86ef2dc59d7245a9eef884db3c55
+
   private final CaseHistoryRepository caseHistoryRepository;
   private final MemberService memberService;
 

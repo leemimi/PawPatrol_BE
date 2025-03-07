@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Optional;
 
 
-
 public interface ShelterRepository extends JpaRepository<Shelter, Long>,
                                             QuerydslPredicateExecutor<Shelter> {
     @Query("SELECT DISTINCT s FROM Shelter s " +
