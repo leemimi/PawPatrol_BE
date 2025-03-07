@@ -6,7 +6,6 @@ import com.patrol.api.member.auth.dto.MyPostsResponse;
 import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.animal.repository.AnimalRepository;
 import com.patrol.domain.image.service.ImageHandlerService;
-import com.patrol.domain.lostFoundPost.entity.AnimalType;
 import com.patrol.domain.lostFoundPost.entity.LostFoundPost;
 import com.patrol.domain.lostFoundPost.entity.PostStatus;
 import com.patrol.domain.lostFoundPost.repository.LostFoundPostRepository;
@@ -15,7 +14,6 @@ import com.patrol.domain.image.repository.ImageRepository;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.global.error.ErrorCode;
 import com.patrol.global.exception.CustomException;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -50,12 +48,7 @@ public class LostFoundPostService {
                     .orElseThrow(() -> new IllegalArgumentException("Pet not found"));
         }
 
-        AnimalType animalType = requestDto.getAnimalType() != null
-                ? AnimalType.valueOf(requestDto.getAnimalType())
-                : null;
-
-// LostFoundPost 객체 생성 (pet이 null일 수 있음)
-        LostFoundPost lostFoundPost = new LostFoundPost(requestDto, author, pet, animalType);
+        LostFoundPost lostFoundPost = new LostFoundPost(requestDto, author, pet);
 
         System.out.println("Received petId: " + requestDto.getPetId());
         System.out.println("📌 LostFoundPost created with pet: " + (lostFoundPost.getPet() != null ? lostFoundPost.getPet() : "null"));
