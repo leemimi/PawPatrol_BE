@@ -25,6 +25,8 @@ services:
       - --default-log-level=debug
     image: docker.redpanda.com/redpandadata/redpanda:v23.3.6
     container_name: redpanda-0
+    environment:
+      KAFKA_LOG4J_LOGGINGLEVEL: "ERROR"  # Kafka 로그 레벨을 ERROR로 설정
     volumes:
       - redpanda-0:/var/lib/redpanda/data
     networks:

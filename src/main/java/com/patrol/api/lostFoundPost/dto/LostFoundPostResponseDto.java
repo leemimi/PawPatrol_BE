@@ -1,5 +1,6 @@
 package com.patrol.api.lostFoundPost.dto;
 
+import com.patrol.api.PostResponseDto.PostResponseDto;
 import com.patrol.api.animal.dto.PetResponseDto;
 import com.patrol.api.image.dto.ImageResponseDto;
 import com.patrol.api.member.member.dto.MemberResponseDto;
@@ -18,8 +19,8 @@ import java.util.stream.Collectors;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LostFoundPostResponseDto {
-    private Long foundId;
+public class LostFoundPostResponseDto implements PostResponseDto {
+    private Long id;
     private MemberResponseDto author;
     private Long userId;
     private String nickname;
@@ -40,7 +41,7 @@ public class LostFoundPostResponseDto {
     //private Long petId;
 
     public LostFoundPostResponseDto(LostFoundPost lostFoundPost) {
-        this.foundId = lostFoundPost.getId();
+        this.id = lostFoundPost.getId();
         this.author = new MemberResponseDto(lostFoundPost.getAuthor());
         this.userId = lostFoundPost.getAuthor().getId();
         this.nickname = lostFoundPost.getAuthor().getNickname();
@@ -64,5 +65,21 @@ public class LostFoundPostResponseDto {
     }
     public static LostFoundPostResponseDto from(LostFoundPost lostFoundPost) {
         return new LostFoundPostResponseDto(lostFoundPost);
+    }
+
+
+    @Override
+    public Long getId() {
+        return id;
+    }
+
+    @Override
+    public String getTitle() {
+        return content;
+    }
+
+    @Override
+    public String getPostType() {
+        return "LOSTFOUND";
     }
 }
