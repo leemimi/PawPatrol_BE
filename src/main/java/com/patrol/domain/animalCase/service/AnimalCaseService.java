@@ -4,6 +4,7 @@ package com.patrol.domain.animalCase.service;
 import com.patrol.api.animalCase.dto.AnimalCaseDetailDto;
 import com.patrol.api.animalCase.dto.AnimalCaseListResponse;
 import com.patrol.domain.animal.entity.Animal;
+import com.patrol.domain.animal.enums.AnimalType;
 import com.patrol.domain.animalCase.entity.AnimalCase;
 import com.patrol.domain.animalCase.enums.CaseStatus;
 import com.patrol.domain.animalCase.repository.AnimalCaseRepository;
@@ -61,9 +62,14 @@ public class AnimalCaseService {
     return animalCaseRepository.findByIdAndStatusesWithHistories(caseId, statuses);
   }
 
-  public Page<AnimalCaseListResponse> findAllByStatuses(Collection<CaseStatus> statuses, Pageable pageable) {
-    return animalCaseRepository.findAllByStatusIn(statuses, pageable)
-        .map(AnimalCaseListResponse::of);
+  public Page<AnimalCaseListResponse> findAllByStatuses(
+      Collection<CaseStatus> statuses, AnimalType animalType, String location, Pageable pageable
+  ) {
+    String locationParam = (location != null && !location.trim().isEmpty()) ? location.trim() : null;
+
+    return animalCaseRepository.findAllByStatusInAndFilters(
+        statuses, animalType, locationParam, pageable
+    ).map(AnimalCaseListResponse::of);
   }
 
   // 관리자용
@@ -99,5 +105,11 @@ public class AnimalCaseService {
     AnimalCase animalCase = animalCaseRepository.findByAnimalId(animalId)
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
     return animalCase.getId();
+  }
+
+  public long countByCurrentFosterAndStatus(Member currentFoster, CaseStatus caseStatus) {
+    return animalCaseRepository.countByCurrentFosterAndStatus(
+        currentFoster, caseStatus
+    );
   }
 }
