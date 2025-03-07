@@ -43,7 +43,9 @@ public class AnimalService {
                 List.of(petRegisterRequest.imageFile()),
                 HOMELESS_FOLDER_PATH,
                 null,
-                null
+                null,
+                null,
+                petRegisterRequest.animalType()
         );
 
         if (!savedImages.isEmpty()) {
@@ -68,7 +70,9 @@ public class AnimalService {
                 List.of(petRegisterRequest.imageFile()),
                 folderPath,
                 null,
-                null
+                null,
+                null,
+                petRegisterRequest.animalType()
         );
 
         if (!savedImages.isEmpty()) {
@@ -94,7 +98,7 @@ public class AnimalService {
 
         // 이미지 등록 및 Kafka 이벤트 발행
         try {
-            Image registeredImage = imageHandlerService.registerImage(imageUrl, savedAnimal.getId(), null);
+            Image registeredImage = imageHandlerService.registerImage(imageUrl, savedAnimal.getId(), null, null, petRegisterRequest.animalType());
         } catch (Exception e) {
             log.error("이미지 등록 중 오류 발생: {}", e.getMessage(), e);
             throw e;
@@ -136,36 +140,35 @@ public class AnimalService {
         // 반려동물 소유자 검증
         validateOwner(animal, member);
 
-        // 반려동물 정보 업데이트
-        animal.setEstimatedAge(modiPetInfoRequest.getEstimatedAge());
-        animal.setFeature(modiPetInfoRequest.getFeature());
-        animal.setHealthCondition(modiPetInfoRequest.getHealthCondition());
-        animal.setSize(modiPetInfoRequest.getSize());
-        animal.setRegistrationNo(modiPetInfoRequest.getRegistrationNo());
+        // 반려동물 정보 업데이트 (null이 아닌 값만 반영)
+        Optional.ofNullable(modiPetInfoRequest.getEstimatedAge()).ifPresent(animal::setEstimatedAge);
+        Optional.ofNullable(modiPetInfoRequest.getFeature()).ifPresent(animal::setFeature);
+        Optional.ofNullable(modiPetInfoRequest.getHealthCondition()).ifPresent(animal::setHealthCondition);
+        Optional.ofNullable(modiPetInfoRequest.getSize()).ifPresent(animal::setSize);
+        Optional.ofNullable(modiPetInfoRequest.getRegistrationNo()).ifPresent(animal::setRegistrationNo);
 
-        // 이미지 파일이 제공된 경우에만 처리
+        // 🛠 새 이미지 파일이 제공된 경우에만 처리
         if (modiPetInfoRequest.getImageFile() != null && !modiPetInfoRequest.getImageFile().isEmpty()) {
-            String folderPath = "petRegister/" + member.getId() + "/";
+            String folderPath = MEMBER_FOLDER_PATH_PREFIX + member.getId() + "/";
 
-            // 기존 이미지 삭제
-            if (animal.getImageUrl() != null && !animal.getImageUrl().isEmpty()) {
-                imageHandlerService.deleteImageByPath(animal.getImageUrl());
-            }
-
-            // 새 이미지 업로드 및 등록
-            List<Image> savedImages = imageHandlerService.uploadAndRegisterImages(
+            // 📌 새 이미지 업로드 후 성공한 경우에만 기존 이미지 삭제 (롤백 방지)
+            List<Image> savedImages = imageHandlerService.uploadAndModifiedImages(
                     List.of(modiPetInfoRequest.getImageFile()),
                     folderPath,
-                    animal.getId(),
-                    null
+                    animal.getId()
             );
 
             if (!savedImages.isEmpty()) {
-                // 이미지 URL 업데이트
+                // 기존 이미지 삭제는 업로드 성공 후에 수행
+                if (animal.getImageUrl() != null && !animal.getImageUrl().isEmpty()) {
+                    imageHandlerService.deleteImageByPath(animal.getImageUrl());
+                }
+                // 🛠 업로드된 이미지 URL을 반려동물 정보에 반영
                 animal.setImageUrl(savedImages.get(0).getPath());
             }
         }
     }
+
 
     // 내 반려동물 정보 삭제 (마이페이지)
     @Transactional

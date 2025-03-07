@@ -201,6 +201,32 @@ def draw_annotations(image, face, shape, scores):
     cv2.putText(image, text2, (10, 60),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
 
+def compare_embeddings_only(img1, img2):
+    """
+    얼굴 감지가 실패했을 때, 이미지 전체에서 CLIP 임베딩을 추출하여 비교하는 함수
+    """
+    print("⚠ 얼굴을 감지하지 못했습니다. 이미지 전체로 CLIP 임베딩 비교 수행.")
+
+    # 이미지 전체에서 CLIP 임베딩 추출
+    def extract_image_embedding(image):
+        img_pil = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+        img_tensor = transform(img_pil).unsqueeze(0).to(device)
+        with torch.no_grad():
+            embedding = clip_model.encode_image(img_tensor)
+        embedding = embedding / embedding.norm(dim=-1, keepdim=True)  # 정규화
+        return embedding
+
+    # 각 이미지에 대해 CLIP 임베딩 추출
+    embedding1 = extract_image_embedding(img1)
+    embedding2 = extract_image_embedding(img2)
+
+    # 코사인 유사도 계산
+    emb_sim = torch.nn.functional.cosine_similarity(embedding1, embedding2).item()
+
+    return emb_sim
+
+
+
 # =====================
 # 얼굴 비교 및 시각화
 # =====================
@@ -216,9 +242,25 @@ def compare_faces(img1, img2, display=True):
     faces2 = face_locations(gray2)
     
     if not faces1 or not faces2:
-        print("하나 이상의 이미지에서 강아지 얼굴을 찾을 수 없습니다.")
-        return None, None, None
+        print("동물의 얼굴을 감지하지 못했습니다!!")
+        similarity = compare_embeddings_only(img1, img2)
 
+        result_img1, result_img2 = img1, img2
+        if display:
+            plt.figure(figsize=(10, 5))
+            plt.subplot(121)
+            plt.imshow(cv2.cvtColor(result_img1, cv2.COLOR_BGR2RGB))
+            plt.title('Image 1 (전체)')
+            plt.axis('off')
+
+            plt.subplot(122)
+            plt.imshow(cv2.cvtColor(result_img2, cv2.COLOR_BGR2RGB))
+            plt.title('Image 2 (전체)')
+            plt.axis('off')
+
+            plt.suptitle(f'CLIP Embedding Similarity: {similarity:.2f}', fontsize=16)
+            plt.show()
+            return result_img1, result_img2, similarity
     # 첫 번째 검출된 얼굴 사용
     face1 = faces1[0]
     face2 = faces2[0]
@@ -250,11 +292,18 @@ def compare_faces(img1, img2, display=True):
         lmk_sim = 1 - (np.linalg.norm(lmk_features1 - lmk_features2) / (norm1 + norm2))
     
     # 가중치 조정 (상황에 따라 조정 가능)
-    comb_score = 0.6 * emb_sim + 0.4 * lmk_sim
+    face_detection_confidence = len(faces1) * len(faces2)  # 얼굴 감지된 개수로 신뢰도 설정
+    if face_detection_confidence == 0:
+        # 얼굴 감지 실패 → CLIP 임베딩 100% 사용
+        combine_score = emb_sim
+        lmk_sim = 0  # 랜드마크 유사도 무시
+    else:
+        # 얼굴 감지 성공 → 기존 가중치 적용
+        combine_score = 0.6 * emb_sim + 0.4 * lmk_sim
 
     result_img1 = img1.copy()
     result_img2 = img2.copy()
-    scores = {'embedding': emb_sim, 'landmark': lmk_sim, 'combined': comb_score}
+    scores = {'embedding': emb_sim, 'landmark': lmk_sim, 'combined': combine_score}
     
     draw_annotations(result_img1, face1, shape1, scores)
     draw_annotations(result_img2, face2, shape2, scores)
@@ -289,7 +338,7 @@ def compare_faces(img1, img2, display=True):
                  verticalalignment='center',
                  fontsize=12, transform=plt.gca().transAxes)
         plt.text(0.5, 0.4,
-                 f'Embedding: {emb_sim:.2f}\nLandmark: {lmk_sim:.2f}\nCombined: {comb_score:.2f}',
+                 f'Embedding: {emb_sim:.2f}\nLandmark: {lmk_sim:.2f}\nCombined: {combine_score:.2f}',
                  horizontalalignment='center',
                  verticalalignment='center',
                  fontsize=10, transform=plt.gca().transAxes)
@@ -308,7 +357,33 @@ def compare_faces(img1, img2, display=True):
         plt.tight_layout()
         plt.show()
     
-    return result_img1, result_img2, comb_score
+    return result_img1, result_img2, combine_score
+
+def compare_embeddings_and_features(embedding1, features1, embedding2, features2):
+    """
+    두 개의 embedding 및 feature 벡터를 비교하여 유사도를 계산합니다.
+    - embedding: CLIP에서 추출한 벡터
+    - features: dlib landmark 기반 벡터
+    """
+    similarity_scores = []
+
+    # CLIP embedding 기반 유사도 계산 (코사인 유사도)
+    if embedding1 is not None and embedding2 is not None:
+        emb_sim = torch.nn.functional.cosine_similarity(embedding1, embedding2).item()
+        similarity_scores.append(emb_sim)
+
+    # 랜드마크 feature 기반 유사도 계산 (유클리디안 거리)
+    if features1 is not None and features2 is not None:
+        norm1 = np.linalg.norm(features1)
+        norm2 = np.linalg.norm(features2)
+        if norm1 + norm2 > 0:
+            feature_sim = 1 - (np.linalg.norm(features1 - features2) / (norm1 + norm2))
+            similarity_scores.append(feature_sim)
+
+    # 두 유사도의 평균값 반환
+    if similarity_scores:
+        return sum(similarity_scores) / len(similarity_scores)
+    return 0  # 유사도를 계산할 수 없는 경우 0 반환
 
 # =====================
 # 메인 실행부 (테스트용)

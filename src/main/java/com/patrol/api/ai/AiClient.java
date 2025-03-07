@@ -1,5 +1,6 @@
 package com.patrol.api.ai;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -37,46 +38,34 @@ public class AiClient {
         log.info("🔍 AI 서비스 임베딩 추출 시작: {}", imageUrl);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        headers.setContentType(MediaType.APPLICATION_JSON);  // ✅ JSON 요청
 
-        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("url", imageUrl);
+        Map<String, String> body = new HashMap<>();
+        body.put("image_url", imageUrl);  // ✅ JSON 구조
 
-        HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(body, headers);
+        HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(body, headers);
 
         try {
             String endpoint = aiServiceUrl + "/extract-embedding-from-url";
             log.info("📡 AI 서비스 요청: POST {}", endpoint);
+            log.info("📦 요청 데이터: {}", objectMapper.writeValueAsString(body));  // ✅ JSON 로그 출력
 
-            ResponseEntity<String> response = restTemplate.postForEntity(
-                    endpoint,
-                    requestEntity,
-                    String.class
-            );
+            ResponseEntity<String> response = restTemplate.postForEntity(endpoint, requestEntity, String.class);
 
             log.info("📄 AI 서비스 응답 상태: {}", response.getStatusCode());
+            log.info("📄 AI 서비스 응답 본문: {}", response.getBody()); // ✅ 응답 본문 로그
 
             if (response.getStatusCode() == HttpStatus.OK) {
                 JsonNode jsonNode = objectMapper.readTree(response.getBody());
-
-                if (jsonNode.has("success") && jsonNode.get("success").asBoolean()) {
-                    Map<String, String> result = new HashMap<>();
-                    String embedding = jsonNode.get("embedding").toString();
-                    String features = jsonNode.get("features").toString();
-
-                    // 임베딩 데이터 길이 로깅 (전체 내용은 너무 길어서 길이만 로깅)
-                    log.info("✅ 임베딩 추출 성공: 길이={}", embedding.length());
-                    log.info("✅ 피처 추출 성공: {}", features);
-
-                    result.put("embedding", embedding);
-                    result.put("features", features);
-                    return result;
-                } else {
-                    String errorMessage = jsonNode.has("message") ?
-                            jsonNode.get("message").asText() : "알 수 없는 오류";
-                    log.error("❌ AI 서비스 처리 실패: {}", errorMessage);
-                    throw new IOException("URL에서 임베딩 추출 실패: " + errorMessage);
+                if (jsonNode == null || jsonNode.get("embedding") == null || jsonNode.get("features") == null) {
+                    log.error("🚨 FastAPI 임베딩 추출 실패: 응답 값이 유효하지 않음");
+                    return Map.of("embedding", "", "features", "");  // 빈 값 반환
                 }
+
+                Map<String, String> result = new HashMap<>();
+                result.put("embedding", jsonNode.get("embedding").toString());
+                result.put("features", jsonNode.get("features").toString());
+                return result;
             } else {
                 log.error("❌ AI 서비스 응답 오류: {}", response.getStatusCode());
                 throw new IOException("URL 임베딩 추출 API 호출 실패: " + response.getStatusCode());
@@ -89,6 +78,8 @@ public class AiClient {
             throw new IOException("임베딩 추출 중 예외 발생: " + e.getMessage(), e);
         }
     }
+
+
 
 
     public List<AnimalSimilarity> batchCompareUrl(String path, Map<String, List<Double>> animalEmbeddings) throws IOException {
@@ -156,6 +147,39 @@ public class AiClient {
             throw new IOException("배치 비교 중 예외 발생: " + e.getMessage(), e);
         }
     }
+
+    public double calculateSimilarity(List<Double> findingEmbedding, List<Double> findingFeatures,
+                                      List<Double> sightedEmbedding, List<Double> sightedFeatures) {
+        log.info("🔍 FastAPI 유사도 비교 요청");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("finding_embedding", findingEmbedding);
+        requestBody.put("finding_features", findingFeatures);
+        requestBody.put("sighted_embedding", sightedEmbedding);
+        requestBody.put("sighted_features", sightedFeatures);
+
+        HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
+
+        try {
+            String endpoint = aiServiceUrl + "/compare-embeddings";
+            ResponseEntity<JsonNode> response = restTemplate.postForEntity(endpoint, requestEntity, JsonNode.class);
+
+            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+                double similarity = response.getBody().get("similarity").asDouble();
+                log.info("✅ 유사도 계산 완료: {}", similarity);
+                return similarity;
+            }
+        } catch (Exception e) {
+            log.error("❌ FastAPI 유사도 비교 요청 실패: {}", e.getMessage());
+        }
+
+        return 0.0; // 기본값 (비교 실패 시)
+    }
+
+
 
     @Data
     @AllArgsConstructor

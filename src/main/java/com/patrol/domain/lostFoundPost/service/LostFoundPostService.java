@@ -40,7 +40,7 @@ public class LostFoundPostService {
 
     @Transactional
     public LostFoundPostResponseDto createLostFoundPost(LostFoundPostRequestDto requestDto, Long petId, Member author, List<MultipartFile> images) {
-        log.info("분실/발견 게시글 생성 시작: petId={}", petId);
+        log.info("📌 분실/발견 게시글 생성 시작: petId={}", petId);
 
         Animal pet = null;
         if (petId != null) {
@@ -50,13 +50,14 @@ public class LostFoundPostService {
 
         LostFoundPost lostFoundPost = new LostFoundPost(requestDto, author, pet);
         lostFoundPostRepository.save(lostFoundPost);
-        log.info("분실/발견 게시글 저장 완료: postId={}", lostFoundPost.getId());
+        log.info("✅ 분실/발견 게시글 저장 완료: postId={}", lostFoundPost.getId());
 
-        // 반려동물 이미지가 있는 경우 해당 이미지를 게시글에도 연결
         if (petId != null) {
             Image petImage = imageRepository.findByAnimalId(petId);
             if (petImage != null) {
                 petImage.setFoundId(lostFoundPost.getId());
+                petImage.setStatus(lostFoundPost.getStatus());
+                petImage.setAnimalType(lostFoundPost.getAnimalType());
                 imageRepository.save(petImage);
                 log.info("반려동물 이미지를 게시글에 연결: imageId={}, postId={}", petImage.getId(), lostFoundPost.getId());
             }
@@ -84,7 +85,15 @@ public class LostFoundPostService {
         if (requestDto.getLostTime() != null) lostFoundPost.setLostTime(requestDto.getLostTime());
         // status가 null이 아니면 PostStatus enum으로 변환
         if (requestDto.getStatus() != null) {
-            lostFoundPost.setStatus(PostStatus.fromString(requestDto.getStatus()));
+            PostStatus newStatus = PostStatus.fromString(requestDto.getStatus());
+            lostFoundPost.setStatus(newStatus);
+
+            // 해당 게시글과 연결된 이미지들의 상태도 업데이트
+            List<Image> relatedImages = imageRepository.findAllByFoundId(postId);
+            for (Image image : relatedImages) {
+                image.updateStatus(newStatus);
+                imageRepository.save(image);
+            }
         }
 
         return getSavedImages(images, lostFoundPost);
@@ -193,19 +202,22 @@ public class LostFoundPostService {
     }
 
     @NotNull
-    private LostFoundPostResponseDto getSavedImages (List<MultipartFile> images, LostFoundPost lostFoundPost) {
+    private LostFoundPostResponseDto getSavedImages(List<MultipartFile> images, LostFoundPost lostFoundPost) {
         if (images != null && !images.isEmpty()) {
             List<Image> savedImages = imageHandlerService.uploadAndRegisterImages(
                     images,
                     FOLDER_PATH,
                     null,
-                    lostFoundPost.getId()
+                    lostFoundPost.getId(),
+                    lostFoundPost.getStatus(),
+                    lostFoundPost.getAnimalType()
             );
+
             for (Image image : savedImages) {
                 lostFoundPost.addImage(image);
             }
         }
-
         return LostFoundPostResponseDto.from(lostFoundPost);
     }
+
 }

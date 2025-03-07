@@ -2,6 +2,7 @@ package com.patrol.domain.lostFoundPost.entity;
 
 import com.patrol.api.lostFoundPost.dto.LostFoundPostRequestDto;
 import com.patrol.domain.animal.entity.Animal;
+import com.patrol.domain.animal.enums.AnimalType;
 import com.patrol.domain.comment.entity.Comment;
 import com.patrol.domain.image.entity.Image;
 import com.patrol.domain.member.member.entity.Member;
@@ -58,8 +59,8 @@ public class LostFoundPost extends BaseEntity {
     public LostFoundPost(LostFoundPostRequestDto requestDto, Member author, Animal pet,AnimalType animalType) {
         this(requestDto);
         this.author = author;
-        this.pet = pet != null ? pet : null;
-        this.animalType = animalType != null ? animalType : null;
+        this.pet = pet;
+        this.animalType = animalType;
     }
 
 
@@ -98,7 +99,6 @@ public class LostFoundPost extends BaseEntity {
         this.pet = pet;
     }
 
-
     public void addImage(Image image) {
         if (this.images == null) {
             this.images = new ArrayList<>();
@@ -106,5 +106,8 @@ public class LostFoundPost extends BaseEntity {
         this.images.add(image);
     }
 
-
+    public void addComment (String comment) {
+        Comment newComment = new Comment(comment, this);
+        this.comments.add(newComment);
+    }
 }

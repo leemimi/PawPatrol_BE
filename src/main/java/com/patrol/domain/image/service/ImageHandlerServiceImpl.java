@@ -1,7 +1,9 @@
 package com.patrol.domain.image.service;
 
+import com.patrol.domain.animal.enums.AnimalType;
 import com.patrol.domain.image.entity.Image;
 import com.patrol.domain.image.repository.ImageRepository;
+import com.patrol.domain.lostFoundPost.entity.PostStatus;
 import com.patrol.global.error.ErrorCode;
 import com.patrol.global.exception.CustomException;
 import com.patrol.global.storage.FileStorageHandler;
@@ -40,13 +42,15 @@ public class ImageHandlerServiceImpl implements ImageHandlerService {
 
     @Override
     @Transactional
-    public Image registerImage(String imageUrl, Long animalId, Long foundId) {
+    public Image registerImage (String imageUrl, Long animalId, Long foundId, PostStatus status, AnimalType animalType) {
         log.info("이미지 등록 시작: animalId={}, foundId={}, Path={}", animalId, foundId, imageUrl);
 
         Image image = Image.builder()
                 .path(imageUrl)
                 .animalId(animalId)
                 .foundId(foundId)
+                .status(status)
+                .animalType(animalType)
                 .build();
 
         Image savedImage = imageRepository.save(image);
@@ -61,15 +65,14 @@ public class ImageHandlerServiceImpl implements ImageHandlerService {
             log.info("Kafka 이벤트 발행 완료: imageId={}", savedImage.getId());
         } catch (Exception e) {
             log.error("Kafka 이벤트 발행 중 오류 발생: imageId={}, 오류={}", savedImage.getId(), e.getMessage(), e);
-            // 오류가 발생해도 이미지 등록은 정상적으로 처리됨
-            // 필요한 경우 재시도 로직 또는 다른 처리를 여기에 추가할 수 있음
         }
 
         return savedImage;
     }
-    @Override
+
     @Transactional
-    public List<Image> uploadAndRegisterImages(List<MultipartFile> files, String folderPath, Long animalId, Long foundId) {
+    @Override
+    public List<Image> uploadAndRegisterImages (List<MultipartFile> files, String folderPath, Long animalId, Long foundId, PostStatus status,  AnimalType animalType) {
         List<Image> savedImages = new ArrayList<>();
         List<String> uploadedPaths = new ArrayList<>();
 
@@ -87,7 +90,7 @@ public class ImageHandlerServiceImpl implements ImageHandlerService {
                     uploadedPaths.add(fileName);
 
                     String imageUrl = createImageUrl(folderPath, fileName);
-                    Image image = registerImage(imageUrl, animalId, foundId);
+                    Image image = registerImage(imageUrl, animalId, foundId, status, animalType);
                     savedImages.add(image);
                 }
             }
@@ -100,6 +103,47 @@ public class ImageHandlerServiceImpl implements ImageHandlerService {
             throw new CustomException(ErrorCode.DATABASE_ERROR);
         }
     }
+
+    @Override
+    public List<Image> uploadAndModifiedImages(List<MultipartFile> imageFiles, String folderPath, Long animalId) {
+        List<Image> savedImages = new ArrayList<>();
+        List<String> uploadedPaths = new ArrayList<>();
+
+        try {
+            for (MultipartFile file : imageFiles) {
+                FileUploadResult uploadResult = fileStorageHandler.handleFileUpload(
+                        FileUploadRequest.builder()
+                                .folderPath(folderPath)
+                                .file(file)
+                                .build()
+                );
+
+                if (uploadResult != null) {
+                    String fileName = uploadResult.getFileName();
+                    uploadedPaths.add(fileName);
+
+                    String imageUrl = createImageUrl(folderPath, fileName);
+
+                    Image existingImage = imageRepository.findByAnimalId(animalId);
+                    Long foundId = (existingImage != null) ? existingImage.getFoundId() : null;
+                    PostStatus status = (existingImage != null) ? existingImage.getStatus() : null;
+                    AnimalType animalType = (existingImage != null) ? existingImage.getAnimalType() : null;
+
+                    Image image = registerImage(imageUrl, animalId, foundId, status, animalType);
+                    savedImages.add(image);
+                }
+            }
+
+            return savedImages;
+        } catch (Exception e) {
+            for (String path : uploadedPaths) {
+                ncpObjectStorageService.delete(path);
+            }
+
+            throw new CustomException(ErrorCode.DATABASE_ERROR);
+        }
+    }
+
 
     @Override
     @Transactional
