@@ -91,14 +91,12 @@ public class ApiV2MemberController {
     }
 
     // 마이페이지 > 내 반려동물 정보 삭제
-    @DeleteMapping("/pets/{pet-id}")
+    @DeleteMapping("/pets/{petId}")
     public GlobalResponse<Void> deleteMyPetInfo(
             @LoginUser Member member,
-            @RequestBody DeleteMyPetInfoRequest deleteMyPetInfoRequest) {
+            @PathVariable Long petId) {
 
-        System.out.println("=============" + deleteMyPetInfoRequest.id());
-
-        animalService.deleteMyPetInfo(member, deleteMyPetInfoRequest);
+        animalService.deleteMyPetInfo(member, petId);
         return GlobalResponse.success();
     }
 
