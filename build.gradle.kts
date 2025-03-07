@@ -81,6 +81,11 @@ dependencies {
 
     implementation("org.springframework.kafka:spring-kafka")
     testImplementation("org.springframework.kafka:spring-kafka-test")
+
+    //FCM 알람 보내는 용도
+    implementation("com.google.firebase:firebase-admin:7.1.1")
+
+    implementation ("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.2")
 }
 
 tasks.withType<Test> {

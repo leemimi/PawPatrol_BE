@@ -1,5 +1,7 @@
 package com.patrol.domain.chatRoom.entity;
 
+import com.patrol.domain.Postable.Postable;
+import com.patrol.domain.animalCase.entity.AnimalCase;
 import com.patrol.domain.chatMessage.entity.ChatMessage;
 import com.patrol.domain.lostFoundPost.entity.LostFoundPost;
 import com.patrol.domain.member.member.entity.Member;
@@ -21,9 +23,15 @@ import java.util.List;
 @NoArgsConstructor
 @SuperBuilder
 public class ChatRoom extends BaseEntity {
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
-    private LostFoundPost post;
+    private ChatRoomType type;
+
+    @ManyToOne
+    @JoinColumn(name = "lost_found_post_id")
+    private LostFoundPost lostFoundPost;
+
+    @ManyToOne
+    @JoinColumn(name = "animal_case_id")
+    private AnimalCase animalCase;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member1_id")
@@ -35,11 +43,28 @@ public class ChatRoom extends BaseEntity {
 
     private String roomIdentifier;
 
-    public static String createRoomIdentifier(LostFoundPost post, Member member1, Member member2) {
+    public static String createRoomIdentifier(Postable post, Member member1, Member member2, ChatRoomType type) {
         Long postId = post.getId();
         Long smallerId = Math.min(member1.getId(), member2.getId());
         Long largerId = Math.max(member1.getId(), member2.getId());
 
-        return String.format("%d_%d_%d", postId, smallerId, largerId);
+        return String.format("%d_%d_%d_%s", postId, smallerId, largerId, type.name());
+    }
+
+    public Object getPost() {
+        if (type == ChatRoomType.LOSTFOUND) {
+            return lostFoundPost;
+        } else {
+            return animalCase;
+        }
+    }
+
+    public Long getPostId() {
+        if (type == ChatRoomType.LOSTFOUND && lostFoundPost != null) {
+            return lostFoundPost.getId();
+        } else if (type != ChatRoomType.LOSTFOUND && animalCase != null) {
+            return animalCase.getId();
+        }
+        return null;
     }
 }

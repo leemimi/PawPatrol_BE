@@ -1,6 +1,7 @@
 package com.patrol.domain.lostFoundPost.entity;
 
 import com.patrol.api.lostFoundPost.dto.LostFoundPostRequestDto;
+import com.patrol.domain.Postable.Postable;
 import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.comment.entity.Comment;
 import com.patrol.domain.image.entity.Image;
@@ -19,7 +20,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @Table(name = "lost_found_post")
-public class LostFoundPost extends BaseEntity {
+public class LostFoundPost extends BaseEntity implements Postable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id")
@@ -104,6 +105,16 @@ public class LostFoundPost extends BaseEntity {
             this.images = new ArrayList<>();
         }
         this.images.add(image);
+    }
+
+    @Override
+    public Long getId() {
+        return super.getId(); // BaseEntity에서 상속
+    }
+
+    @Override
+    public String getPostType() {
+        return "LOSTFOUND";
     }
 
 
