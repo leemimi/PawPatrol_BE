@@ -49,7 +49,16 @@ public class LostFoundPostResponseDto {
         this.longitude = lostFoundPost.getLongitude();
         this.findTime = lostFoundPost.getFindTime();
         this.lostTime = lostFoundPost.getLostTime();
-        this.animalType= String.valueOf(lostFoundPost.getAnimalType());
+        // Set animalType based on pet or lostFoundPost's animalType
+        if (lostFoundPost.getPet() != null && lostFoundPost.getPet().getAnimalType() != null) {
+            // Convert AnimalType enum to String
+            this.animalType = lostFoundPost.getPet().getAnimalType().toString(); // Convert enum to String
+        } else {
+            // If animalType in pet is null, set it from lostFoundPost
+            this.animalType = (lostFoundPost.getAnimalType() != null && !lostFoundPost.getAnimalType().toString().equals("null"))
+                    ? lostFoundPost.getAnimalType().toString() // Convert to String
+                    : "null"; // If it is "null", explicitly set it to "null" // If animalType is "null" set it to "null" explicitly
+        }
         this.status= String.valueOf(lostFoundPost.getStatus());
         this.location = lostFoundPost.getLocation();
         this.createdAt = lostFoundPost.getCreatedAt();
