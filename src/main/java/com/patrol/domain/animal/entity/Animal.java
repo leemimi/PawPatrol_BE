@@ -1,13 +1,18 @@
 package com.patrol.domain.animal.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.patrol.domain.animal.enums.AnimalGender;
 import com.patrol.domain.animal.enums.AnimalSize;
 import com.patrol.domain.animal.enums.AnimalType;
+import com.patrol.domain.animalCase.entity.AnimalCase;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.global.jpa.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * packageName    : com.patrol.domain.animal.entity
@@ -50,4 +55,8 @@ public class Animal extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private AnimalType animalType;  // 고양이, 강아지 구분
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "animal", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AnimalCase> animalCases = new ArrayList<>();
 }

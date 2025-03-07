@@ -172,8 +172,8 @@ public class AnimalService {
 
     // 내 반려동물 정보 삭제 (마이페이지)
     @Transactional
-    public void deleteMyPetInfo(Member member, DeleteMyPetInfoRequest deleteMyPetInfoRequest) {
-        Animal animal = animalRepository.findById(deleteMyPetInfoRequest.id())
+    public void deleteMyPetInfo(Member member, Long petId) {
+        Animal animal = animalRepository.findById(petId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ANIMAL_NOT_FOUND));
 
         // 반려동물 소유자 검증
@@ -181,7 +181,10 @@ public class AnimalService {
 
         // 반려동물 이미지 삭제
         if (animal.getImageUrl() != null && !animal.getImageUrl().isEmpty()) {
-            imageHandlerService.deleteImageByPath(animal.getImageUrl());
+
+            String objectKey = animal.getImageUrl().replace("https://kr.object.ncloudstorage.com/paw-patrol/", "");
+
+            imageHandlerService.deleteImageByPath(objectKey);
         }
 
         animalRepository.delete(animal);
