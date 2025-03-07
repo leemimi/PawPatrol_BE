@@ -1,6 +1,5 @@
 package com.patrol.api.chatRoom.controller;
 
-import com.patrol.domain.chatRoom.entity.ChatRoomType;
 import com.patrol.domain.chatRoom.service.ChatRoomService;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.global.rsData.RsData;
@@ -22,12 +21,7 @@ public class ChatRoomController {
     @GetMapping
     @ResponseBody
     @Operation(summary = "채팅방 목록 조회")
-    public RsData<Object> getChatRooms(
-            @RequestParam(required = false) ChatRoomType type,
-            @LoginUser Member loginUser) {
-        if (type != null) {
-            return chatRoomService.getUserChatRoomsByType(loginUser, type);
-        }
+    public RsData<Object> getChatRooms(@LoginUser Member loginUser) {
         return chatRoomService.getUserChatRooms(loginUser);
     }
 

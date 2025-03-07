@@ -15,6 +15,8 @@ import com.patrol.global.error.ErrorCode;
 import com.patrol.global.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -111,23 +113,22 @@ public class AnimalService {
 
     // 등록된 나의 반려동물 리스트 가져오기 (마이페이지)
     @Transactional
-    public List<MyPetListResponse> myPetList(Member member) {
-        return animalRepository.findByOwnerId(member.getId())
-                .stream()
-                .map(animal -> MyPetListResponse.builder()
-                        .id(animal.getId())
-                        .name(animal.getName())
-                        .breed(animal.getBreed())
-                        .feature(animal.getFeature())
-                        .estimatedAge(animal.getEstimatedAge())
-                        .healthCondition(animal.getHealthCondition())
-                        .size(animal.getSize())
-                        .registrationNo(animal.getRegistrationNo())
-                        .imageUrl(animal.getImageUrl())
-                        .gender(animal.getGender())
-                        .animalType(animal.getAnimalType())
-                        .build())
-                .collect(Collectors.toList());
+    public Page<MyPetListResponse> myPetList(Member member, Pageable pageable) {
+        Page<Animal> animalPage = animalRepository.findByOwnerId(member.getId(), pageable);
+
+        return animalPage.map(animal -> MyPetListResponse.builder()
+                .id(animal.getId())
+                .name(animal.getName())
+                .breed(animal.getBreed())
+                .feature(animal.getFeature())
+                .estimatedAge(animal.getEstimatedAge())
+                .healthCondition(animal.getHealthCondition())
+                .size(animal.getSize())
+                .registrationNo(animal.getRegistrationNo())
+                .imageUrl(animal.getImageUrl())
+                .gender(animal.getGender())
+                .animalType(animal.getAnimalType())
+                .build());
     }
 
     // 내 반려동물 정보 수정 (마이페이지)

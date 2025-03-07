@@ -6,8 +6,8 @@ import com.patrol.domain.comment.entity.Comment;
 import com.patrol.domain.comment.repository.CommentRepository;
 import com.patrol.domain.lostFoundPost.entity.LostFoundPost;
 import com.patrol.domain.lostFoundPost.repository.LostFoundPostRepository;
+import com.patrol.domain.lostFoundPost.service.NotificationService;
 import com.patrol.domain.member.member.entity.Member;
-import com.patrol.domain.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,13 +27,16 @@ public class CommentService {
         Comment comment = new Comment();
         comment.setContent(requestDto.getContent());
 
+        // ✅ 로그인한 사용자 정보 설정
         comment.setAuthor(author);
 
+        // FindPost 조회 후 설정
         if (requestDto.getLostFoundPostId() != null) {
             LostFoundPost lostFoundPost = lostFoundPostRepository.findById(requestDto.getLostFoundPostId())
                     .orElseThrow(() -> new RuntimeException("해당 ID의 제보 게시글을 찾을 수 없습니다."));
             comment.setLostFoundPost(lostFoundPost);
 
+            // After saving the comment, send a notification via WebSocket
             notificationService.sendLostFoundPostNotification(lostFoundPost);
         }
 
@@ -47,6 +50,7 @@ public class CommentService {
         Comment comment = commentRepository.findById(commentId)
             .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
 
+        // 로그인한 사용자(author)가 댓글 작성자와 일치하는지 확인
         if (!comment.getAuthor().equals(author)) {
             throw new RuntimeException("댓글 수정 권한이 없습니다.");
         }
@@ -58,7 +62,7 @@ public class CommentService {
     public void deleteComment(Long commentId, Member author) {
         Comment comment = commentRepository.findById(commentId)
             .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
-
+        // 로그인한 사용자(author)가 댓글 작성자와 일치하는지 확인
         if (!comment.getAuthor().equals(author)) {
             throw new RuntimeException("댓글 삭제 권한이 없습니다.");
         }

@@ -4,8 +4,6 @@ spring:
       enabled: always
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/pawpatrol_db?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Seoul
-    username: root
-    password: 1234
   data:
     redis:
       host: localhost

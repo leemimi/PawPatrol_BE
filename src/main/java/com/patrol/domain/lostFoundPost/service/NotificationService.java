@@ -1,4 +1,4 @@
-package com.patrol.domain.notification.service;
+package com.patrol.domain.lostFoundPost.service;
 
 import com.patrol.api.lostFoundPost.dto.LostFoundPostResponseDto;
 import com.patrol.domain.lostFoundPost.entity.LostFoundPost;
