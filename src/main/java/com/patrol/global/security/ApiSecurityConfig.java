@@ -113,8 +113,9 @@ public class ApiSecurityConfig {
                 .requestMatchers("/login/**").permitAll()
                     .requestMatchers("/ws/**").permitAll()
                     // v2 회원가입
-                .requestMatchers(HttpMethod.POST, "/api/*/auth/sign-up").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/*/auth/**").permitAll()
+                .requestMatchers("/api/*/auth/sign-up").permitAll()
+                .requestMatchers("/api/*/auth/**").permitAll()
+                    .requestMatchers("/api/*/auth/**").permitAll()
                 .anyRequest().authenticated()
         )
         .headers(headers ->
@@ -150,6 +151,7 @@ public class ApiSecurityConfig {
                                 String redirectUrl = UriComponentsBuilder
                                         .fromUriString(domain)
                                         .queryParam("temp_token", tempToken)
+                                        .encode()
                                         .toUriString();
                                 response.sendRedirect(redirectUrl);
                                 return;

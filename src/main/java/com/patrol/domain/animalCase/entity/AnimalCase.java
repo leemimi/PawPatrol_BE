@@ -77,4 +77,8 @@ public class AnimalCase extends BaseEntity implements Postable {
     return "PROTECTADOPT";
   }
 
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "shelter_id")
+  private Shelter shelter;
+
 }

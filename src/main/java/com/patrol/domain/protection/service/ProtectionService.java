@@ -52,7 +52,8 @@ public class ProtectionService {
     Collection<CaseStatus> possibleStatuses = List.of(
         CaseStatus.PROTECT_WAITING,
         CaseStatus.TEMP_PROTECTING,
-        CaseStatus.SHELTER_PROTECTING
+        CaseStatus.SHELTER_PROTECTING,
+        CaseStatus.MY_PET
     );
     AnimalCase animalCase = animalCaseService.findByIdAndStatusesWithHistories(caseId, possibleStatuses)
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
@@ -94,7 +95,13 @@ public class ProtectionService {
 
 
   public Page<MyAnimalCaseResponse> findMyAnimalCases(Member currentFoster, Pageable pageable) {
-    Page<AnimalCase> cases = animalCaseService.findAllByCurrentFoster(currentFoster, pageable);
+    Page<AnimalCase> cases = animalCaseService.findAllByCurrentFosterAndStatus(
+        currentFoster, List.of(
+            CaseStatus.PROTECT_WAITING,
+            CaseStatus.TEMP_PROTECTING,
+            CaseStatus.SHELTER_PROTECTING
+        ), pageable
+    );
 
     return cases.map(animalCase -> {
       List<PendingProtectionResponse> pendingProtections = getPendingProtections(animalCase.getId());
@@ -142,7 +149,7 @@ public class ProtectionService {
         .build();
 
     protectionRepository.save(protection);
-    animalCaseEventPublisher.applyProtection(protection.getId(), memberId, animalCase.getStatus());
+    animalCaseEventPublisher.applyProtection(protection, memberId, animalCase.getStatus());
     return ProtectionResponse.of(protection);
   }
 
@@ -191,7 +198,7 @@ public class ProtectionService {
 
     animalCase.getAnimal().setOwner(protection.getApplicant());
     animalCase.setCurrentFoster(protection.getApplicant());
-    animalCaseEventPublisher.acceptProtection(protection.getId(), memberId, animalCase.getStatus());
+    animalCaseEventPublisher.acceptProtection(protection, memberId, animalCase.getStatus());
   }
 
 

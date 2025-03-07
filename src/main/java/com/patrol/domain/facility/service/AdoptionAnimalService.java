@@ -226,7 +226,7 @@ public class AdoptionAnimalService {
             animal = createAnimalFromRow(row);
             animalRepository.save(animal);
           }
-
+          
           List<Image> animalImages = animalImagesMap.get(row.getAnimalNo());
           if (animalImages != null && !animalImages.isEmpty()) {
             for (Image image : animalImages) {
@@ -242,11 +242,10 @@ public class AdoptionAnimalService {
           Shelter shelter = shelterRepository.findByName(centerName)
               .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
 
-
           // 3. AnimalCase 생성 또는 업데이트
           AnimalCase existingAnimalCase = animalCaseService.findByAnimal(animal);
           if (existingAnimalCase != null) {
-            updateAnimalCaseFromRow(existingAnimalCase, row, shelter);
+            updateAnimalCaseFromRow(existingAnimalCase, row);
           } else {
             AnimalCase animalCase = createAnimalCaseFromRow(row, animal, shelter);
             animalCases.add(animalCase);
@@ -337,10 +336,7 @@ public class AdoptionAnimalService {
 
 
   // AnimalCase 업데이트
-  private void updateAnimalCaseFromRow(AnimalCase animalCase, AdoptionAnimalApiResponse.Row row, Shelter shelter) {
-    animalCase.setStatus(CaseStatus.SHELTER_PROTECTING);
-    animalCase.setShelter(shelter);
-    animalCase.setCurrentFoster(shelter.getShelterMember());
+  private void updateAnimalCaseFromRow(AnimalCase animalCase, AdoptionAnimalApiResponse.Row row) {
     animalCase.setTitle(row.getName());
     animalCase.setDescription("영상 링크 : " + row.getVideoUrl());
   }
@@ -352,6 +348,7 @@ public class AdoptionAnimalService {
     animalCase.setCurrentFoster(shelter.getShelterMember());
     animalCase.setTitle(row.getName());
     animalCase.setDescription("영상 링크 : " + row.getVideoUrl());
+    animalCase.getAnimal().setOwner(shelter.getShelterMember());
     return animalCase;
   }
 
