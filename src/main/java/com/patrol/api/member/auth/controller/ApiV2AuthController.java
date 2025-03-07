@@ -1,13 +1,14 @@
 package com.patrol.api.member.auth.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.patrol.api.member.auth.dto.BusinessValidationResponse;
+import com.patrol.api.member.auth.dto.SearchShelterResponse;
 import com.patrol.api.member.auth.dto.request.EmailRequest;
 import com.patrol.api.member.auth.dto.request.EmailVerifyRequest;
 import com.patrol.api.member.auth.dto.request.SignupRequest;
-import com.patrol.api.member.auth.dto.requestV2.LoginRequest;
+import com.patrol.api.member.auth.dto.requestV2.*;
 import com.patrol.api.member.auth.dto.LoginUserInfoResponse;
-import com.patrol.api.member.auth.dto.requestV2.NewPasswordRequest;
-import com.patrol.api.member.auth.dto.requestV2.SocialConnectRequest;
-import com.patrol.api.member.auth.dto.requestV2.VerifyResetCodeRequest;
+import com.patrol.domain.facility.service.ShelterService;
 import com.patrol.domain.member.auth.service.EmailService;
 import com.patrol.domain.member.auth.service.V2AuthService;
 import com.patrol.domain.member.member.entity.Member;
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -48,11 +50,19 @@ public class ApiV2AuthController {
     private final EmailService emailService;
     private final Rq rq;
     private final PasswordEncoder passwordEncoder;
+    private final ShelterService shelterService;
 
     // 회원가입
     @PostMapping("/sign-up")
     public GlobalResponse<String> signUp(@Valid @RequestBody SignupRequest request) {
         Member member = v2AuthService.signUp(request);
+        return GlobalResponse.success(member.getNickname());
+    }
+
+    // 보호소 회원가입
+    @PostMapping("/shelter/sigh-up")
+    public GlobalResponse<String> shelterSignUp(@Valid @RequestBody ShelterSignupRequest request) {
+        Member member = v2AuthService.shelterSignUp(request);
         return GlobalResponse.success(member.getNickname());
     }
 
@@ -198,5 +208,22 @@ public class ApiV2AuthController {
         v2AuthService.deleteToken(request.email());
 
         return GlobalResponse.success();
+    }
+
+    // 사업자 등록번호 검증
+    @PostMapping("/validate/business-number")
+    public GlobalResponse<BusinessValidationResponse> validateBusinessNumber(
+            @Valid @RequestBody BusinessNumberRequest request) throws Exception {
+        String jsonResponse = v2AuthService.validateBusinessNumber(request);
+        ObjectMapper objectMapper = new ObjectMapper();
+        BusinessValidationResponse validationResponse = objectMapper.readValue(jsonResponse, BusinessValidationResponse.class);
+        return GlobalResponse.success(validationResponse);
+    }
+
+    // 보호소 리스트 검색
+    @GetMapping("/shelters")
+    public GlobalResponse<List<SearchShelterResponse>> searchShelters(
+            @RequestParam String keyword) {
+        return GlobalResponse.success(shelterService.searchShelters(keyword));
     }
 }

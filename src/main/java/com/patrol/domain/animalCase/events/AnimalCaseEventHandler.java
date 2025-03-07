@@ -41,8 +41,7 @@ public class AnimalCaseEventHandler {
   @EventListener
   public void handleAnimalCaseCreated(AnimalCaseCreatedEvent event) {
     animalCaseEventManager.handleAnimalCaseCreated(
-        event.getAnimal(), event.getMember(), event.getTitle(), event.getDescription()
+        event.getAnimal(), event.getMember(), event.getTitle(), event.getDescription(), event.getToStatus()
     );
   }
-
 }

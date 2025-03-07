@@ -2,10 +2,11 @@ package com.patrol.domain.member.auth.service;
 
 import com.patrol.api.member.auth.dto.SocialTokenInfo;
 import com.patrol.api.member.auth.dto.request.SignupRequest;
-import com.patrol.api.member.auth.dto.requestV2.LoginRequest;
-import com.patrol.api.member.auth.dto.requestV2.NewPasswordRequest;
-import com.patrol.api.member.auth.dto.requestV2.SocialConnectRequest;
+import com.patrol.api.member.auth.dto.requestV2.*;
+import com.patrol.domain.facility.entity.Shelter;
+import com.patrol.domain.facility.repository.ShelterRepository;
 import com.patrol.domain.member.member.entity.Member;
+import com.patrol.domain.member.member.enums.MemberRole;
 import com.patrol.domain.member.member.enums.MemberStatus;
 import com.patrol.domain.member.member.enums.ProviderType;
 import com.patrol.domain.member.member.repository.V2MemberRepository;
@@ -19,19 +20,22 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestTemplate;
 
+import java.net.URI;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -49,6 +53,11 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 @Transactional
 public class V2AuthService {
+    @Value("${custom.shelter.baseUrl}")
+    private String baseUrl;
+    @Value("${custom.shelter.serviceKey}")
+    private String serviceKey;
+
     private final Logger logger = LoggerFactory.getLogger(V2AuthService.class.getName());
     private final V2MemberRepository v2MemberRepository;
     private final V2MemberService v2MemberService;
@@ -56,14 +65,21 @@ public class V2AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthTokenService authTokenService;
     private final StringRedisTemplate redisTemplate;
+    private final RestTemplate restTemplate;
     private final Rq rq;
+    private final ShelterRepository shelterRepository;
 
     private static final String KEY_PREFIX = "find:verification:";
 
     // 회원가입
     @Transactional
     public Member signUp(SignupRequest request) {
-        logger.info("회원가입_signUp");
+        logger.info("회원가입 : signUp");
+
+        // 이메일 중복 확인
+        if (v2MemberRepository.existsByEmail(request.email())) {
+            throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
+        }
 
         Member member = Member.builder()
                 .email(request.email())
@@ -247,4 +263,128 @@ public class V2AuthService {
             member.updatePassword(passwordEncoder.encode(request.newPassword()));
         }
     }
+
+    // 사업자 등록번호 검증
+    public String validateBusinessNumber(BusinessNumberRequest request) throws Exception {
+        String fullUrl = baseUrl + "?serviceKey=" + serviceKey;
+        URI uri = new URI(fullUrl);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("businesses", List.of(
+                Map.of(
+                        "b_no", request.businessNumber(),
+                        "start_dt", request.startDate(),
+                        "p_nm", request.owner()
+                )
+        ));
+
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    uri,
+                    HttpMethod.POST,
+                    entity,
+                    String.class
+            );
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                return response.getBody();
+            } else {
+                throw new RuntimeException("API call failed with status: " + response.getStatusCodeValue());
+            }
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            logger.error("API call failed. Status code: {}, Response body: {}", e.getRawStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException("API call failed", e);
+        }
+    }
+
+    // 보호소 회원가입
+    public Member shelterSignUp(ShelterSignupRequest request) {
+        logger.info("보호소 회원가입 : shelterSignUp");
+
+        // 이메일 중복 확인
+        if (v2MemberRepository.existsByEmail(request.email())) {
+            throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
+        }
+
+        // 사업자등록번호 중복 확인
+        if (shelterRepository.existsByBusinessRegistrationNumber(request.businessRegistrationNumber())) {
+            throw new CustomException(ErrorCode.DUPLICATE_BUSINESS_NUMBER);
+        }
+
+        // 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(request.password());
+
+        // Member 엔티티 생성
+        Member member = Member.builder()
+                .email(request.email())
+                .password(encodedPassword)
+                .nickname(request.nickname()) // 여기서 닉네임은 사업장명임
+                .address(request.address())
+                .status(MemberStatus.ACTIVE)
+                .role(MemberRole.ROLE_SHELTER) // 보호소 역할 부여
+                .loginType(ProviderType.SELF)
+                .apiKey(UUID.randomUUID().toString())
+                .marketingAgree(false) // 기본값
+                .build();
+
+        // Member 저장
+        Member savedMember = v2MemberRepository.save(member);
+
+        try {
+            // request.shelterId가 null 일 경우 새로운 보호소 생성
+            if (request.shelterId() == null) {
+                // ShelterMember 엔티티 생성 및 연결
+                Shelter shelter = Shelter.builder()
+                        .shelterMember(savedMember)
+                        .name(request.nickname()) // 기본 사업장명 설정
+                        .owner(request.owner())
+                        .address(request.address())
+                        .businessRegistrationNumber(request.businessRegistrationNumber())
+                        .build();
+
+                // Shelter 저장
+                shelterRepository.save(shelter);
+
+                // Member와 ShelterMember 연결
+                savedMember.setShelter(shelter);
+            } else {
+                // shelterId가 null이 아닌 경우 기존 보호소 검색
+                Optional<Shelter> shelterOptional = shelterRepository.findById(request.shelterId());
+
+                if (shelterOptional.isPresent()) {
+                    // DB에 저장된 보호소 정보 가져오기
+                    Shelter isShelter = shelterOptional.get();
+
+                    // DB에 저장된 보호소가 이미 ShelterMember를 가지고 있는 경우
+                    if (isShelter.getShelterMember() != null) {
+                        throw new CustomException(ErrorCode.DUPLICATE_SHELTER_MEMBER);
+                    }
+
+                    // DB에 저장된 보호소가 이미 ShelterMember를 가지고 있지 않은 경우
+                    // Member와 ShelterMember 연결
+                    savedMember.setShelter(isShelter);
+                    isShelter.setShelterMember(savedMember);
+                } else {
+                    // 요청된 shelterId가 존재하지 않는 경우
+                    logger.error("존재하지 않는 보호소 ID: {}", request.shelterId());
+                    throw new CustomException(ErrorCode.SHELTER_NOT_FOUND);
+                }
+            }
+        } catch (CustomException e) {
+            // 이미 생성된 회원 삭제 (롤백)
+            v2MemberRepository.delete(savedMember);
+            // 원래 예외를 그대로 전파
+            throw e;
+        }
+
+        logger.info("보호소 회원가입 완료: {}", savedMember.getEmail());
+        return savedMember;
+    }
+
 }

@@ -4,6 +4,7 @@ import com.patrol.domain.animal.entity.Animal;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * packageName    : com.patrol.domain.animal.repository
@@ -18,4 +19,6 @@ import java.util.List;
  */
 public interface AnimalRepository extends JpaRepository<Animal, Long> {
     List<Animal> findByOwnerId(Long ownerId);
+
+    Optional<Animal> findByRegistrationNo(String animalNo);
 }

@@ -3,14 +3,21 @@ package com.patrol.domain.facility.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.patrol.api.facility.dto.FacilitiesResponse;
 import com.patrol.api.facility.dto.ShelterApiResponse;
+import com.patrol.api.facility.dto.ShelterListResponse;
+import com.patrol.api.member.auth.dto.SearchShelterResponse;
 import com.patrol.domain.facility.entity.OperatingHours;
+import com.patrol.domain.facility.entity.QShelter;
 import com.patrol.domain.facility.entity.Shelter;
 import com.patrol.domain.facility.repository.ShelterRepository;
+import com.querydsl.core.BooleanBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -55,6 +62,14 @@ public class ShelterService implements FacilityService {
         .collect(Collectors.toList());
   }
 
+
+  public List<ShelterListResponse> findAllWithAnimals() {
+    List<Shelter> shelters = shelterRepository.findAllWithAnimalCasesAndAnimals();
+    return shelters.stream()
+        .map(ShelterListResponse::of)
+        .collect(Collectors.toList());
+  }
+
   @Override
   public List<FacilitiesResponse> getFacilitiesWithinRadius(
           double latitude,
@@ -65,6 +80,15 @@ public class ShelterService implements FacilityService {
             .stream()
             .map(FacilitiesResponse::of)
             .collect(Collectors.toList());
+  }
+
+  public List<ShelterListResponse> getSheltersWithinRadius(
+      double latitude, double longitude, double radius
+  ) {
+    return shelterRepository.findSheltersWithinRadius(latitude, longitude, radius)
+        .stream()
+        .map(ShelterListResponse::of)
+        .collect(Collectors.toList());
   }
 
 
@@ -94,4 +118,36 @@ public class ShelterService implements FacilityService {
     return startTime + " - " + endTime;
   }
 
+  // 관리자 페이지 보호소 목록 조회 (페이징 처리)
+  public Page<ShelterListResponse> getAllShelter(Pageable pageable) {
+    Page<Shelter> shelterPage = shelterRepository.findAllWithAnimalCasesAndAnimals(pageable);
+    return shelterPage.map(ShelterListResponse::of);
+  }
+
+  // 회원가입 시 보호소 목록 조회
+  public List<SearchShelterResponse> searchShelters(String keyword) {
+    QShelter qShelter = QShelter.shelter;
+    BooleanBuilder builder = new BooleanBuilder();
+
+    // keyword 를 통해 보호소 검색 (보호소 이름)
+    if(keyword != null && !keyword.isEmpty()) {
+      builder.and(qShelter.name.containsIgnoreCase(keyword));
+    }
+
+    Iterable<Shelter> shelterIterable = shelterRepository.findAll(builder);
+    List<Shelter> shelterList = new ArrayList<>();
+
+    // Iterable을 List로 변환
+    shelterIterable.forEach(shelterList::add);
+
+    // List를 SearchShelterResponse로 변환
+    return shelterList.stream()
+            .map(shelter -> SearchShelterResponse.builder()
+                    .id(shelter.getId())
+                    .name(shelter.getName())
+                    .address(shelter.getAddress())
+                    .tel(shelter.getTel())
+                    .build())
+            .collect(Collectors.toList());
+  }
 }

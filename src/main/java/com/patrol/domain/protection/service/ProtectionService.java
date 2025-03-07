@@ -51,20 +51,24 @@ public class ProtectionService {
   public AnimalCaseDetailResponse findPossibleAnimalCase(Long caseId, Long memberId) {
     Collection<CaseStatus> possibleStatuses = List.of(
         CaseStatus.PROTECT_WAITING,
-        CaseStatus.TEMP_PROTECTING
+        CaseStatus.TEMP_PROTECTING,
+        CaseStatus.SHELTER_PROTECTING,
+        CaseStatus.MY_PET
     );
     AnimalCase animalCase = animalCaseService.findByIdAndStatusesWithHistories(caseId, possibleStatuses)
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
     boolean isOwner = animalCase.getCurrentFoster() != null &&
         animalCase.getCurrentFoster().getId().equals(memberId);
 
+    List<Image> images = imageService.findAllByAnimalId(animalCase.getAnimal().getId());
+
     if (isOwner) {
       return AnimalCaseDetailResponse.create(
-          AnimalCaseDetailDto.of(animalCase), isOwner, getPendingProtections(animalCase.getId())
+          AnimalCaseDetailDto.of(animalCase), isOwner, getPendingProtections(animalCase.getId()), images
       );
     } else {
       return AnimalCaseDetailResponse.create(
-          AnimalCaseDetailDto.of(animalCase), isOwner, null
+          AnimalCaseDetailDto.of(animalCase), isOwner, null, images
       );
     }
   }
@@ -73,7 +77,8 @@ public class ProtectionService {
     return animalCaseService.findAllByStatuses(
         List.of(
             CaseStatus.PROTECT_WAITING,
-            CaseStatus.TEMP_PROTECTING
+            CaseStatus.TEMP_PROTECTING,
+            CaseStatus.SHELTER_PROTECTING
         ),
         pageable
     );
@@ -90,7 +95,13 @@ public class ProtectionService {
 
 
   public Page<MyAnimalCaseResponse> findMyAnimalCases(Member currentFoster, Pageable pageable) {
-    Page<AnimalCase> cases = animalCaseService.findAllByCurrentFoster(currentFoster, pageable);
+    Page<AnimalCase> cases = animalCaseService.findAllByCurrentFosterAndStatus(
+        currentFoster, List.of(
+            CaseStatus.PROTECT_WAITING,
+            CaseStatus.TEMP_PROTECTING,
+            CaseStatus.SHELTER_PROTECTING
+        ), pageable
+    );
 
     return cases.map(animalCase -> {
       List<PendingProtectionResponse> pendingProtections = getPendingProtections(animalCase.getId());
@@ -110,7 +121,7 @@ public class ProtectionService {
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
 
     AnimalCase animalCase = animalCaseService.findByIdAndStatusesWithHistories(caseId,
-            List.of(CaseStatus.PROTECT_WAITING, CaseStatus.TEMP_PROTECTING))
+            List.of(CaseStatus.PROTECT_WAITING, CaseStatus.TEMP_PROTECTING, CaseStatus.SHELTER_PROTECTING))
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
 
     if (animalCase.getCurrentFoster() == null) {
@@ -138,7 +149,7 @@ public class ProtectionService {
         .build();
 
     protectionRepository.save(protection);
-    animalCaseEventPublisher.applyProtection(protection.getId(), memberId, animalCase.getStatus());
+    animalCaseEventPublisher.applyProtection(protection, memberId, animalCase.getStatus());
     return ProtectionResponse.of(protection);
   }
 
@@ -187,7 +198,7 @@ public class ProtectionService {
 
     animalCase.getAnimal().setOwner(protection.getApplicant());
     animalCase.setCurrentFoster(protection.getApplicant());
-    animalCaseEventPublisher.acceptProtection(protection.getId(), memberId, animalCase.getStatus());
+    animalCaseEventPublisher.acceptProtection(protection, memberId, animalCase.getStatus());
   }
 
 
@@ -242,7 +253,8 @@ public class ProtectionService {
   public void updateAnimalCase(Long caseId, UpdateAnimalCaseRequest request, Member member, List<MultipartFile> images) {
     Collection<CaseStatus> possibleStatuses = List.of(
         CaseStatus.PROTECT_WAITING,
-        CaseStatus.TEMP_PROTECTING
+        CaseStatus.TEMP_PROTECTING,
+        CaseStatus.SHELTER_PROTECTING
     );
     AnimalCase animalCase = animalCaseService.findByIdAndStatusesWithHistories(caseId, possibleStatuses)
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));

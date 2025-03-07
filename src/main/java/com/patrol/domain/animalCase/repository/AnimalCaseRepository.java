@@ -64,10 +64,23 @@ public interface AnimalCaseRepository extends JpaRepository<AnimalCase, Long> {
       Pageable pageable
   );
 
+  @Query(value = "SELECT ac FROM AnimalCase ac " +
+      "LEFT JOIN FETCH ac.animal " +
+      "LEFT JOIN FETCH ac.currentFoster " +
+      "WHERE ac.currentFoster = :currentFoster AND ac.status IN :statuses AND ac.deletedAt IS NULL",
+      countQuery = "SELECT COUNT(ac) FROM AnimalCase ac WHERE ac.currentFoster = :currentFoster AND ac.status IN :statuses AND ac.deletedAt IS NULL")
+  Page<AnimalCase> findAllByCurrentFosterAndStatusIn(
+      @Param("currentFoster") Member currentFoster,
+      @Param("statuses") Collection<CaseStatus> statuses,
+      Pageable pageable
+  );
+
   // 기본 findById 오버라이딩 - 소프트 삭제 필터링 추가
   @Query("SELECT ac FROM AnimalCase ac " +
       "LEFT JOIN FETCH ac.animal " +
       "LEFT JOIN FETCH ac.currentFoster " +
       "WHERE ac.id = :id AND ac.deletedAt IS NULL")
   Optional<AnimalCase> findById(@Param("id") Long id);
+
+  Optional<AnimalCase> findByAnimalId(Long animalId);
 }

@@ -7,6 +7,7 @@ import com.patrol.api.animal.dto.request.ModiPetInfoRequest;
 import com.patrol.api.member.member.dto.request.PetRegisterRequest;
 import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.animal.repository.AnimalRepository;
+import com.patrol.domain.animalCase.service.AnimalCaseEventPublisher;
 import com.patrol.domain.image.entity.Image;
 import com.patrol.domain.image.service.ImageHandlerService;
 import com.patrol.domain.member.member.entity.Member;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 public class AnimalService {
     private final AnimalRepository animalRepository;
     private final ImageHandlerService imageHandlerService;
+    private final AnimalCaseEventPublisher animalCaseEventPublisher;
     private static final String HOMELESS_FOLDER_PATH = "petRegister/homeless/";
     private static final String MEMBER_FOLDER_PATH_PREFIX = "petRegister/";
 
@@ -79,6 +81,8 @@ public class AnimalService {
             Animal savedAnimal = animalRepository.save(animal);
             Image image = savedImages.get(0);
             image.setAnimalId(savedAnimal.getId());
+
+            animalCaseEventPublisher.createMyPet(member, animal);  // AnimalCase(상세화면) 생성
         } else {
             throw new CustomException(ErrorCode.FILE_UPLOAD_ERROR);
         }
@@ -121,6 +125,7 @@ public class AnimalService {
                         .registrationNo(animal.getRegistrationNo())
                         .imageUrl(animal.getImageUrl())
                         .gender(animal.getGender())
+                        .animalType(animal.getAnimalType())
                         .build())
                 .collect(Collectors.toList());
     }

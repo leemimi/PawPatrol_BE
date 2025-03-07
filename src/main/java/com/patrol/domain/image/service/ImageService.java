@@ -249,6 +249,7 @@ public class ImageService {
         return embeddings;
     }
 
+
     @Transactional
     public void compareAndLinkSightedToFindingPosts() {
         log.info("📌 `Finding` 상태 이미지와 `Sighted` 상태 이미지 비교 시작");
@@ -337,4 +338,7 @@ public class ImageService {
                 findingPost.getId(), sightedPost.getId(), similarity);
     }
 
+    public List<Image> findAllByAnimalId(Long animalId) {
+      return imageRepository.findAllByAnimalId(animalId);
+    }
 }

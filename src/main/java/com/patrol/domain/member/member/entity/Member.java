@@ -3,6 +3,7 @@ package com.patrol.domain.member.member.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.patrol.api.member.member.dto.OAuthProviderStatus;
 import com.patrol.api.member.member.dto.request.MemberUpdateRequest;
+import com.patrol.domain.facility.entity.Shelter;
 import com.patrol.domain.member.auth.entity.OAuthProvider;
 import com.patrol.domain.member.member.enums.Gender;
 import com.patrol.domain.member.member.enums.MemberRole;
@@ -97,9 +98,6 @@ public class Member extends BaseEntity {
     @Column(nullable = false, columnDefinition = "VARCHAR(50) DEFAULT 'SELF'")
     private ProviderType loginType = ProviderType.SELF;  // 현재 로그인 방식
 
-
-
-
     // 1대1 관계 설정
     @JsonIgnore
     @OneToOne(mappedBy = "member", cascade = ALL, orphanRemoval = true)
@@ -135,13 +133,10 @@ public class Member extends BaseEntity {
         return oAuthProvider.getOAuthProviderStatuses();
     }
 
-
-
-
-    // 1:N 관계 설정
-
-
-
+    // 1:1 관계 설정
+    @JsonIgnore
+    @OneToOne(mappedBy = "shelterMember")
+    private Shelter shelter;
 
 
     // Entity 메서드

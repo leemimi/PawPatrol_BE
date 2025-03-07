@@ -10,7 +10,11 @@ import com.patrol.domain.animalCase.service.AnimalCaseEventPublisher;
 import com.patrol.domain.member.auth.service.AuthService;
 import com.patrol.domain.member.auth.service.V2AuthService;
 import com.patrol.domain.member.member.entity.Member;
+import com.patrol.domain.member.member.enums.MemberRole;
+import com.patrol.domain.member.member.enums.MemberStatus;
 import com.patrol.domain.member.member.enums.ProviderType;
+import com.patrol.domain.member.member.repository.V2MemberRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
@@ -29,7 +33,8 @@ public class NotProd {
       V2AuthService authService,
       AnimalService animalService,
       AnimalCaseEventPublisher animalCaseEventPublisher,
-      AnimalRepository animalRepository
+      AnimalRepository animalRepository,
+      V2MemberRepository memberRepository
 
   ) {
     return new ApplicationRunner() {
@@ -45,6 +50,20 @@ public class NotProd {
         Member member1 = authService.signUp(request1);
         Member member2 = authService.signUp(request2);
         Member member3 = authService.signUp(request3);
+
+        long member3Id = member3.getId();
+
+        // ID로 멤버 조회
+        Member mem3 = memberRepository.findById(member3Id).orElseThrow(() ->
+                new EntityNotFoundException("Member not found with id: " + member3Id));
+
+        // 멤버3 권한 변경 (ADMIN)
+        mem3.setRole(MemberRole.ROLE_ADMIN);
+        mem3.setLoginType(ProviderType.SELF);
+        mem3.setStatus(MemberStatus.ACTIVE);
+        mem3.setProfileImageUrl("default.png");
+        memberRepository.save(mem3);
+
 
         List<PetRegisterRequest> sampleAnimals = SampleAnimalData.getSampleStrayAnimals();
         List<String> imageUrls = SampleAnimalData.getSampleImageUrls();
