@@ -1,5 +1,7 @@
 package com.patrol.domain.image.entity;
 
+import com.patrol.domain.animal.enums.AnimalType;
+import com.patrol.domain.lostFoundPost.entity.PostStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,15 +33,26 @@ public class Image {
     @Column(columnDefinition = "TEXT")
     private String features;
 
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private PostStatus status;
+
+    @Enumerated(EnumType.STRING)
+    private AnimalType animalType;
 
     @Builder
-    public Image(String path, Long animalId, Long foundId, String embedding, String features) {
+    public Image(String path, Long animalId, Long foundId,
+                 String embedding, String features, PostStatus status, AnimalType animalType) {
         this.path = path;
-        this.animalId=animalId;
+        this.animalId = animalId;
         this.foundId = foundId;
         this.embedding = embedding;
         this.features = features;
+        this.status = status;
+        this.animalType = animalType;
         this.createdAt = LocalDateTime.now();
+    }
+
+    public void updateStatus(PostStatus status) {
+        this.status = status;
     }
 }
