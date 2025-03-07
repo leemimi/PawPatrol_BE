@@ -2,7 +2,6 @@ package com.patrol.domain.animalCase.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.patrol.domain.Postable.Postable;
 import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.animalCase.enums.CaseStatus;
 import com.patrol.domain.facility.entity.Facility;
@@ -26,7 +25,7 @@ import java.util.List;
 @Getter
 @Setter
 @Table(name = "animal_cases")
-public class AnimalCase extends BaseEntity implements Postable {
+public class AnimalCase extends BaseEntity {
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
@@ -61,21 +60,7 @@ public class AnimalCase extends BaseEntity implements Postable {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "current_foster_id")
-  private Member currentFoster;
-
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "shelter_id")
-  private Shelter shelter;
-
-  @Override
-  public Long getId() {
-    return super.getId();
-  }
-
-  @Override
-  public String getPostType() {
-    return "PROTECTADOPT";
-  }
+  private Member currentFoster;  // 현재 임시보호자
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "shelter_id")
