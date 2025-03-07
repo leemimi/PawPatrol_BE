@@ -226,8 +226,7 @@ public class AdoptionAnimalService {
             animal = createAnimalFromRow(row);
             animalRepository.save(animal);
           }
-
-
+          
           List<Image> animalImages = animalImagesMap.get(row.getAnimalNo());
           if (animalImages != null && !animalImages.isEmpty()) {
             for (Image image : animalImages) {

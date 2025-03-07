@@ -133,6 +133,7 @@ public class Member extends BaseEntity {
         return oAuthProvider.getOAuthProviderStatuses();
     }
 
+
     // 1:1 관계 설정
     @JsonIgnore
     @OneToOne(mappedBy = "shelterMember")

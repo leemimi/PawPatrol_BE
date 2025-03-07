@@ -13,6 +13,7 @@ import com.patrol.domain.member.auth.service.EmailService;
 import com.patrol.domain.member.auth.service.V2AuthService;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.service.V2MemberService;
+import com.patrol.domain.notification.service.FCMService;
 import com.patrol.global.error.ErrorCode;
 import com.patrol.global.exceptions.ErrorCodes;
 import com.patrol.global.exceptions.ServiceException;
@@ -48,6 +49,7 @@ public class ApiV2AuthController {
     private final V2AuthService v2AuthService;
     private final V2MemberService v2MemberService;
     private final EmailService emailService;
+    private final FCMService fcmService;
     private final Rq rq;
     private final PasswordEncoder passwordEncoder;
     private final ShelterService shelterService;
@@ -91,6 +93,7 @@ public class ApiV2AuthController {
     @PostMapping("/login")
     public GlobalResponse<String> login(@Valid @RequestBody LoginRequest loginRequest) {
         logger.info("로그인");
+        fcmService.saveToken(loginRequest);
         return GlobalResponse.success(v2AuthService.login(loginRequest));
     }
 
