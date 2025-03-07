@@ -33,7 +33,7 @@ public class LostFoundPost extends BaseEntity {
     @OneToMany(mappedBy = "lostFoundPost", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();  // Comments relationship
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)  // 즉시 로딩
     @JoinColumn(name = "pet_id", nullable = true)
     private Animal pet;
 

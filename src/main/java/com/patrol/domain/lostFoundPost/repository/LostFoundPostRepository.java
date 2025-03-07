@@ -47,7 +47,7 @@ public interface LostFoundPostRepository extends JpaRepository<LostFoundPost, Lo
             @Param("latitude") double latitude,
             @Param("longitude") double longitude,
             @Param("radius") double radius,
-            String name);
+            @Param("name") String name);
 
     @Query(value = """
     SELECT * FROM lost_found_post lfp
@@ -59,6 +59,6 @@ public interface LostFoundPostRepository extends JpaRepository<LostFoundPost, Lo
             @Param("latitude") double latitude,
             @Param("longitude") double longitude,
             @Param("radius") double radius,
-            String name);
+            @Param("name") String name);
 
 }

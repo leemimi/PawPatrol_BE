@@ -72,9 +72,7 @@ public class CommentService {
     @Transactional(readOnly = true)
     public List<CommentResponseDto> getCommentsByLostFoundPost(Long lostFoundPostId) {
         List<Comment> comments = commentRepository.findByLostFoundPostId(lostFoundPostId);  // ✅ 올바른 메서드 호출
-        if (comments.isEmpty()) {
-            throw new RuntimeException("해당 제보글에 대한 댓글이 없습니다.");
-        }
+
         return comments.stream().map(CommentResponseDto::new).collect(Collectors.toList());
     }
 
