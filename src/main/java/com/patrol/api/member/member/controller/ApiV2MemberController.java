@@ -21,7 +21,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 /**
  * packageName    : com.patrol.api.member.member.controller
@@ -72,9 +71,11 @@ public class ApiV2MemberController {
 
     // 마이페이지 > 내 반려동물 리스트
     @GetMapping("/pets")
-    public GlobalResponse<List<MyPetListResponse>> myPetList(@LoginUser Member member) {
+    public GlobalResponse<Page<MyPetListResponse>> myPetList(
+            @LoginUser Member member,
+            Pageable pageable) {
 
-        List<MyPetListResponse> list = animalService.myPetList(member);
+        Page<MyPetListResponse> list = animalService.myPetList(member, pageable);
 
         return GlobalResponse.success(list);
     }
@@ -90,11 +91,12 @@ public class ApiV2MemberController {
     }
 
     // 마이페이지 > 내 반려동물 정보 삭제
-    @DeleteMapping("/pets/{pet-id}")
+    @DeleteMapping("/pets/{petId}")
     public GlobalResponse<Void> deleteMyPetInfo(
             @LoginUser Member member,
-            @RequestBody DeleteMyPetInfoRequest deleteMyPetInfoRequest) {
-        animalService.deleteMyPetInfo(member, deleteMyPetInfoRequest);
+            @PathVariable Long petId) {
+
+        animalService.deleteMyPetInfo(member, petId);
         return GlobalResponse.success();
     }
 

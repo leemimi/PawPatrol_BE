@@ -6,8 +6,8 @@ import com.patrol.domain.comment.entity.Comment;
 import com.patrol.domain.comment.repository.CommentRepository;
 import com.patrol.domain.lostFoundPost.entity.LostFoundPost;
 import com.patrol.domain.lostFoundPost.repository.LostFoundPostRepository;
+import com.patrol.domain.lostFoundPost.service.NotificationService;
 import com.patrol.domain.member.member.entity.Member;
-import com.patrol.domain.member.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CommentService {
     private final CommentRepository commentRepository;
-    private final MemberRepository memberRepository;
+    private final NotificationService notificationService;
     private final LostFoundPostRepository lostFoundPostRepository;
 
     @Transactional
@@ -33,8 +33,11 @@ public class CommentService {
         // FindPost 조회 후 설정
         if (requestDto.getLostFoundPostId() != null) {
             LostFoundPost lostFoundPost = lostFoundPostRepository.findById(requestDto.getLostFoundPostId())
-                .orElseThrow(() -> new RuntimeException("해당 ID의 제보 게시글을 찾을 수 없습니다."));
+                    .orElseThrow(() -> new RuntimeException("해당 ID의 제보 게시글을 찾을 수 없습니다."));
             comment.setLostFoundPost(lostFoundPost);
+
+            // After saving the comment, send a notification via WebSocket
+            notificationService.sendLostFoundPostNotification(lostFoundPost);
         }
 
         // 저장 후 강제 플러시
@@ -69,9 +72,7 @@ public class CommentService {
     @Transactional(readOnly = true)
     public List<CommentResponseDto> getCommentsByLostFoundPost(Long lostFoundPostId) {
         List<Comment> comments = commentRepository.findByLostFoundPostId(lostFoundPostId);  // ✅ 올바른 메서드 호출
-        if (comments.isEmpty()) {
-            throw new RuntimeException("해당 제보글에 대한 댓글이 없습니다.");
-        }
+
         return comments.stream().map(CommentResponseDto::new).collect(Collectors.toList());
     }
 

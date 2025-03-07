@@ -16,8 +16,7 @@ public record PetResponseDto(
         String imageUrl,
         String estimatedAge,
         String healthCondition,
-        String feature,
-        Long ownerId  // ownerId를 추가
+        String feature
 ) {
     public PetResponseDto(Animal animal) {
         this(
@@ -31,8 +30,7 @@ public record PetResponseDto(
                 animal.getImageUrl(),
                 animal.getEstimatedAge(),
                 animal.getHealthCondition(),
-                animal.getFeature(),
-                animal.getOwner() != null ? animal.getOwner().getId() : null // owner의 id를 가져오기
+                animal.getFeature()
         );
     }
 }

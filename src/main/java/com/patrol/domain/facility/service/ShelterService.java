@@ -4,9 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.patrol.api.facility.dto.FacilitiesResponse;
 import com.patrol.api.facility.dto.ShelterApiResponse;
 import com.patrol.api.facility.dto.ShelterListResponse;
+import com.patrol.api.member.auth.dto.SearchShelterResponse;
 import com.patrol.domain.facility.entity.OperatingHours;
+import com.patrol.domain.facility.entity.QShelter;
 import com.patrol.domain.facility.entity.Shelter;
 import com.patrol.domain.facility.repository.ShelterRepository;
+import com.querydsl.core.BooleanBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -14,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -118,5 +122,32 @@ public class ShelterService implements FacilityService {
   public Page<ShelterListResponse> getAllShelter(Pageable pageable) {
     Page<Shelter> shelterPage = shelterRepository.findAllWithAnimalCasesAndAnimals(pageable);
     return shelterPage.map(ShelterListResponse::of);
+  }
+
+  // 회원가입 시 보호소 목록 조회
+  public List<SearchShelterResponse> searchShelters(String keyword) {
+    QShelter qShelter = QShelter.shelter;
+    BooleanBuilder builder = new BooleanBuilder();
+
+    // keyword 를 통해 보호소 검색 (보호소 이름)
+    if(keyword != null && !keyword.isEmpty()) {
+      builder.and(qShelter.name.containsIgnoreCase(keyword));
+    }
+
+    Iterable<Shelter> shelterIterable = shelterRepository.findAll(builder);
+    List<Shelter> shelterList = new ArrayList<>();
+
+    // Iterable을 List로 변환
+    shelterIterable.forEach(shelterList::add);
+
+    // List를 SearchShelterResponse로 변환
+    return shelterList.stream()
+            .map(shelter -> SearchShelterResponse.builder()
+                    .id(shelter.getId())
+                    .name(shelter.getName())
+                    .address(shelter.getAddress())
+                    .tel(shelter.getTel())
+                    .build())
+            .collect(Collectors.toList());
   }
 }

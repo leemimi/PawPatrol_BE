@@ -1,9 +1,11 @@
 package com.patrol.domain.animal.repository;
 
 import com.patrol.domain.animal.entity.Animal;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -17,8 +19,9 @@ import java.util.Optional;
  * -----------------------------------------------------------
  * 2025-02-24        kyd54       최초 생성
  */
+@Repository
 public interface AnimalRepository extends JpaRepository<Animal, Long> {
-    List<Animal> findByOwnerId(Long ownerId);
+    Page<Animal> findByOwnerId(Long ownerId, Pageable pageable);
 
     Optional<Animal> findByRegistrationNo(String animalNo);
 }
