@@ -18,10 +18,9 @@ public enum PostStatus {
         return description;
     }
 
-    // String 값을 PostStatus로 변환하는 메서드 추가
     public static PostStatus fromString(String status) {
         for (PostStatus ps : PostStatus.values()) {
-            if (ps.name().equalsIgnoreCase(status)) { // 대소문자 구분하지 않고 비교
+            if (ps.name().equalsIgnoreCase(status)) {
                 return ps;
             }
         }
