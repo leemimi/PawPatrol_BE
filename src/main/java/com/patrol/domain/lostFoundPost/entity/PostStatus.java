@@ -6,7 +6,7 @@ public enum PostStatus {
     FOSTERING("임보 중"),
     FOUND("주인 찾기 완료"),
     FINDING("실종"),
-    SIGHTED("목격"); // 올바른 위치로 변경된 부분
+    SIGHTED("목격");
 
     private final String description;
 
