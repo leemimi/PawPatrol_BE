@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.patrol.api.animalCase.dto.AnimalCaseListResponse;
 import com.patrol.api.protection.dto.*;
+import com.patrol.domain.animal.enums.AnimalType;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.protection.service.ProtectionService;
 import com.patrol.global.rsData.RsData;
@@ -34,10 +35,13 @@ public class ApiV1ProtectionController {
   @Operation(summary = "임시보호/입양 대기 중인 동물 목록")
   public RsData<Page<AnimalCaseListResponse>> getPossibleProtections(
       @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "10") int size
+      @RequestParam(defaultValue = "10") int size,
+      @RequestParam(required = false) AnimalType animalType,
+      @RequestParam(required = false) String location
   ) {
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-    Page<AnimalCaseListResponse> response = protectionService.findPossibleAnimalCases(pageable);
+    Page<AnimalCaseListResponse> response = protectionService.findPossibleAnimalCases(
+        pageable, animalType, location);
     return new RsData<>("200", "보호 희망 동물의 목록 조회 성공", response);
   }
 
@@ -101,13 +105,13 @@ public class ApiV1ProtectionController {
 
   @GetMapping("/my-cases")
   @Operation(summary = "내가 등록한 임시보호/입양 동물 목록")
-  public RsData<Page<MyAnimalCaseResponse>> getMyAnimalCases(
+  public RsData<MyAnimalCasePageResponse> getMyAnimalCases(
       @LoginUser Member loginUser,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size
   ) {
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-    Page<MyAnimalCaseResponse> response = protectionService.findMyAnimalCases(loginUser, pageable);
+    MyAnimalCasePageResponse response = protectionService.findMyAnimalCases(loginUser, pageable);
     return new RsData<>("200", "내가 등록한 보호 희망 동물의 목록 조회 성공", response);
   }
 

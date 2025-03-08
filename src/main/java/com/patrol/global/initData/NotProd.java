@@ -90,12 +90,11 @@ public class NotProd {
         // 임시보호용 게시글 타이틀 가져오기
         List<String> protectionTitles = SampleAnimalData.getSampleTitles();
 
-
         // member1 - 20마리
         int casesForMember1 = Math.min(20, animalList.size());
         for (int i = 0; i < casesForMember1; i++) {
           animalCaseEventPublisher.createAnimalCase(
-              member1, animalList.get(i), protectionTitles.get(i), null
+              member1, animalList.get(i), protectionTitles.get(i), null, "서울 마포구"
           );
           System.out.println("Member1의 동물 케이스 생성: " + animalList.get(i).getBreed());
         }
@@ -106,7 +105,7 @@ public class NotProd {
           int index = casesForMember1 + i;
           if (index < animalList.size()) {
             animalCaseEventPublisher.createAnimalCase(
-                member2, animalList.get(index), protectionTitles.get(index), null
+                member2, animalList.get(index), protectionTitles.get(index), null, "서울 송파구"
             );
             System.out.println("Member2의 동물 케이스 생성: " + animalList.get(index).getBreed());
           }
@@ -119,7 +118,7 @@ public class NotProd {
           int index = startIndexForMember3 + i;
           if (index < animalList.size()) {
             animalCaseEventPublisher.createAnimalCase(
-                member3, animalList.get(index), protectionTitles.get(index), null
+                member3, animalList.get(index), protectionTitles.get(index), null, "경기도 안양시"
             );
             System.out.println("Member3의 동물 케이스 생성: " + animalList.get(index).getBreed());
           }

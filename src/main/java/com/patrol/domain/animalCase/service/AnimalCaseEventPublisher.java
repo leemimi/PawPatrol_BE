@@ -70,9 +70,11 @@ public class AnimalCaseEventPublisher {
     ));
   }
 
-  public void createAnimalCase(Member member, Animal animal, String title, String description) {
+  public void createAnimalCase(
+      Member member, Animal animal, String title, String description, String location
+  ) {
     eventPublisher.publishEvent(new AnimalCaseCreatedEvent(
-        member, animal, title, description, CaseStatus.PROTECT_WAITING
+        member, animal, title, description, location, CaseStatus.PROTECT_WAITING
     ));
   }
 
@@ -95,7 +97,7 @@ public class AnimalCaseEventPublisher {
 
   public void createMyPet(Member member, Animal animal) {
     eventPublisher.publishEvent(new AnimalCaseCreatedEvent(
-        member, animal, null, null, CaseStatus.MY_PET
+        member, animal, null, null, null, CaseStatus.MY_PET
     ));
   }
 }
