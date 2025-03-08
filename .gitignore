@@ -252,3 +252,10 @@ src/main/generated
 
 src/main/generated/
 __pycache__
+<<<<<<< HEAD
+=======
+__pycache__/
+*.pyc
+
+pawpatrol-2b0e3-firebase-adminsdk-fbsvc-d2a02ca142.json
+>>>>>>> dev

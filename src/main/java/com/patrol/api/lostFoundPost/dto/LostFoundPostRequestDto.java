@@ -2,8 +2,6 @@ package com.patrol.api.lostFoundPost.dto;
 
 import lombok.*;
 
-
-
 @Getter
 @Setter
 @Builder
@@ -21,4 +19,3 @@ public class LostFoundPostRequestDto {
     private String animalType; // Add animalType here to capture the animal type
 
 }
-

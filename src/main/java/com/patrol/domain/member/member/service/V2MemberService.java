@@ -68,8 +68,9 @@ public class V2MemberService {
         logger.info("마이페이지 > 프로필 이미지 삭제 : resetProfileImage");
         Member modifyMem = v2MemberRepository.findByEmail(member.getEmail()).orElseThrow();
 
+//        String objectKey = modifyProfileRequest.imageUrl().replace("https://kr.object.ncloudstorage.com/paw-patrol/", "");
         // 기존 파일 삭제
-        fileStorageHandler.handleFileDelete(modifyProfileRequest.imageUrl());
+        fileStorageHandler.handleFileDelete(modifyMem.getProfileImageUrl());
         
         // 프로필을 디폴트 이미지로 변경
         if(modifyProfileRequest.file() == null && !modifyProfileRequest.imageUrl().isEmpty()) {
@@ -131,14 +132,8 @@ public class V2MemberService {
                             .build()
             );
 
-            String imageUrl = storageConfig.getEndpoint()
-                    + "/"
-                    + storageConfig.getBucketname()
-                    + "/"
-                    + uploadResult.getFullPath();
-
             // 이미지 URL 업데이트
-            modifyMem.setProfileImageUrl(imageUrl);
+            modifyMem.setProfileImageUrl(uploadResult.getFullPath());
         }
 
         // 전화번호 인증, 변경

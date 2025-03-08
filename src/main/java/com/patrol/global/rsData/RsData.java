@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 
-
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @AllArgsConstructor
 @Getter

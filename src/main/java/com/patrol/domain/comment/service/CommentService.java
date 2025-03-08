@@ -8,7 +8,6 @@ import com.patrol.domain.lostFoundPost.entity.LostFoundPost;
 import com.patrol.domain.lostFoundPost.repository.LostFoundPostRepository;
 import com.patrol.domain.lostFoundPost.service.NotificationService;
 import com.patrol.domain.member.member.entity.Member;
-import com.patrol.domain.member.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,9 +19,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CommentService {
     private final CommentRepository commentRepository;
-    private final MemberRepository memberRepository;
+    private final NotificationService notificationService;
     private final LostFoundPostRepository lostFoundPostRepository;
-    private final NotificationService notificationService; // WebSocket service to send notificationss
 
     @Transactional
     public CommentResponseDto createComment(CommentRequestDto requestDto, Member author) {
@@ -35,7 +33,7 @@ public class CommentService {
         // FindPost 조회 후 설정
         if (requestDto.getLostFoundPostId() != null) {
             LostFoundPost lostFoundPost = lostFoundPostRepository.findById(requestDto.getLostFoundPostId())
-                .orElseThrow(() -> new RuntimeException("해당 ID의 제보 게시글을 찾을 수 없습니다."));
+                    .orElseThrow(() -> new RuntimeException("해당 ID의 제보 게시글을 찾을 수 없습니다."));
             comment.setLostFoundPost(lostFoundPost);
 
             // After saving the comment, send a notification via WebSocket
