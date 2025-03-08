@@ -41,13 +41,22 @@ public class ShelterService implements FacilityService {
           && response.getResponse().getBody().getItems() != null
           && response.getResponse().getBody().getItems().getItem() != null) {
 
-        List<Shelter> shelters = response.getResponse().getBody().getItems().getItem()
+        List<String> existingShelterNames = shelterRepository.findAll().stream()
+            .map(Shelter::getName)
+            .toList();
+
+        List<Shelter> newShelters = response.getResponse().getBody().getItems().getItem()
             .stream()
+            .filter(item -> !existingShelterNames.contains(item.getCareNm()))
             .map(this::convertToEntity)
             .collect(Collectors.toList());
 
-        shelterRepository.saveAll(shelters);
-        log.info("저장된 보호소 수: {}", shelters.size());
+        if (!newShelters.isEmpty()) {
+          shelterRepository.saveAll(newShelters);
+          log.info("새로 저장된 보호소 수: {}", newShelters.size());
+        }
+
+        log.info("처리된 전체 보호소 수: {}", response.getResponse().getBody().getItems().getItem().size());
       }
     } catch (Exception e) {
       log.error("데이터 저장 중 에러 발생: {}", e.getMessage(), e);
