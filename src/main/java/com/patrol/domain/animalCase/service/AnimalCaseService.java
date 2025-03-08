@@ -104,6 +104,7 @@ public class AnimalCaseService {
   public Long findIdByAnimalId(Long animalId) {
     AnimalCase animalCase = animalCaseRepository.findByAnimalId(animalId)
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
+
     return animalCase.getId();
   }
 

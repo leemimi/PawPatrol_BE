@@ -116,11 +116,14 @@ public class ProtectionService {
 
     long totalWaitingCount = animalCaseService.countByCurrentFosterAndStatus(
         currentFoster, CaseStatus.PROTECT_WAITING);
-
     long totalProtectingCount = animalCaseService.countByCurrentFosterAndStatus(
         currentFoster, CaseStatus.TEMP_PROTECTING);
+    long shelterCount = animalCaseService.countByCurrentFosterAndStatus(
+        currentFoster, CaseStatus.SHELTER_PROTECTING);
 
-    return MyAnimalCasePageResponse.create(myAnimalCaseResponses, totalWaitingCount, totalProtectingCount);
+    return MyAnimalCasePageResponse.create(
+        myAnimalCaseResponses, currentFoster.getRole(), totalWaitingCount, totalProtectingCount, shelterCount
+    );
   }
 
 
