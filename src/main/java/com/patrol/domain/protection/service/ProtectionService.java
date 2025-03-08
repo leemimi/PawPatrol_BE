@@ -5,6 +5,7 @@ import com.patrol.api.animalCase.dto.AnimalCaseDetailDto;
 import com.patrol.api.animalCase.dto.AnimalCaseListResponse;
 import com.patrol.api.protection.dto.*;
 import com.patrol.domain.animal.entity.Animal;
+import com.patrol.domain.animal.enums.AnimalType;
 import com.patrol.domain.animal.repository.AnimalRepository;
 import com.patrol.domain.animalCase.entity.AnimalCase;
 import com.patrol.domain.animalCase.enums.CaseStatus;
@@ -73,14 +74,16 @@ public class ProtectionService {
     }
   }
 
-  public Page<AnimalCaseListResponse> findPossibleAnimalCases(Pageable pageable) {
+  public Page<AnimalCaseListResponse> findPossibleAnimalCases(
+      Pageable pageable, AnimalType animalType, String location
+  ) {
     return animalCaseService.findAllByStatuses(
         List.of(
             CaseStatus.PROTECT_WAITING,
             CaseStatus.TEMP_PROTECTING,
             CaseStatus.SHELTER_PROTECTING
         ),
-        pageable
+        animalType, location, pageable
     );
   }
 
@@ -94,7 +97,7 @@ public class ProtectionService {
   }
 
 
-  public Page<MyAnimalCaseResponse> findMyAnimalCases(Member currentFoster, Pageable pageable) {
+  public MyAnimalCasePageResponse findMyAnimalCases(Member currentFoster, Pageable pageable) {
     Page<AnimalCase> cases = animalCaseService.findAllByCurrentFosterAndStatus(
         currentFoster, List.of(
             CaseStatus.PROTECT_WAITING,
@@ -103,13 +106,24 @@ public class ProtectionService {
         ), pageable
     );
 
-    return cases.map(animalCase -> {
+    Page<MyAnimalCaseResponse> myAnimalCaseResponses = cases.map(animalCase -> {
       List<PendingProtectionResponse> pendingProtections = getPendingProtections(animalCase.getId());
 
       int pendingCount = protectionRepository.countByAnimalCaseIdAndProtectionStatusAndDeletedAtIsNull(
           animalCase.getId(), ProtectionStatus.PENDING);
       return MyAnimalCaseResponse.of(animalCase, pendingCount, pendingProtections);
     });
+
+    long totalWaitingCount = animalCaseService.countByCurrentFosterAndStatus(
+        currentFoster, CaseStatus.PROTECT_WAITING);
+    long totalProtectingCount = animalCaseService.countByCurrentFosterAndStatus(
+        currentFoster, CaseStatus.TEMP_PROTECTING);
+    long shelterCount = animalCaseService.countByCurrentFosterAndStatus(
+        currentFoster, CaseStatus.SHELTER_PROTECTING);
+
+    return MyAnimalCasePageResponse.create(
+        myAnimalCaseResponses, currentFoster.getRole(), totalWaitingCount, totalProtectingCount, shelterCount
+    );
   }
 
 
@@ -236,8 +250,9 @@ public class ProtectionService {
       animal.setImageUrl(imageList.getFirst().getPath());
     }
 
-
-    animalCaseEventPublisher.createAnimalCase(member, animal, request.title(), request.description());
+    animalCaseEventPublisher.createAnimalCase(
+        member, animal, request.title(), request.description(), request.location()
+    );
   }
 
 

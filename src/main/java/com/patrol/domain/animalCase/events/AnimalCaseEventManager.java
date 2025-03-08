@@ -30,31 +30,33 @@ public class AnimalCaseEventManager {
 
   // PostCreated 이벤트 처리
   @Transactional
-  public void handleLostPost(
-      Long animalId, ContentType contentType, Long contentId, Long memberId
-  ) {
-    Animal animal = animalService.findById(animalId)
+  public void handleLostPost(PostCreatedEvent event) {
+    Animal animal = animalService.findById(event.getAnimalId())
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
 
     AnimalCase animalCase = getOrCreateAnimalCase(animal, CaseStatus.MISSING);
     boolean isNewCase = animalCase.getId() == null;
     if (isNewCase) {
-      caseHistoryService.addInitialLostPost(animalCase, contentType, contentId, memberId);
+      caseHistoryService.addInitialLostPost(
+          animalCase, event.getContentType(), event.getLostFoundPostId(), event.getMemberId()
+      );
     } else {
-      caseHistoryService.addAdditionalLostPost(animalCase, contentType, contentId, memberId);
+      caseHistoryService.addAdditionalLostPost(
+          animalCase, event.getContentType(), event.getLostFoundPostId(), event.getMemberId()
+      );
     }
   }
 
 
   @Transactional
-  public void handleFindPost(
-      Long animalId, ContentType contentType, Long contentId, Long memberId
-  ) {
-    Animal animal = animalService.findById(animalId)
+  public void handleFindPost(PostCreatedEvent event) {
+    Animal animal = animalService.findById(event.getAnimalId())
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
 
     AnimalCase animalCase = getOrCreateAnimalCase(animal, CaseStatus.UNKNOWN);
-    caseHistoryService.addFindPost(animalCase, contentType, contentId, memberId);
+    caseHistoryService.addFindPost(
+        animalCase, event.getContentType(), event.getLostFoundPostId(), event.getMemberId()
+    );
   }
 
 
@@ -70,21 +72,21 @@ public class AnimalCaseEventManager {
 
   // ProtectionStatusChange 이벤트 처리
   @Transactional
-  public void handleProtectionStatusChange(
-      Long protectionId, Long memberId, CaseStatus toStatus, CaseHistoryStatus historyStatus
-  ) {
-    Protection protection = protectionService.findById(protectionId)
+  public void handleProtectionStatusChange(ProtectionStatusChangeEvent event) {
+    Protection protection = protectionService.findById(event.getProtectionId())
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
 
     AnimalCase animalCase = protection.getAnimalCase();
 
     // 유효성 검증
-    validateStatusTransition(animalCase.getStatus(), toStatus);  // 상태 전이 가능 여부 (임보대기 -> 임보 중)
+    validateStatusTransition(animalCase.getStatus(), event.getToStatus());  // 상태 전이 가능 여부 (임보대기 -> 임보 중)
 
-    animalCase.updateStatus(toStatus);
-    caseHistoryService.addHistory(animalCase, historyStatus, ContentType.PROTECTION, protection.getId(), memberId);
+    animalCase.updateStatus(event.getToStatus());
+    caseHistoryService.addHistory(
+        animalCase, event.getHistoryStatus(), ContentType.PROTECTION, protection.getId(), event.getMemberId()
+    );
 
-    if (toStatus == CaseStatus.ADOPTED) {
+    if (event.getToStatus() == CaseStatus.ADOPTED) {
       animalCase.updateStatus(CaseStatus.MY_PET);
     }
   }
@@ -108,21 +110,20 @@ public class AnimalCaseEventManager {
 
   // AnimalCaseCreated 이벤트 처리
   @Transactional
-  public void handleAnimalCaseCreated(
-      Animal animal, Member member, String title, String description, CaseStatus caseStatus
-  ) {
-    AnimalCase animalCase = animalCaseService.createNewCase(caseStatus, animal);
-    animalCase.setCurrentFoster(member);
-    animalCase.setTitle(title);
-    animalCase.setDescription(description);
+  public void handleAnimalCaseCreated(AnimalCaseCreatedEvent event) {
+    AnimalCase animalCase = animalCaseService.createNewCase(event.getToStatus(), event.getAnimal());
+    animalCase.setCurrentFoster(event.getMember());
+    animalCase.setTitle(event.getTitle());
+    animalCase.setDescription(event.getDescription());
+    animalCase.setLocation(event.getLocation());
 
-    if (caseStatus == CaseStatus.MY_PET) {
+    if (event.getToStatus() == CaseStatus.MY_PET) {
       caseHistoryService.addMyPet(
-          animalCase, ContentType.ANIMAL_CASE, animalCase.getId(), member.getId()
+          animalCase, ContentType.ANIMAL_CASE, animalCase.getId(), event.getMember().getId()
       );
     } else {
       caseHistoryService.addAnimalCase(
-          animalCase, ContentType.ANIMAL_CASE, animalCase.getId(), member.getId()
+          animalCase, ContentType.ANIMAL_CASE, animalCase.getId(), event.getMember().getId()
       );
     }
   }
