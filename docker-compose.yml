@@ -28,7 +28,7 @@ services:
           memory: "128MB"
 
   main-service:
-    image: ghcr.io/backendschoolplus3th/pawpatrol:latest
+    image: ghcr.io/backendschoolplus3th/pawpatrol_be:latest
     container_name: main-service
     restart: unless-stopped
     ports:
