@@ -78,35 +78,13 @@ public class V2MemberService {
         }
     }
 
-    // 회원 정보 수정 > 전화번호 수정 시 인증 필요함
+    // 마이페이지 >> 프로필 이미지 수정
     @Transactional
-    public ModifyProfileResponse modifyProfile(Member member,
-                                               ModifyProfileRequest modifyProfileRequest) {
-        logger.info("회원 정보 수정_modifyProfile");
+    public ModifyProfileResponse modifyProfileImage(
+            Member member,
+            ModifyProfileRequest modifyProfileRequest
+    ) {
         Member modifyMem = v2MemberRepository.findByEmail(member.getEmail()).orElseThrow();
-
-        // 닉네임 변경
-        if(modifyProfileRequest.nickname() != null) {
-            logger.info("회원 정보 수정 - 닉네임 변경");
-            modifyMem.updateNickname(modifyProfileRequest.nickname());
-        }
-        // 비밀번호 변경
-        if (modifyProfileRequest.currentPassword() != null
-                && modifyProfileRequest.newPassword() != null
-                && modifyProfileRequest.confirmPassword() != null) {
-            logger.info("회원 정보 수정 - 비밀번호 변경");
-            // 비밀번호 검증 로직
-            // 현재 비밀번호와 일치하는지
-            if (!passwordEncoder.matches(modifyProfileRequest.currentPassword(), member.getPassword())) {
-                throw new ServiceException(ErrorCodes.CURRENT_PASSWORD_NOT_MATCH);
-            }
-            // 새 비밀번호와 비밀번호 확인이 일치하는지
-            if (!modifyProfileRequest.confirmPassword().equals(modifyProfileRequest.newPassword())) {
-                throw new ServiceException(ErrorCodes.INVALID_PASSWORD);
-            }
-
-            modifyMem.updatePassword(passwordEncoder.encode(modifyProfileRequest.newPassword()));
-        }
 
         // 프로필 이미지 변경
         if (modifyProfileRequest.file() != null && !modifyProfileRequest.file().isEmpty()) {
@@ -136,15 +114,46 @@ public class V2MemberService {
             modifyMem.setProfileImageUrl(uploadResult.getFullPath());
         }
 
+        return ModifyProfileResponse.builder()
+                .profileImage(modifyMem.getProfileImageUrl())
+                .build();
+    }
+
+    // 회원 정보 수정 > 전화번호 수정 시 인증 필요함
+    @Transactional
+    public void modifyProfile(Member member,
+                                               ModifyProfileRequest modifyProfileRequest) {
+        logger.info("회원 정보 수정_modifyProfile");
+        Member modifyMem = v2MemberRepository.findByEmail(member.getEmail()).orElseThrow();
+
+        // 닉네임 변경
+        if(modifyProfileRequest.nickname() != null) {
+            logger.info("회원 정보 수정 - 닉네임 변경");
+            modifyMem.updateNickname(modifyProfileRequest.nickname());
+        }
+        // 비밀번호 변경
+        if (modifyProfileRequest.currentPassword() != null
+                && modifyProfileRequest.newPassword() != null
+                && modifyProfileRequest.confirmPassword() != null) {
+            logger.info("회원 정보 수정 - 비밀번호 변경");
+            // 비밀번호 검증 로직
+            // 현재 비밀번호와 일치하는지
+            if (!passwordEncoder.matches(modifyProfileRequest.currentPassword(), member.getPassword())) {
+                throw new ServiceException(ErrorCodes.CURRENT_PASSWORD_NOT_MATCH);
+            }
+            // 새 비밀번호와 비밀번호 확인이 일치하는지
+            if (!modifyProfileRequest.confirmPassword().equals(modifyProfileRequest.newPassword())) {
+                throw new ServiceException(ErrorCodes.INVALID_PASSWORD);
+            }
+
+            modifyMem.updatePassword(passwordEncoder.encode(modifyProfileRequest.newPassword()));
+        }
+
         // 전화번호 인증, 변경
         if (modifyProfileRequest.phoneNumber() != null) {
             logger.info("회원 정보 수정 - 전화번호 변경");
             modifyMem.updatePhoneNum(modifyProfileRequest.phoneNumber());
         }
-
-        return ModifyProfileResponse.builder()
-                .profileImage(modifyMem.getProfileImageUrl())
-                .build();
     }
 
     // 소셜 로그인 연동 시, 자체 계정 유무 확인
