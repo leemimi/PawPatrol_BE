@@ -77,7 +77,13 @@ public class LostFoundPostService {
                 log.info("반려동물 이미지를 게시글에 연결: imageId={}, postId={}", petImage.getId(), lostFoundPost.getId());
             }
         }
-        return getSavedImages(images, lostFoundPost);
+        // 이미지를 업로드하지 않아도 오류가 발생하지 않도록 처리
+        if (images != null && !images.isEmpty()) {
+            return getSavedImages(images, lostFoundPost);  // 이미지가 있을 경우만 저장
+        } else {
+            // 이미지가 없으면 기본 응답 객체 반환
+            return new LostFoundPostResponseDto(lostFoundPost);  // 이미지가 없어도 정상적으로 응답
+        }
     }
 
     @Transactional
