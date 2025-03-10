@@ -6,6 +6,7 @@ import com.patrol.api.notification.fcm.dto.FCMTokenDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+//채팅 관련 알림을 보내는 서비스
 @RequiredArgsConstructor
 @Service
 public class FCMNotificationService {

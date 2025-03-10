@@ -6,7 +6,6 @@ import com.patrol.api.chatMessage.dto.RequestMessage;
 import com.patrol.api.chatMessage.dto.ResponseMessage;
 import com.patrol.api.image.dto.ImageResponseDto;
 import com.patrol.api.member.member.dto.MemberResponseDto;
-import com.patrol.domain.Postable.Postable;
 import com.patrol.domain.animalCase.entity.AnimalCase;
 import com.patrol.domain.animalCase.repository.AnimalCaseRepository;
 import com.patrol.domain.chatMessage.entity.ChatMessage;
@@ -21,7 +20,6 @@ import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.repository.MemberRepository;
 import com.patrol.global.error.ErrorCode;
 import com.patrol.global.exception.CustomException;
-import com.patrol.global.jpa.BaseEntity;
 import com.patrol.global.rsData.RsData;
 import com.patrol.global.storage.FileStorageHandler;
 import com.patrol.global.storage.FileUploadRequest;
@@ -33,14 +31,13 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
+//채팅 메시지 서비스
 @Transactional(readOnly = true)
 @Service
 @RequiredArgsConstructor

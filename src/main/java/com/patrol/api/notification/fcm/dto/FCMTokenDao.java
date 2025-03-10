@@ -5,7 +5,7 @@ import com.patrol.global.webMvc.LoginUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
-
+//fcm 토큰 레디스에 저장
 @Repository
 @RequiredArgsConstructor
 public class FCMTokenDao {

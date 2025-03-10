@@ -16,7 +16,7 @@ public class NotificationService {
         this.messagingTemplate = messagingTemplate;
     }
 
-    // LostFoundPost 등록 후 알림 전송
+    // LostFoundPost 등록 후 알림
     public void sendLostFoundPostNotification(LostFoundPost lostFoundPost) {
         LostFoundPostResponseDto responseDto = LostFoundPostResponseDto.from(lostFoundPost);
 

@@ -5,7 +5,7 @@ import com.patrol.domain.chatMessage.entity.ChatMessage;
 import com.patrol.global.jpa.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-
+//알림 엔티티
 @Entity
 @Getter
 @Setter

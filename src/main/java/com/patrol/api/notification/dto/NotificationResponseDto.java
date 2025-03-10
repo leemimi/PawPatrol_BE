@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+//알림 저장인데 현재 안쓰임.
 @Data
 @Builder
 @NoArgsConstructor
