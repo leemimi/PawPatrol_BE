@@ -1,19 +1,14 @@
 package com.patrol.domain.chatRoom.entity;
 
-import com.patrol.domain.chatMessage.entity.ChatMessage;
+import com.patrol.domain.animalCase.entity.AnimalCase;
 import com.patrol.domain.lostFoundPost.entity.LostFoundPost;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.global.jpa.BaseEntity;
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Setter
@@ -22,8 +17,12 @@ import java.util.List;
 @SuperBuilder
 public class ChatRoom extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
-    private LostFoundPost post;
+    @JoinColumn(name = "lostFoundPost_id")
+    private LostFoundPost lostFoundPost;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "animalCase_id")
+    private AnimalCase animalCase;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member1_id")
@@ -35,11 +34,39 @@ public class ChatRoom extends BaseEntity {
 
     private String roomIdentifier;
 
-    public static String createRoomIdentifier(LostFoundPost post, Member member1, Member member2) {
+    private ChatRoomType type;
+
+    // LostFoundPost용 메서드
+    public static String createRoomIdentifier(LostFoundPost post, Member member1, Member member2, ChatRoomType type) {
         Long postId = post.getId();
         Long smallerId = Math.min(member1.getId(), member2.getId());
         Long largerId = Math.max(member1.getId(), member2.getId());
 
-        return String.format("%d_%d_%d", postId, smallerId, largerId);
+        return String.format("%d_%d_%d_%s", postId, smallerId, largerId, type);
+    }
+
+    // AnimalCase용 메서드
+    public static String createRoomIdentifier(AnimalCase post, Member member1, Member member2, ChatRoomType type) {
+        Long postId = post.getId();
+        Long smallerId = Math.min(member1.getId(), member2.getId());
+        Long largerId = Math.max(member1.getId(), member2.getId());
+
+        return String.format("%d_%d_%d_%s", postId, smallerId, largerId, type);
+    }
+
+    public Object getPost() {
+        if (type == ChatRoomType.LOSTFOUND) {
+            return lostFoundPost;
+        } else {
+            return animalCase;
+        }
+    }
+
+    public Long getPostId() {
+        if (type == ChatRoomType.LOSTFOUND) {
+            return lostFoundPost != null ? lostFoundPost.getId() : null;
+        } else {
+            return animalCase != null ? animalCase.getId() : null;
+        }
     }
 }
