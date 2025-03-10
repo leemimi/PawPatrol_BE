@@ -32,7 +32,7 @@ public class lostFoundPostController {
     private final ObjectMapper objectMapper;
 
     @PostMapping
-    @Operation(summary = "제보 게시글 등록")
+    @Operation(summary = "제보 게시글 등록") //해결
     public RsData<LostFoundPostResponseDto> createStandaloneFindPost(
             @RequestParam("metadata") String metadataJson,
             @RequestParam(value = "images", required = false) List<MultipartFile> images,
