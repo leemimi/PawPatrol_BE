@@ -143,7 +143,7 @@ public class ChatMessageService {
                             .build();
                 } else {
                     roomIdentifier = ChatRoom.createRoomIdentifier(
-                            (AnimalCase) post, sender, receiver, type);
+                            (Postable) post, sender, receiver, type);
 
                     chatRoom = ChatRoom.builder()
                             .animalCase((AnimalCase) post)
@@ -197,8 +197,7 @@ public class ChatMessageService {
             if (webSocketEventListener.isSubscribedToRoom(receiverId, chatRoom.getRoomIdentifier())) {
                 logger.info("실시간 채팅으로 메시지 전송");
                 kafkaTemplate.send("real-time-chat-messages", messageJson);
-            }
-            else {
+            } else {
                 logger.info("오프라인 알림으로 메시지 전송");
                 kafkaTemplate.send("offline-notifications", messageJson);
             }
@@ -352,8 +351,7 @@ public class ChatMessageService {
                     objectMapper.registerModule(new JavaTimeModule());
                     String messageJson = objectMapper.writeValueAsString(messageDTO);
                     kafkaTemplate.send("real-time-chat-messages", messageJson);
-                }
-                else {
+                } else {
                     logger.info("오프라인 알림으로 메시지 전송");
                     ObjectMapper objectMapper = new ObjectMapper();
                     objectMapper.registerModule(new JavaTimeModule());
