@@ -72,26 +72,34 @@ public class ImageHandlerServiceImpl implements ImageHandlerService {
 
     @Transactional
     @Override
-    public List<Image> uploadAndRegisterImages (List<MultipartFile> files, String folderPath, Long animalId, Long foundId, PostStatus status,  AnimalType animalType) {
+    public List<Image> uploadAndRegisterImages(List<MultipartFile> files, String folderPath, Long animalId, Long foundId, PostStatus status, AnimalType animalType) {
         List<Image> savedImages = new ArrayList<>();
         List<String> uploadedPaths = new ArrayList<>();
 
+        // 파일이 없을 경우 빈 리스트를 바로 반환
+        if (files == null || files.isEmpty()) {
+            return savedImages; // 빈 리스트 반환
+        }
+
         try {
             for (MultipartFile file : files) {
-                FileUploadResult uploadResult = fileStorageHandler.handleFileUpload(
-                        FileUploadRequest.builder()
-                                .folderPath(folderPath)
-                                .file(file)
-                                .build()
-                );
+                // 파일이 null이 아니고 유효한 경우에만 업로드 진행
+                if (file != null && !file.isEmpty()) {
+                    FileUploadResult uploadResult = fileStorageHandler.handleFileUpload(
+                            FileUploadRequest.builder()
+                                    .folderPath(folderPath)
+                                    .file(file)
+                                    .build()
+                    );
 
-                if (uploadResult != null) {
-                    String fileName = uploadResult.getFileName();
-                    uploadedPaths.add(fileName);
+                    if (uploadResult != null) {
+                        String fileName = uploadResult.getFileName();
+                        uploadedPaths.add(fileName);
 
-                    String imageUrl = createImageUrl(folderPath, fileName);
-                    Image image = registerImage(imageUrl, animalId, foundId, status, animalType);
-                    savedImages.add(image);
+                        String imageUrl = createImageUrl(folderPath, fileName);
+                        Image image = registerImage(imageUrl, animalId, foundId, status, animalType);
+                        savedImages.add(image);
+                    }
                 }
             }
             return savedImages;
@@ -100,9 +108,11 @@ public class ImageHandlerServiceImpl implements ImageHandlerService {
             for (String path : uploadedPaths) {
                 ncpObjectStorageService.delete(path);
             }
+            // 오류를 던지기 전에 적절한 예외를 처리
             throw new CustomException(ErrorCode.DATABASE_ERROR);
         }
     }
+
 
     @Override
     public List<Image> uploadAndModifiedImages(List<MultipartFile> imageFiles, String folderPath, Long animalId) {
