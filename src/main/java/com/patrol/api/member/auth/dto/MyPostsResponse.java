@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
  * 2025-02-27        kyd54       최초 생성
  */
 public record MyPostsResponse (
+        Long id,
         String content,
         PostStatus status,
         String findTime,
