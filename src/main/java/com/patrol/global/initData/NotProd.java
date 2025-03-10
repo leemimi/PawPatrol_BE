@@ -130,10 +130,13 @@ public class NotProd {
         List<PetRegisterRequest> myPets = SampleMyPetData.getSamplePets();
         List<String> myPetImageUrls = SampleMyPetData.getSampleImageUrls();
 
-// 각 회원별로 2마리씩 반려동물 등록
+// 임시보호용 게시글 타이틀 가져오기 (필요한 경우)
+//        List<String> protectionTitles = SampleAnimalData.getSampleTitles();
+
+// 각 회원별로 반려동물 등록 및 동물 케이스 생성
         for (int i = 0; i < myPets.size(); i++) {
-          // 회원 할당 (0,1번 동물은 member1, 2,3번 동물은 member2, 4,5번 동물은 member3)
-          Member owner = (i < 2) ? member1 : (i < 4) ? member2 : member3;
+          // 회원 할당 (0,1,2번 동물은 member1, 3,4,5번 동물은 member2)
+          Member owner = (i < 3) ? member1 : member2;
 
           // Animal 객체 생성
           Animal pet = Animal.builder()
@@ -153,9 +156,15 @@ public class NotProd {
           // Animal 객체 저장
           animalRepository.save(pet);
 
-          System.out.println("반려동물 등록: " + owner.getNickname() + "의 " +
-                  pet.getName() + " - " + pet.getBreed() + " (" + pet.getImageUrl() + ")");
+          // 동물 케이스 생성
+          String location = (owner == member1) ? "서울 마포구" : "서울 송파구";
+          animalCaseEventPublisher.createAnimalCase(
+                  owner, pet, protectionTitles.get(i % protectionTitles.size()), null, location
+          );
+
+          System.out.println(owner.getNickname() + "의 반려동물 등록 및 동물 케이스 생성: " + pet.getName() + " - " + pet.getBreed());
         }
+
       }
     };
   }
