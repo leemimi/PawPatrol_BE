@@ -15,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
@@ -25,9 +27,9 @@ import java.util.List;
 @Slf4j
 public class ImageHandlerServiceImpl implements ImageHandlerService {
     private final ImageRepository imageRepository;
-    private final ImageService imageService;
     private final FileStorageHandler fileStorageHandler;
     private final NcpObjectStorageService ncpObjectStorageService;
+    private final ImageEventProducer imageEventProducer;
 
     @Value("${ncp.storage.endpoint}")
     private String endPoint;
@@ -58,21 +60,27 @@ public class ImageHandlerServiceImpl implements ImageHandlerService {
         log.info("이미지 저장 완료: ID={}, animalId={}, foundId={}, Path={}",
                 savedImage.getId(), savedImage.getAnimalId(), savedImage.getFoundId(), savedImage.getPath());
 
-        // Kafka 이벤트 발행
-        try {
-            log.info("Kafka 이벤트 발행 시작: imageId={}, path={}", savedImage.getId(), savedImage.getPath());
-            imageService.sendImageEvent(savedImage.getId(), savedImage.getPath());
-            log.info("Kafka 이벤트 발행 완료: imageId={}", savedImage.getId());
-        } catch (Exception e) {
-            log.error("Kafka 이벤트 발행 중 오류 발생: imageId={}, 오류={}", savedImage.getId(), e.getMessage(), e);
-        }
-
         return savedImage;
+    }
+
+    @Override
+    public void registerImageAndSendEvent(String path, Long animalId, Long foundId, PostStatus status, AnimalType animalType) {
+        // 먼저 이미지 등록
+        Image image = registerImage(path, animalId, foundId, status, animalType);
+
+        // 트랜잭션 완료 후 Kafka 이벤트 전송 보장
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                imageEventProducer.sendImageEvent(image.getId(), image.getPath());
+                log.info("✅ Kafka 이벤트 전송 요청 완료: imageId={}, path={}", image.getId(), image.getPath());
+            }
+        });
     }
 
     @Transactional
     @Override
-    public List<Image> uploadAndRegisterImages (List<MultipartFile> files, String folderPath, Long animalId, Long foundId, PostStatus status,  AnimalType animalType) {
+    public List<Image> uploadAndRegisterImages (List<MultipartFile> files, String folderPath, Long animalId, Long foundId, PostStatus status, AnimalType animalType) {
         List<Image> savedImages = new ArrayList<>();
         List<String> uploadedPaths = new ArrayList<>();
 
@@ -90,7 +98,15 @@ public class ImageHandlerServiceImpl implements ImageHandlerService {
                     uploadedPaths.add(fileName);
 
                     String imageUrl = createImageUrl(folderPath, fileName);
-                    Image image = registerImage(imageUrl, animalId, foundId, status, animalType);
+
+                    // 기존 코드: 이미지 등록만 함
+                    // Image image = registerImage(imageUrl, animalId, foundId, status, animalType);
+
+                    // 수정된 코드: 이미지 등록 후 Kafka 이벤트 발송까지 함께 처리
+                    registerImageAndSendEvent(imageUrl, animalId, foundId, status, animalType);
+
+                    // 현재 이미지 정보를 가져와서 리스트에 추가
+                    Image image = imageRepository.findByPath(imageUrl);
                     savedImages.add(image);
                 }
             }

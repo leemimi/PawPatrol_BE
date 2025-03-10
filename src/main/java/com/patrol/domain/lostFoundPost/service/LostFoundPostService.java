@@ -5,6 +5,8 @@ import com.patrol.api.lostFoundPost.dto.LostFoundPostResponseDto;
 import com.patrol.api.member.auth.dto.MyPostsResponse;
 import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.animal.repository.AnimalRepository;
+import com.patrol.domain.animal.service.AnimalService;
+import com.patrol.domain.image.service.ImageEventProducer;
 import com.patrol.domain.image.service.ImageHandlerService;
 import com.patrol.domain.lostFoundPost.entity.LostFoundPost;
 import com.patrol.domain.animal.enums.AnimalType;
@@ -24,6 +26,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -37,8 +41,10 @@ public class LostFoundPostService {
     private final AnimalRepository animalRepository;
     private final ImageRepository imageRepository;
     private final ImageHandlerService imageHandlerService;
+    private final ImageEventProducer imageEventProducer;
 
     private static final String FOLDER_PATH = "lostfoundpost/";
+    private final AnimalService animalService;
 
     @Transactional
     public LostFoundPostResponseDto createLostFoundPost(LostFoundPostRequestDto requestDto, Long petId, Member author, List<MultipartFile> images) {
@@ -47,6 +53,7 @@ public class LostFoundPostService {
         if (requestDto.getPetId() != null) {
             pet = animalRepository.findById(requestDto.getPetId())
                     .orElseThrow(() -> new IllegalArgumentException("Pet not found"));
+            pet.markAsLost();
         }
 
         LostFoundPost lostFoundPost = new LostFoundPost(requestDto, author, pet);
@@ -67,14 +74,21 @@ public class LostFoundPostService {
         lostFoundPostRepository.save(lostFoundPost);
         log.info("✅ 분실/발견 게시글 저장 완료: postId={}", lostFoundPost.getId());
 
-        if (petId != null) {
+        if (pet != null) {
             Image petImage = imageRepository.findByAnimalId(petId);
             if (petImage != null) {
                 petImage.setFoundId(lostFoundPost.getId());
                 petImage.setStatus(lostFoundPost.getStatus());
                 petImage.setAnimalType(lostFoundPost.getAnimalType());
                 imageRepository.save(petImage);
-                log.info("반려동물 이미지를 게시글에 연결: imageId={}, postId={}", petImage.getId(), lostFoundPost.getId());
+
+                imageHandlerService.registerImageAndSendEvent(
+                        petImage.getPath(),
+                        petImage.getAnimalId(),
+                        petImage.getFoundId(),
+                        petImage.getStatus(),
+                        petImage.getAnimalType()
+                );
             }
         }
         return getSavedImages(images, lostFoundPost);
