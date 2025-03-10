@@ -57,7 +57,7 @@ public class ChatRoomService {
                                     .content(latestMessage.getContent())
                                     .sender(new MemberResponseDto(latestMessage.getSender()))
                                     .receiver(new MemberResponseDto(latestMessage.getReceiver()))
-                                    .postId(room.getPost().getId())
+                                    .postId(room.getPostId())
                                     .timestamp(latestMessage.getCreatedAt())
                                     .isRead(latestMessage.isRead())
                                     .messageType(latestMessage.getMessageType()) // ChatMessage에 이 필드가 없다면 조정 필요

@@ -40,7 +40,7 @@ public class ChatMessageConsumer {
             objectMapper.registerModule(new JavaTimeModule());
             ResponseMessage message = objectMapper.readValue(messageJson, ResponseMessage.class);
 
-            fcmNotificationService.sendChatNotification(message, message.getReceiver().getEmail());
+            fcmNotificationService.sendChatNotification(message, String.valueOf(message.getReceiver().getId()));
         } catch (Exception e) {
             logger.error("Error processing notification: ", e);
         }

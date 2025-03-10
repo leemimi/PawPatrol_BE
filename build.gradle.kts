@@ -81,6 +81,8 @@ dependencies {
 
     implementation("org.springframework.kafka:spring-kafka")
     testImplementation("org.springframework.kafka:spring-kafka-test")
+
+    implementation ("com.google.firebase:firebase-admin:9.2.0")
 }
 
 tasks.withType<Test> {
