@@ -28,6 +28,11 @@ public class HospitalService implements FacilityService {
   @Transactional
   public void loadData() {
     try {
+      if (hospitalRepository.count() > 0) {
+        log.info("병원 데이터가 이미 존재합니다. 초기 로드를 건너뜁니다.");
+        return;
+      }
+
       Resource resource = new ClassPathResource("data/hospitals.csv");
       List<CsvParser.HospitalData> hospitalDataList =
           csvParser.parseHospitals(resource.getInputStream());

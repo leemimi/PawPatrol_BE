@@ -2,10 +2,8 @@ package com.patrol.domain.animalCase.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.patrol.domain.Postable.Postable;
 import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.animalCase.enums.CaseStatus;
-import com.patrol.domain.facility.entity.Facility;
 import com.patrol.domain.facility.entity.Shelter;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.protection.entity.Protection;
@@ -26,7 +24,7 @@ import java.util.List;
 @Getter
 @Setter
 @Table(name = "animal_cases")
-public class AnimalCase extends BaseEntity implements Postable {
+public class AnimalCase extends BaseEntity {
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
@@ -38,6 +36,7 @@ public class AnimalCase extends BaseEntity implements Postable {
 
   private String title;
   private String description;
+  private String location;
   private LocalDateTime deletedAt;
 
   @JsonIgnore
@@ -72,8 +71,4 @@ public class AnimalCase extends BaseEntity implements Postable {
     return super.getId();
   }
 
-  @Override
-  public String getPostType() {
-    return "PROTECTADOPT";
-  }
 }

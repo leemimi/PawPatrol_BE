@@ -31,7 +31,7 @@ public class AiClient {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
-    @Value("${ai.service.url}")
+    @Value("${ai.service-url}")
     private String aiServiceUrl;
 
     public Map<String, String> extractEmbeddingAndFeaturesFromUrl(String imageUrl) throws IOException {

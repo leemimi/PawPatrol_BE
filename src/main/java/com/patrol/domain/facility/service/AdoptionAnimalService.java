@@ -160,28 +160,32 @@ public class AdoptionAnimalService {
 
       Map<String, List<Image>> animalImagesMap = new HashMap<>();
       if (response.getTbAdpWaitAnimalPhotoView() != null) {
-        List<Image> allImages = new ArrayList<>();
+        List<Image> imagesToSave = new ArrayList<>();
 
         for (AdoptionAnimalImageApiResponse.Row row : response.getTbAdpWaitAnimalPhotoView().getRow()) {
           String animalNo = row.getAnimalNo();
+          String imageUrl = "https://" + row.getPhotoUrl();
 
-          Image image = Image.builder()
-              .path("https://" + row.getPhotoUrl())
-              .build();
-
-          allImages.add(image);
+          Image existingImage = imageRepository.findByPath(imageUrl);
+          if (existingImage == null) {
+            existingImage = Image.builder()
+                .path("https://" + row.getPhotoUrl())
+                .build();
+            imagesToSave.add(existingImage);
+          }
 
           if (!animalImagesMap.containsKey(animalNo)) {
             animalImagesMap.put(animalNo, new ArrayList<>());
           }
-          animalImagesMap.get(animalNo).add(image);
+          animalImagesMap.get(animalNo).add(existingImage);
         }
 
-        if (!allImages.isEmpty()) {
-          imageRepository.saveAll(allImages);
+        if (!imagesToSave.isEmpty()) {
+          imageRepository.saveAll(imagesToSave);
+          log.info("새로 저장된 입양대기 이미지 수: {}", imagesToSave.size());
         }
 
-        log.info("저장된 입양대기 이미지 수: {}", response.getTbAdpWaitAnimalPhotoView().getRow().size());
+        log.info("처리된 입양대기 이미지 수: {}", response.getTbAdpWaitAnimalPhotoView().getRow().size());
       } else {
         log.warn("이미지 API에서 받은 데이터가 없거나 비어있습니다.");
       }
@@ -226,7 +230,8 @@ public class AdoptionAnimalService {
             animal = createAnimalFromRow(row);
             animalRepository.save(animal);
           }
-          
+
+
           List<Image> animalImages = animalImagesMap.get(row.getAnimalNo());
           if (animalImages != null && !animalImages.isEmpty()) {
             for (Image image : animalImages) {
@@ -347,6 +352,7 @@ public class AdoptionAnimalService {
     animalCase.setShelter(shelter);
     animalCase.setCurrentFoster(shelter.getShelterMember());
     animalCase.setTitle(row.getName());
+    animalCase.setLocation(shelter.getName());
     animalCase.setDescription("영상 링크 : " + row.getVideoUrl());
     animalCase.getAnimal().setOwner(shelter.getShelterMember());
     return animalCase;

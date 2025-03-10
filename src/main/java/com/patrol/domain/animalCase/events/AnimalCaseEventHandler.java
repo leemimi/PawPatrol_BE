@@ -14,34 +14,18 @@ public class AnimalCaseEventHandler {
   @EventListener
   public void handlePostCreated(PostCreatedEvent event) {
     switch (event.getContentType()) {
-      case LOSTPOST ->
-          animalCaseEventManager.handleLostPost(
-              event.getAnimalId(), event.getContentType(),
-              event.getLostFoundPostId(), event.getMemberId()
-          );
-
-      case FINDPOST ->
-          animalCaseEventManager.handleFindPost(
-              event.getAnimalId(), event.getContentType(),
-              event.getLostFoundPostId(), event.getMemberId()
-          );
+      case LOSTPOST -> animalCaseEventManager.handleLostPost(event);
+      case FINDPOST -> animalCaseEventManager.handleFindPost(event);
     }
   }
 
   @EventListener
   public void handleProtectionStatusChange(ProtectionStatusChangeEvent event) {
-        animalCaseEventManager.handleProtectionStatusChange(
-            event.getProtectionId(),
-            event.getMemberId(),
-            event.getToStatus(),
-            event.getHistoryStatus()
-        );
+        animalCaseEventManager.handleProtectionStatusChange(event);
   }
 
   @EventListener
   public void handleAnimalCaseCreated(AnimalCaseCreatedEvent event) {
-    animalCaseEventManager.handleAnimalCaseCreated(
-        event.getAnimal(), event.getMember(), event.getTitle(), event.getDescription(), event.getToStatus()
-    );
+    animalCaseEventManager.handleAnimalCaseCreated(event);
   }
 }

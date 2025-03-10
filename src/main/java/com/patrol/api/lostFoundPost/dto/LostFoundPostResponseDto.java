@@ -1,6 +1,5 @@
 package com.patrol.api.lostFoundPost.dto;
 
-import com.patrol.api.PostResponseDto.PostResponseDto;
 import com.patrol.api.animal.dto.PetResponseDto;
 import com.patrol.api.image.dto.ImageResponseDto;
 import com.patrol.api.member.member.dto.MemberResponseDto;
@@ -19,8 +18,8 @@ import java.util.stream.Collectors;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LostFoundPostResponseDto implements PostResponseDto {
-    private Long id;
+public class LostFoundPostResponseDto {
+    private Long foundId;
     private MemberResponseDto author;
     private Long userId;
     private String nickname;
@@ -41,7 +40,7 @@ public class LostFoundPostResponseDto implements PostResponseDto {
     //private Long petId;
 
     public LostFoundPostResponseDto(LostFoundPost lostFoundPost) {
-        this.id = lostFoundPost.getId();
+        this.foundId = lostFoundPost.getId();
         this.author = new MemberResponseDto(lostFoundPost.getAuthor());
         this.userId = lostFoundPost.getAuthor().getId();
         this.nickname = lostFoundPost.getAuthor().getNickname();
@@ -50,7 +49,16 @@ public class LostFoundPostResponseDto implements PostResponseDto {
         this.longitude = lostFoundPost.getLongitude();
         this.findTime = lostFoundPost.getFindTime();
         this.lostTime = lostFoundPost.getLostTime();
-        this.animalType= String.valueOf(lostFoundPost.getAnimalType());
+        // Set animalType based on pet or lostFoundPost's animalType
+        if (lostFoundPost.getPet() != null && lostFoundPost.getPet().getAnimalType() != null) {
+            // Convert AnimalType enum to String
+            this.animalType = lostFoundPost.getPet().getAnimalType().toString(); // Convert enum to String
+        } else {
+            // If animalType in pet is null, set it from lostFoundPost
+            this.animalType = (lostFoundPost.getAnimalType() != null && !lostFoundPost.getAnimalType().toString().equals("null"))
+                    ? lostFoundPost.getAnimalType().toString() // Convert to String
+                    : "null"; // If it is "null", explicitly set it to "null" // If animalType is "null" set it to "null" explicitly
+        }
         this.status= String.valueOf(lostFoundPost.getStatus());
         this.location = lostFoundPost.getLocation();
         this.createdAt = lostFoundPost.getCreatedAt();
@@ -65,21 +73,5 @@ public class LostFoundPostResponseDto implements PostResponseDto {
     }
     public static LostFoundPostResponseDto from(LostFoundPost lostFoundPost) {
         return new LostFoundPostResponseDto(lostFoundPost);
-    }
-
-
-    @Override
-    public Long getId() {
-        return id;
-    }
-
-    @Override
-    public String getTitle() {
-        return content;
-    }
-
-    @Override
-    public String getPostType() {
-        return "LOSTFOUND";
     }
 }

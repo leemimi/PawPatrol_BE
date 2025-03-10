@@ -1,6 +1,7 @@
 package com.patrol.domain.animalCase.repository;
 
 import com.patrol.domain.animal.entity.Animal;
+import com.patrol.domain.animal.enums.AnimalType;
 import com.patrol.domain.animalCase.entity.AnimalCase;
 import com.patrol.domain.animalCase.enums.CaseStatus;
 import com.patrol.domain.member.member.entity.Member;
@@ -45,12 +46,22 @@ public interface AnimalCaseRepository extends JpaRepository<AnimalCase, Long> {
   );
 
   @Query(value = "SELECT ac FROM AnimalCase ac " +
-      "LEFT JOIN FETCH ac.animal " +
+      "LEFT JOIN FETCH ac.animal a " +
       "LEFT JOIN FETCH ac.currentFoster " +
-      "WHERE ac.status IN :statuses AND ac.deletedAt IS NULL",
-      countQuery = "SELECT COUNT(ac) FROM AnimalCase ac WHERE ac.status IN :statuses AND ac.deletedAt IS NULL")
-  Page<AnimalCase> findAllByStatusIn(
+      "WHERE ac.status IN :statuses " +
+      "AND (:animalType IS NULL OR a.animalType = :animalType) " +
+      "AND (:location IS NULL OR ac.location LIKE %:location%) " +
+      "AND ac.deletedAt IS NULL",
+      countQuery = "SELECT COUNT(ac) FROM AnimalCase ac " +
+          "LEFT JOIN ac.animal a " +
+          "WHERE ac.status IN :statuses " +
+          "AND (:animalType IS NULL OR a.animalType = :animalType) " +
+          "AND (:location IS NULL OR ac.location LIKE %:location%) " +
+          "AND ac.deletedAt IS NULL")
+  Page<AnimalCase> findAllByStatusInAndFilters(
       @Param("statuses") Collection<CaseStatus> statuses,
+      @Param("animalType") AnimalType animalType,
+      @Param("location") String location,
       Pageable pageable
   );
 
@@ -83,4 +94,6 @@ public interface AnimalCaseRepository extends JpaRepository<AnimalCase, Long> {
   Optional<AnimalCase> findById(@Param("id") Long id);
 
   Optional<AnimalCase> findByAnimalId(Long animalId);
+
+  long countByCurrentFosterAndStatus(Member currentFoster, CaseStatus caseStatus);
 }

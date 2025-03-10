@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class CaseHistoryService {
+
   private final CaseHistoryRepository caseHistoryRepository;
   private final MemberService memberService;
 
