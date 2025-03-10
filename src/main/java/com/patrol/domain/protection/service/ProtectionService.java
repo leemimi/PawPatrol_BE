@@ -243,6 +243,7 @@ public class ProtectionService {
       CreateAnimalCaseRequest request, Member member, List<MultipartFile> images
   ) {
     Animal animal = request.toAnimal();
+    animal.setOwner(member);
     animalRepository.save(animal);
 
     if (images != null && !images.isEmpty()) {
