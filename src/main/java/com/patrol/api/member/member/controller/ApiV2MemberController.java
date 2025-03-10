@@ -41,13 +41,21 @@ public class ApiV2MemberController {
     private final AnimalService animalService;
     private final OAuthService oAuthService;
 
+    // 마이페이지 > 프로필 이미지 수정
+    @PatchMapping("/profile/pic")
+    public GlobalResponse<ModifyProfileResponse> modifyProfileImage(
+            @LoginUser Member member,
+            @ModelAttribute ModifyProfileRequest modifyProfileRequest) {
+        return GlobalResponse.success(v2MemberService.modifyProfileImage(member, modifyProfileRequest));
+    }
 
     // 마이페이지 > 회원정보 수정
     @PatchMapping("/profile")
-    public GlobalResponse<ModifyProfileResponse> modifyProfile(
+    public GlobalResponse<Void> modifyProfile(
             @LoginUser Member member,
-            @ModelAttribute  ModifyProfileRequest modifyProfileRequest) {
-        return GlobalResponse.success(v2MemberService.modifyProfile(member, modifyProfileRequest));
+            @RequestBody  ModifyProfileRequest modifyProfileRequest) {
+        v2MemberService.modifyProfile(member, modifyProfileRequest);
+        return GlobalResponse.success();
     }
 
     // 마이페이지 > 프로필 이미지 삭제
