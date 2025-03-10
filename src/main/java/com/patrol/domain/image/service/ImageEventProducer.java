@@ -33,7 +33,7 @@ public class ImageEventProducer {
             String eventJson = objectMapper.writeValueAsString(event);
 
             // Kafka 비동기 전송 (재귀적 재시도 로직 포함)
-            //sendWithRetry(imageId.toString(), eventJson, 0);
+            sendWithRetry(imageId.toString(), eventJson, 0);
 
         } catch (Exception e) {
             log.error("🚨 Kafka 메시지 변환 실패: {}", e.getMessage(), e);
