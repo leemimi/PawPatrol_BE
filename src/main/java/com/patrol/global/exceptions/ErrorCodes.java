@@ -15,7 +15,7 @@ public enum ErrorCodes {
   REDIRECT_URL_NOT_FOUND(400, "AUTH_007", "리다이렉트 URL을 찾을 수 없습니다."),
   PASSWORD_REQUIRED(400, "AUTH_008", "비밀번호는 필수 입력값입니다."),
   EMAIL_REQUIRED(400, "AUTH_009", "이메일은 필수 입력값입니다."),
-  CURRENT_PASSWORD_NOT_MATCH(400, "AUTH_010", "현재 비밀번호가 일치하지 않습니다."),
+  CURRENT_PASSWORD_NOT_MATCH(400, "AUTH_010", "현재 사용중인 비밀번호가 일치하지 않습니다."),
   PASSWORD_CHANGE_FAILED(500, "AUTH_011", "비밀번호 변경에 실패했습니다."),
   EMAIL_NOT_VERIFIED(400, "AUTH_012", "이메일 인증을 완료 후 회원가입 진행해주세요."),
   SOCIAL_ACCOUNT_ALREADY_IN_USE(400, "AUTH_013", "이미 사용중인 소셜 계정입니다."),
