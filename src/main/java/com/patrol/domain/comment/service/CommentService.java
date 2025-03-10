@@ -21,6 +21,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final NotificationService notificationService;
     private final LostFoundPostRepository lostFoundPostRepository;
+    private final NotificationService notificationService; // WebSocket service to send notificationss
 
     @Transactional
     public CommentResponseDto createComment(CommentRequestDto requestDto, Member author) {

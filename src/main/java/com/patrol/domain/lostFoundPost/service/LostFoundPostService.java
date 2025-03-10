@@ -8,8 +8,8 @@ import com.patrol.domain.animal.repository.AnimalRepository;
 import com.patrol.domain.animal.service.AnimalService;
 import com.patrol.domain.image.service.ImageEventProducer;
 import com.patrol.domain.image.service.ImageHandlerService;
+import com.patrol.domain.lostFoundPost.entity.AnimalType;
 import com.patrol.domain.lostFoundPost.entity.LostFoundPost;
-import com.patrol.domain.animal.enums.AnimalType;
 import com.patrol.domain.lostFoundPost.entity.PostStatus;
 import com.patrol.domain.lostFoundPost.repository.LostFoundPostRepository;
 import com.patrol.domain.image.entity.Image;
@@ -17,11 +17,10 @@ import com.patrol.domain.image.repository.ImageRepository;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.global.error.ErrorCode;
 import com.patrol.global.exception.CustomException;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -48,6 +47,8 @@ public class LostFoundPostService {
 
     @Transactional
     public LostFoundPostResponseDto createLostFoundPost(LostFoundPostRequestDto requestDto, Long petId, Member author, List<MultipartFile> images) {
+        log.info("📌 분실/발견 게시글 생성 시작: petId={}", petId);
+
         // Animal 조회 (petId가 null이면 null을 할당, 아니면 실제 Animal 객체 가져오기)
         Animal pet = null;
         if (requestDto.getPetId() != null) {
@@ -56,21 +57,18 @@ public class LostFoundPostService {
             pet.markAsLost();
         }
 
-        LostFoundPost lostFoundPost = new LostFoundPost(requestDto, author, pet);
+        AnimalType animalType = requestDto.getAnimalType() != null
+                ? AnimalType.valueOf(requestDto.getAnimalType())
+                : null;
 
-// Handle animalType logic (check pet's animalType or use lostFoundPost's animalType)
-        if (pet != null && pet.getAnimalType() != null) {
-            // pet의 animalType이 null이 아니면 그대로 설정
-            lostFoundPost.setAnimalType(pet.getAnimalType());
-        } else {
-            // requestDto의 animalType이 null이 아니고 "null" 문자열이 아닐 경우 설정
-            if (requestDto.getAnimalType() != null && !requestDto.getAnimalType().toString().equals("null")) {
-                lostFoundPost.setAnimalType(AnimalType.valueOf(requestDto.getAnimalType().toString())); // String을 Enum으로 변환
-            } else {
-                lostFoundPost.setAnimalType(null); // 명시적으로 null 설정
-            }
-        }
+// LostFoundPost 객체 생성 (pet이 null일 수 있음)
+        LostFoundPost lostFoundPost = new LostFoundPost(requestDto, author, pet, animalType);
 
+        System.out.println("Received petId: " + requestDto.getPetId());
+        System.out.println("📌 LostFoundPost created with pet: " + (lostFoundPost.getPet() != null ? lostFoundPost.getPet() : "null"));
+
+        // LostFoundPost 저장
+        log.info("분실/발견 게시글 생성 시작: petId={}", petId);
         lostFoundPostRepository.save(lostFoundPost);
         log.info("✅ 분실/발견 게시글 저장 완료: postId={}", lostFoundPost.getId());
 
@@ -135,29 +133,27 @@ public class LostFoundPostService {
     }
     @Transactional
     public void deleteLostFoundPost(Long postId, Member author) {
-        // 로깅을 위한 Logger 객체 생성
-        Logger logger = LoggerFactory.getLogger(getClass());
 
-        // 게시글 조회
         LostFoundPost lostFoundPost = lostFoundPostRepository.findById(postId)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
 
-        // 게시글 작성자 확인
         if (!lostFoundPost.getAuthor().equals(author)) {
             throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
         }
+        List<Image> images = imageRepository.findAllByFoundId(postId);
 
-        // 이미지 삭제 로직 제외 (아래 코드를 삭제하거나 주석 처리)
-        // 이미지를 삭제하지 않으므로 이 부분을 생략합니다.
-
-        // 게시글 삭제 (이미지 삭제와 상관없이 진행)
-        try {
-            lostFoundPostRepository.deleteById(postId);
-            logger.info("Post with ID {} deleted successfully", postId);
-        } catch (Exception e) {
-            // 게시글 삭제 오류 발생 시
-            logger.error("Error deleting post with ID {}: {}", postId, e.getMessage());
+        for (Image image : images) {
+            if (image.getAnimalId() != null) {
+                // 반려동물 이미지인 경우 foundId만 null로 설정
+                image.setFoundId(null);
+                imageRepository.save(image);
+            } else {
+                // 게시글 전용 이미지인 경우 삭제
+                imageHandlerService.deleteImage(image);
+            }
         }
+        // 게시글 삭제
+        lostFoundPostRepository.deleteById(postId);
     }
 
     @Transactional(readOnly = true)

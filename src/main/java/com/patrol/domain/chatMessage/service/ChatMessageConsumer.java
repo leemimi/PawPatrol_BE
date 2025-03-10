@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-//채팅 메시지 카프카에 연결
+
 @Service
 @RequiredArgsConstructor
 public class ChatMessageConsumer {
@@ -40,7 +40,7 @@ public class ChatMessageConsumer {
             objectMapper.registerModule(new JavaTimeModule());
             ResponseMessage message = objectMapper.readValue(messageJson, ResponseMessage.class);
 
-            fcmNotificationService.sendChatNotification(message, String.valueOf(message.getReceiver().getId()));
+            fcmNotificationService.sendChatNotification(message, message.getReceiver().getEmail());
         } catch (Exception e) {
             logger.error("Error processing notification: ", e);
         }

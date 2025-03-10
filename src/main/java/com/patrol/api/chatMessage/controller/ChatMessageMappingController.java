@@ -22,10 +22,8 @@ public class ChatMessageMappingController {
     @Operation(summary = "실시간 메시지 전송")
     public void sendMessage(@DestinationVariable("postId") Long postId,
                             @Payload RequestMessage requestMessage) {
-        ChatRoomType type = requestMessage.getType();
 
+        ChatRoomType type = requestMessage.getType();
         chatMessageService.writeMessage(postId, requestMessage, type);
     }
-
-
 }
