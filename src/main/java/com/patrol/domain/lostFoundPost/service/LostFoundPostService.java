@@ -194,6 +194,7 @@ public class LostFoundPostService {
         Page<LostFoundPost> postsPage = lostFoundPostRepository.findByAuthorId(member.getId(), pageable);
 
         return postsPage.map(post -> new MyPostsResponse(
+                post.getId(),
                 post.getContent(),
                 post.getStatus(),
                 post.getFindTime(),
@@ -212,6 +213,7 @@ public class LostFoundPostService {
         );
 
         return reportPosts.map(post -> new MyPostsResponse(
+                post.getId(),
                 post.getContent(),
                 post.getStatus(),
                 post.getFindTime(),
@@ -230,6 +232,7 @@ public class LostFoundPostService {
         );
 
         return witnessPosts.map(post -> new MyPostsResponse(
+                post.getId(),
                 post.getContent(),
                 post.getStatus(),
                 post.getFindTime(),

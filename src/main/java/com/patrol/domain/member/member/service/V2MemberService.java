@@ -47,7 +47,6 @@ public class V2MemberService {
     private final V2MemberRepository v2MemberRepository;
     private final PasswordEncoder passwordEncoder;
     private final FileStorageHandler fileStorageHandler;
-    private final StorageConfig storageConfig;
     private final LostFoundPostService lostFoundPostService;
     private final OAuthProviderRepository oAuthProviderRepository;
 
