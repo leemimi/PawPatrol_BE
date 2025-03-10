@@ -9,6 +9,7 @@ import com.patrol.domain.animalCase.enums.ContentType;
 import com.patrol.domain.animalCase.service.AnimalCaseService;
 import com.patrol.domain.animalCase.service.CaseHistoryService;
 import com.patrol.domain.member.member.entity.Member;
+import com.patrol.domain.member.member.enums.MemberRole;
 import com.patrol.domain.protection.entity.Protection;
 import com.patrol.domain.protection.service.ProtectionService;
 import com.patrol.global.error.ErrorCode;
@@ -111,13 +112,19 @@ public class AnimalCaseEventManager {
   // AnimalCaseCreated 이벤트 처리
   @Transactional
   public void handleAnimalCaseCreated(AnimalCaseCreatedEvent event) {
-    AnimalCase animalCase = animalCaseService.createNewCase(event.getToStatus(), event.getAnimal());
+    CaseStatus toStatus = event.getToStatus();
+    if (event.getMember().getRole() == MemberRole.ROLE_SHELTER) {
+      toStatus = CaseStatus.SHELTER_PROTECTING;
+    }
+
+    AnimalCase animalCase = animalCaseService.createNewCase(toStatus, event.getAnimal());
     animalCase.setCurrentFoster(event.getMember());
     animalCase.setTitle(event.getTitle());
     animalCase.setDescription(event.getDescription());
     animalCase.setLocation(event.getLocation());
+    animalCase.setShelter(event.getMember().getShelter());
 
-    if (event.getToStatus() == CaseStatus.MY_PET) {
+    if (toStatus == CaseStatus.MY_PET) {
       caseHistoryService.addMyPet(
           animalCase, ContentType.ANIMAL_CASE, animalCase.getId(), event.getMember().getId()
       );
