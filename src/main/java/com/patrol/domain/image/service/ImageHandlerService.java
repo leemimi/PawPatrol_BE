@@ -24,4 +24,6 @@ public interface ImageHandlerService {
     List<Image> uploadAndRegisterImages (List<MultipartFile> files, String folderPath, Long animalId, Long foundId, PostStatus status, AnimalType animalType);
 
     List<Image> uploadAndModifiedImages (List< MultipartFile> imageFile, String folderPath, Long animalId);
+
+    void registerImageAndSendEvent (String path, Long animalId, Long foundId, PostStatus status, AnimalType animalType);
 }
