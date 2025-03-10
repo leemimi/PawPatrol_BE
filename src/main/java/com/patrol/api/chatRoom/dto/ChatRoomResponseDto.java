@@ -1,9 +1,15 @@
 package com.patrol.api.chatRoom.dto;
 
+import com.patrol.api.PostResponseDto.PostResponseDto;
+import com.patrol.api.animalCase.dto.AnimalCaseResponseDto;
 import com.patrol.api.chatMessage.dto.ResponseMessage;
 import com.patrol.api.lostFoundPost.dto.LostFoundPostResponseDto;
 import com.patrol.api.member.member.dto.MemberResponseDto;
+import com.patrol.domain.Postable.Postable;
+import com.patrol.domain.animalCase.entity.AnimalCase;
 import com.patrol.domain.chatRoom.entity.ChatRoom;
+import com.patrol.domain.chatRoom.entity.ChatRoomType;
+import com.patrol.domain.lostFoundPost.entity.LostFoundPost;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -14,17 +20,29 @@ public class ChatRoomResponseDto {
     private String roomIdentifier;
     private MemberResponseDto member1;
     private MemberResponseDto member2;
-    private LostFoundPostResponseDto post;
-    private ResponseMessage lastMessage; // 가장 최근 메시지만 포함
-    private int unreadCount; // 읽지 않은 메시지 수
+    private PostResponseDto post;
+    private ResponseMessage lastMessage;
+    private int unreadCount;
+    private ChatRoomType type;
 
     public ChatRoomResponseDto(ChatRoom chatRoom, ResponseMessage lastMessage, int unreadCount) {
         this.id = chatRoom.getId();
         this.roomIdentifier = chatRoom.getRoomIdentifier();
         this.member1 = new MemberResponseDto(chatRoom.getMember1());
         this.member2 = new MemberResponseDto(chatRoom.getMember2());
-        this.post = new LostFoundPostResponseDto(chatRoom.getPost());
+
+        ChatRoomType roomType = chatRoom.getType();
+
+        if (roomType == ChatRoomType.LOSTFOUND) {
+            LostFoundPost lostFoundPost = chatRoom.getLostFoundPost();
+            this.post = new LostFoundPostResponseDto(lostFoundPost);
+        } else {
+            AnimalCase animalCase = chatRoom.getAnimalCase();
+            this.post = new AnimalCaseResponseDto(animalCase);
+        }
+
         this.lastMessage = lastMessage;
         this.unreadCount = unreadCount;
+        this.type=chatRoom.getType();
     }
 }

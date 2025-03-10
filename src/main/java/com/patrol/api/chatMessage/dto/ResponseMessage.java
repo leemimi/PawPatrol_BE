@@ -20,4 +20,6 @@ public class ResponseMessage {
     private LocalDateTime timestamp;
     private boolean isRead;
     private MessageType messageType;
+    private String roomIdentifier;
+
 }

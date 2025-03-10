@@ -27,16 +27,12 @@ import java.util.Optional;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final PasswordEncoder passwordEncoder;
 
 
     public List<Member> findAll() {
         return memberRepository.findAll();
     }
 
-//    public List<Member> findAllByStatus(MemberStatus status) {
-//        return memberRepository.findAllByStatus(status);
-//    }
 
     public Optional<Member> findById(Long id) {
         return memberRepository.findById(id);
@@ -46,16 +42,6 @@ public class MemberService {
         return memberRepository.findByEmail(email)
             .orElseThrow(() -> new ServiceException(ErrorCodes.MEMBER_NOT_FOUND));
     }
-
-
-//    @Transactional
-//    public Member updateInfo(Member member, MemberUpdateRequest memberUpdateRequest) {
-//        Member modifiedMember = memberRepository.findById(member.getId())
-//            .orElseThrow(() -> new ServiceException(ErrorCodes.MEMBER_NOT_FOUND));
-//
-//        modifiedMember.updateInfo(memberUpdateRequest);
-//        return modifiedMember;
-//    }
 
     @Transactional
     public void banMember(Long memberId) {
@@ -81,10 +67,4 @@ public class MemberService {
             .restore();
     }
 
-//    @Transactional
-//    public void addPassword(Long memberId, @NotBlank String password) {
-//        memberRepository.findById(memberId)
-//            .orElseThrow(() -> new ServiceException(ErrorCodes.MEMBER_NOT_FOUND))
-//            .setPassword(passwordEncoder.encode(password));
-//    }
 }
