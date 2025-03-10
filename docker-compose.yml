@@ -28,7 +28,7 @@ services:
           memory: "128MB"
 
   main-service:
-    image: ghcr.io/backendschoolplus3th/pawpatrol:latest
+    image: ghcr.io/backendschoolplus3th/pawpatrol_be:latest
     container_name: main-service
     restart: unless-stopped
     ports:
@@ -40,7 +40,10 @@ services:
       - AI_SERVICE_URL=http://43.201.55.18:8000
 
   ai-service:
-    image: ghcr.io/your-username/pawpatrol-ai-service:latest
+    build:
+      context: ./ai
+      dockerfile: Dockerfile
+    image: ghcr.io/backendschoolplus3th/pawpatrol-ai-service:latest
     container_name: ai-service
     restart: unless-stopped
     ports:
@@ -50,7 +53,7 @@ services:
     environment:
       - TZ=Asia/Seoul
     volumes:
-      - /dockerProjects/pawpatrol/ai/models:/app/models
+      - /dockerProjects/pawpatrol/PawPatrol_BE/ai/models:/app/models
 
 networks:
   backend_network:
