@@ -87,7 +87,10 @@ jobs:
           working-directory: /
           comment: Deploy
           command: |
-            export FIREBASE_CONFIG_PATH=${{ secrets.FIREBASE_CONFIG_PATH }}
+            export FIREBASE_CONFIG_PATH="/dockerProjects/pawpatrol/firebase-config.json"
+            echo "${{ secrets.FIREBASE_CONFIG_PATH }}" > $FIREBASE_CONFIG_PATH
+  
+            chmod 600 $FIREBASE_CONFIG_PATH
             mkdir -p /dockerProjects/pawpatrol
             curl -o /dockerProjects/pawpatrol/zero_downtime_deploy.py https://raw.githubusercontent.com/BackEndSchoolPlus3th/PawPatrol_BE/main/infraScript/zero_downtime_deploy.py
             chmod +x /dockerProjects/pawpatrol/zero_downtime_deploy.py
