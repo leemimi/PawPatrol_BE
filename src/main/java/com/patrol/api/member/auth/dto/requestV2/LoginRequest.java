@@ -1,6 +1,7 @@
 package com.patrol.api.member.auth.dto.requestV2;
 
 import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
 
 /**
  * packageName    : com.patrol.api.member.auth.dto.requestV2
@@ -13,6 +14,7 @@ import jakarta.validation.constraints.NotBlank;
  * -----------------------------------------------------------
  * 2025-02-19        kyd54       최초 생성
  */
+
 public record LoginRequest (
         @NotBlank
         String email,

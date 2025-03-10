@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-//알람 저장
+
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
 }
