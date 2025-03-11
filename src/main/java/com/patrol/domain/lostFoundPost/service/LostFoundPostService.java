@@ -49,7 +49,6 @@ public class LostFoundPostService {
 
     @Transactional
     public LostFoundPostResponseDto createLostFoundPost(LostFoundPostRequestDto requestDto, Long petId, Member author, List<MultipartFile> images) {
-        log.info("📌 분실/발견 게시글 생성 시작: petId={}", petId);
 
         // Animal 조회 (petId가 null이면 null을 할당, 아니면 실제 Animal 객체 가져오기)
         Animal pet = null;
@@ -65,14 +64,8 @@ public class LostFoundPostService {
 
 // LostFoundPost 객체 생성 (pet이 null일 수 있음)
         LostFoundPost lostFoundPost = new LostFoundPost(requestDto, author, pet, animalType);
-
-        System.out.println("Received petId: " + requestDto.getPetId());
-        System.out.println("📌 LostFoundPost created with pet: " + (lostFoundPost.getPet() != null ? lostFoundPost.getPet() : "null"));
-
         // LostFoundPost 저장
-        log.info("분실/발견 게시글 생성 시작: petId={}", petId);
         lostFoundPostRepository.save(lostFoundPost);
-        log.info("✅ 분실/발견 게시글 저장 완료: postId={}", lostFoundPost.getId());
 
         if (pet != null) {
             Image petImage = imageRepository.findByPath(pet.getImageUrl());
@@ -102,7 +95,6 @@ public class LostFoundPostService {
 
     @Transactional
     public LostFoundPostResponseDto updateLostFoundPost(Long postId, LostFoundPostResponseDto requestDto, List<MultipartFile> images, Member author) {
-        log.info("분실/발견 게시글 수정 시작: postId={}", postId);
 
         LostFoundPost lostFoundPost = lostFoundPostRepository.findById(postId)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
