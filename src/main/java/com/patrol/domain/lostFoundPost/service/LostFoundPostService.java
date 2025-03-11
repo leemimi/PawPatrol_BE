@@ -9,6 +9,7 @@ import com.patrol.domain.animal.repository.AnimalRepository;
 import com.patrol.domain.animal.service.AnimalService;
 import com.patrol.domain.image.service.ImageEventProducer;
 import com.patrol.domain.image.service.ImageHandlerService;
+import com.patrol.domain.image.service.ImageService;
 import com.patrol.domain.lostFoundPost.entity.LostFoundPost;
 import com.patrol.domain.lostFoundPost.entity.PostStatus;
 import com.patrol.domain.lostFoundPost.repository.LostFoundPostRepository;
@@ -40,6 +41,7 @@ public class LostFoundPostService {
     private final AnimalRepository animalRepository;
     private final ImageRepository imageRepository;
     private final ImageHandlerService imageHandlerService;
+    private final ImageService imageService;
     private final ImageEventProducer imageEventProducer;
 
     private static final String FOLDER_PATH = "lostfoundpost/";
@@ -73,7 +75,7 @@ public class LostFoundPostService {
         log.info("✅ 분실/발견 게시글 저장 완료: postId={}", lostFoundPost.getId());
 
         if (pet != null) {
-            Image petImage = imageRepository.findByAnimalId(petId);
+            Image petImage = imageRepository.findByPath(pet.getImageUrl());
             if (petImage != null) {
                 petImage.setFoundId(lostFoundPost.getId());
                 petImage.setStatus(lostFoundPost.getStatus());

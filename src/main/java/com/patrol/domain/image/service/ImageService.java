@@ -3,6 +3,9 @@ package com.patrol.domain.image.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.patrol.api.ai.AiClient;
+import com.patrol.domain.animal.entity.Animal;
+import com.patrol.domain.animal.repository.AnimalRepository;
+import com.patrol.domain.animalCase.entity.AnimalCase;
 import com.patrol.domain.comment.entity.Comment;
 import com.patrol.domain.comment.repository.CommentRepository;
 import com.patrol.domain.image.entity.Image;
@@ -37,6 +40,7 @@ import java.util.Map;
 public class ImageService {
 
     private final ImageRepository imageRepository;
+    private final AnimalRepository animalRepository;
     private final AiClient aiClient;
     private final ImageEventProducer imageEventProducer;
     private final FileStorageHandler fileStorageHandler;
@@ -152,13 +156,78 @@ public class ImageService {
         log.info("이미지 다중 삭제: 이미지 개수={}", images.size());
         images.forEach(image -> {
             try {
-                ncpObjectStorageService.delete(image.getPath());
-                imageRepository.delete(image);
-                log.info("이미지 삭제 완료: ID={}, Path={}", image.getId(), image.getPath());
+                String fullPath = image.getPath();
+                String key = extractKeyFromUrl(fullPath);
+                if (key != null) {
+                    ncpObjectStorageService.delete(key);
+                    imageRepository.delete(image);
+                    log.info("이미지 삭제 완료: ID={}, Path={}", image.getId(), fullPath);
+                } else {
+                    log.error("이미지 경로 추출 실패: ID={}, Path={}", image.getId(), fullPath);
+                }
             } catch (Exception e) {
                 log.error("이미지 삭제 실패: ID={}, Path={}, 에러={}", image.getId(), image.getPath(), e.getMessage());
             }
         });
+    }
+
+    @Transactional
+    public void deleteImage(String imageUrl, Long loginUserId) {
+        log.error(imageUrl);
+        Image image = imageRepository.findByPath(imageUrl);
+        if (image == null) {
+            throw new CustomException(ErrorCode.ENTITY_NOT_FOUND);
+        }
+
+        if (image.getAnimalId() != null) {
+            Animal animal = animalRepository.findById(image.getAnimalId())
+                .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
+
+            if (!animal.getOwner().getId().equals(loginUserId)) {
+                throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+            }
+
+        } else if (image.getFoundId() != null) {
+            LostFoundPost post = lostFoundPostRepository.findById(image.getFoundId())
+                .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
+
+            if (!post.getAuthor().getId().equals(loginUserId)) {
+                throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+            }
+        } else {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
+        // 이미지 삭제
+        try {
+            String fullPath = image.getPath();
+            String key = extractKeyFromUrl(fullPath);
+
+            if (key != null) {
+                ncpObjectStorageService.delete(key);
+                imageRepository.delete(image);
+                log.info("이미지 삭제 완료: ID={}, Path={}", image.getId(), fullPath);
+            } else {
+                log.error("이미지 경로 추출 실패: ID={}, Path={}", image.getId(), fullPath);
+                throw new CustomException(ErrorCode.FILE_DELETE_ERROR);
+            }
+        } catch (Exception e) {
+            log.error("이미지 삭제 실패: ID={}, Path={}, 에러={}", image.getId(), image.getPath(), e.getMessage());
+            throw new CustomException(ErrorCode.FILE_DELETE_ERROR);
+        }
+    }
+
+
+    private String extractKeyFromUrl(String url) {
+        try {
+            // 예: https://kr.object.ncloudstorage.com/paw-patrol/protection/sample27.jpg
+            // 에서 "protection/sample27.jpg" 추출
+            int bucketEndIndex = url.indexOf(bucketName) + bucketName.length() + 1; // +1은 '/' 문자 포함
+            return url.substring(bucketEndIndex);
+        } catch (Exception e) {
+            log.error("URL에서 키 추출 실패: {}, 에러: {}", url, e.getMessage());
+            return null;
+        }
     }
 
     @Transactional
@@ -341,4 +410,6 @@ public class ImageService {
     public List<Image> findAllByAnimalId(Long animalId) {
       return imageRepository.findAllByAnimalId(animalId);
     }
+
+
 }

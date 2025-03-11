@@ -17,5 +17,6 @@ public class LostFoundPostRequestDto {
     private String status; // 상태를 String으로 받음
     private Long petId;  // Add petId here
     private String animalType; // Add animalType here to capture the animal type
+    private Integer reward;
 
 }
