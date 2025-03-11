@@ -43,12 +43,6 @@ public class CustomAuthorizationRequestResolver implements OAuth2AuthorizationRe
     }
 
     String redirectUrl = request.getParameter("redirectUrl");
-    if (redirectUrl != null && !redirectUrl.isEmpty()) {
-      System.out.println("Redirect URL: " + redirectUrl);  // 로그 추가
-    } else {
-      System.out.println("No Redirect URL found");
-    }
-
 
     Map<String, Object> additionalParameters = new HashMap<>(authorizationRequest.getAdditionalParameters());
     if (redirectUrl != null && !redirectUrl.isEmpty()) {
