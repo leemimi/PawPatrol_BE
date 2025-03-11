@@ -26,6 +26,11 @@ RUN ./gradlew clean build -x test --no-daemon
 # 두 번째 스테이지: 실행 스테이지
 FROM ghcr.io/graalvm/jdk-community:21
 
+# 빌드 인자로 Firebase 설정 파일 경로 받기
+ARG FIREBASE_CONFIG_PATH
+# 환경 변수로 설정
+ENV FIREBASE_CONFIG_PATH=$FIREBASE_CONFIG_PATH
+
 # 작업 디렉토리 설정
 WORKDIR /app
 
