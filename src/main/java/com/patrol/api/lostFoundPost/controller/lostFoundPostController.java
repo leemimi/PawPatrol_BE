@@ -19,6 +19,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -31,7 +32,7 @@ public class lostFoundPostController {
     private final ObjectMapper objectMapper;
 
     @PostMapping
-    @Operation(summary = "제보 게시글 등록")
+    @Operation(summary = "제보 게시글 등록") //해결
     public RsData<LostFoundPostResponseDto> createStandaloneFindPost(
             @RequestParam("metadata") String metadataJson,
             @RequestParam(value = "images", required =false) List<MultipartFile> images,
@@ -39,6 +40,10 @@ public class lostFoundPostController {
             @LoginUser Member loginUser) {
         try {
             LostFoundPostRequestDto requestDto = objectMapper.readValue(metadataJson, LostFoundPostRequestDto.class);
+            // 이미지가 null일 경우 빈 리스트로 초기화
+            if (images == null) {
+                images = new ArrayList<>();
+            }
             LostFoundPostResponseDto responseDto = lostFoundPostService.createLostFoundPost(requestDto, petId, loginUser, images);
             return new RsData<>("200", "제보 게시글을 성공적으로 등록했습니다.", responseDto);
         } catch (JsonProcessingException e) {
