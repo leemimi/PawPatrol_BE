@@ -15,6 +15,7 @@ import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.service.V2MemberService;
 import com.patrol.domain.notification.service.FCMService;
 import com.patrol.global.error.ErrorCode;
+import com.patrol.global.exception.CustomException;
 import com.patrol.global.exceptions.ErrorCodes;
 import com.patrol.global.exceptions.ServiceException;
 import com.patrol.global.globalDto.GlobalResponse;
@@ -146,6 +147,11 @@ public class ApiV2AuthController {
     // 비밀번호 찾기 1단계 > 이메일 인증
     @PostMapping("/password/reset")
     public GlobalResponse<Map<String, String>> resetPassword(@Valid @RequestBody EmailRequest request) {
+
+        System.out.println("======================" + request.email());
+
+        System.out.println("=====================" + v2MemberService.validateNewEmail(request.email()));
+
         // 이미 가입된 회원이 있을 때 이메일 인증
         if (v2MemberService.validateNewEmail(request.email())) {
             emailService.sendVerificationEmail(request.email());
@@ -154,8 +160,10 @@ public class ApiV2AuthController {
             Map<String, String> response = v2AuthService.resetToken(request.email());
 
             return GlobalResponse.success(response);
+        } else {
+            throw  new CustomException(ErrorCode.EMAIL_NOT_FOUND);
         }
-        return GlobalResponse.error(ErrorCode.EMAIL_NOT_FOUND);
+
     }
 
     // 비밀번호 찾기 2단계 > 이메일 인증 코드 확인

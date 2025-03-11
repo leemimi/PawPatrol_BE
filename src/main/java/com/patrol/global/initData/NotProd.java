@@ -7,6 +7,7 @@ import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.animal.repository.AnimalRepository;
 import com.patrol.domain.animal.service.AnimalService;
 import com.patrol.domain.animalCase.service.AnimalCaseEventPublisher;
+import com.patrol.domain.image.service.ImageHandlerService;
 import com.patrol.domain.member.auth.service.AuthService;
 import com.patrol.domain.member.auth.service.V2AuthService;
 import com.patrol.domain.member.member.entity.Member;
@@ -34,7 +35,8 @@ public class NotProd {
       AnimalService animalService,
       AnimalCaseEventPublisher animalCaseEventPublisher,
       AnimalRepository animalRepository,
-      V2MemberRepository memberRepository
+      V2MemberRepository memberRepository,
+      ImageHandlerService imageHandlerService
 
   ) {
     return new ApplicationRunner() {
@@ -149,9 +151,10 @@ public class NotProd {
                   .feature(myPets.get(i).feature())
                   .build();
 
-          // Animal 객체 저장
           animalRepository.save(pet);
 
+          imageHandlerService.registerImage(myPetImageUrls.get(i), pet.getId(), null, null, pet.getAnimalType());
+          // Animal 객체 저장
         }
       }
     };
