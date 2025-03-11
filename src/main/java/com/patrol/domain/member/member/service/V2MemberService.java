@@ -183,21 +183,30 @@ public class V2MemberService {
         boolean isGoogleConnected = false;
         boolean isKakaoConnected = false;
 
-        if (authProvider.getNaver() != null) {
-            isNaverConnected = authProvider.getNaver().isConnected();
-        }
-        if (authProvider.getGoogle() != null) {
-            isGoogleConnected = authProvider.getGoogle().isConnected();
-        }
-        if (authProvider.getKakao() != null) {
-            isKakaoConnected = authProvider.getKakao().isConnected();
-        }
+        try {
+            if (authProvider.getNaver() != null) {
+                isNaverConnected = authProvider.getNaver().isConnected();
+            }
+            if (authProvider.getGoogle() != null) {
+                isGoogleConnected = authProvider.getGoogle().isConnected();
+            }
+            if (authProvider.getKakao() != null) {
+                isKakaoConnected = authProvider.getKakao().isConnected();
+            }
 
-        return OAuthConnectInfoResponse.builder()
-                .naver(isNaverConnected)
-                .google(isGoogleConnected)
-                .kakao(isKakaoConnected)
-                .build();
+            return OAuthConnectInfoResponse.builder()
+                    .naver(isNaverConnected)
+                    .google(isGoogleConnected)
+                    .kakao(isKakaoConnected)
+                    .build();
+        } catch (NullPointerException e) {
+            logger.info("OAuth2 연동 X");
+            return OAuthConnectInfoResponse.builder()
+                    .naver(isNaverConnected)
+                    .google(isGoogleConnected)
+                    .kakao(isKakaoConnected)
+                    .build();
+        }
     }
 
     // 회원 탈퇴

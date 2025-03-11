@@ -11,7 +11,7 @@ spring:
     virtual:
       enabled: true
   kafka:
-    bootstrap-servers: ${KAFKA_BROKER:43.201.55.18:19092}
+    bootstrap-servers: 43.201.55.18:19092
     consumer:
       group-id: image-embedding-processor
       auto-offset-reset: latest
