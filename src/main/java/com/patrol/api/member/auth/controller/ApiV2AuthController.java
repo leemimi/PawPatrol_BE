@@ -147,11 +147,6 @@ public class ApiV2AuthController {
     // 비밀번호 찾기 1단계 > 이메일 인증
     @PostMapping("/password/reset")
     public GlobalResponse<Map<String, String>> resetPassword(@Valid @RequestBody EmailRequest request) {
-
-        System.out.println("======================" + request.email());
-
-        System.out.println("=====================" + v2MemberService.validateNewEmail(request.email()));
-
         // 이미 가입된 회원이 있을 때 이메일 인증
         if (v2MemberService.validateNewEmail(request.email())) {
             emailService.sendVerificationEmail(request.email());
