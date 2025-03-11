@@ -106,7 +106,7 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
 ai:
-  service-url: ${AI_SERVICE_URL:http://43.201.55.18:8000}
+  service-url: http://223.130.161.144:8000
 
 app:
   upload:
