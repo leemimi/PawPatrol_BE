@@ -51,13 +51,14 @@ public class LostFoundPost extends BaseEntity implements Postable {
     private String lostTime;
     @Enumerated(EnumType.STRING)
     private PostStatus status;
+    private Integer reward;
 
     public LostFoundPost(LostFoundPostRequestDto requestDto, Member author) {
         this(requestDto);
         this.author = author;
     }
 
-    public LostFoundPost(LostFoundPostRequestDto requestDto, Member author, Animal pet,AnimalType animalType) {
+    public LostFoundPost(LostFoundPostRequestDto requestDto, Member author, Animal pet, AnimalType animalType) {
         this(requestDto);
         this.author = author;
         this.pet = pet;  // null로 전달되면 null로 유지됨
