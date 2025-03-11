@@ -36,9 +36,6 @@ public class LostFoundPostResponseDto implements PostResponseDto {
     private PetResponseDto pet;
     private List<ImageResponseDto> images;
     private String animalType;
-    //private Long petId;  // petId 추가
-    // Add petId to the ResponseDto
-    //private Long petId;
 
     public LostFoundPostResponseDto(LostFoundPost lostFoundPost) {
         this.id = lostFoundPost.getId();

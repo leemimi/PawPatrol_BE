@@ -286,6 +286,7 @@ public class AdoptionAnimalService {
     animal.setHealthCondition("YouTube 영상 참고");
     animal.setAnimalType("DOG".equalsIgnoreCase(row.getSpecies()) ? AnimalType.DOG : AnimalType.CAT);
     animal.setSize(calculateSize(row.getWeight()));
+    animal.setLost(false);
     return animal;
   }
 
@@ -305,6 +306,7 @@ public class AdoptionAnimalService {
         .registrationNo(row.getAnimalNo())
         .animalType("DOG".equalsIgnoreCase(row.getSpecies()) ? AnimalType.DOG : AnimalType.CAT)
         .size(calculateSize(row.getWeight()))
+        .isLost(false)
         .build();
   }
 

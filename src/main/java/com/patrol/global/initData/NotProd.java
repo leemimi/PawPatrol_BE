@@ -83,6 +83,7 @@ public class NotProd {
 
           Animal animal = animalService.registerWithImageUrl(animalRequest, imageUrl);
           animal.setName(name);
+          animal.setLost(false);
           animalList.add(animal);
 
           System.out.println("샘플 데이터 생성: " + animal.getName() +

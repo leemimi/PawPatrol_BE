@@ -13,7 +13,7 @@ spring:
   kafka:
     bootstrap-servers: ${KAFKA_BROKER:43.201.55.18:19092}
     consumer:
-      group-id: image-processor-group
+      group-id: image-embedding-processor
       auto-offset-reset: latest
     producer:
       retries: 3
@@ -113,6 +113,8 @@ app:
     dir: ./uploads  # 업로드 디렉토리 경로 설정
   similarity:
     threshold: 0.85
+aws:
+  disableIdleConnectionReaper: true
 
 #    org.hibernate.orm.jdbc.bind: TRACE
 #    org.hibernate.orm.jdbc.extract: TRACE
