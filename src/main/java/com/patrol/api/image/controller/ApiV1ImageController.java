@@ -27,5 +27,4 @@ public class ApiV1ImageController {
     imageService.deleteImage(imageUrl, loginUser.getId());
     return new RsData<>("200", "이미지가 성공적으로 삭제되었습니다.");
   }
-
 }

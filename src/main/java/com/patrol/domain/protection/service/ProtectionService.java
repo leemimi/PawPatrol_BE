@@ -246,8 +246,18 @@ public class ProtectionService {
     animal.setOwner(member);
     animalRepository.save(animal);
 
+    List<Image> imageList = new ArrayList<>();
+    if (request.animalImageUrls() != null && !request.animalImageUrls().isEmpty()) {
+      for (String imageUrl : request.animalImageUrls()) {
+        imageList.add(imageService.connectAnimal(imageUrl, animal.getId()));
+      }
+    }
+
     if (images != null && !images.isEmpty()) {
-      List<Image> imageList = imageService.uploadAnimalImages(images, animal.getId());
+      imageList.addAll(imageService.uploadAnimalImages(images, animal.getId()));
+    }
+
+    if (!imageList.isEmpty()) {
       animal.setImageUrl(imageList.getFirst().getPath());
     }
 
