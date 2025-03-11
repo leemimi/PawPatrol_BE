@@ -113,6 +113,8 @@ app:
     dir: ./uploads  # 업로드 디렉토리 경로 설정
   similarity:
     threshold: 0.85
+aws:
+  disableIdleConnectionReaper: true
 
 #    org.hibernate.orm.jdbc.bind: TRACE
 #    org.hibernate.orm.jdbc.extract: TRACE

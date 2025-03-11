@@ -85,30 +85,30 @@ public class ImageHandlerServiceImpl implements ImageHandlerService {
         List<Image> savedImages = new ArrayList<>();
         List<String> uploadedPaths = new ArrayList<>();
 
+        // 파일이 없을 경우 빈 리스트를 바로 반환
+        if (files == null || files.isEmpty()) {
+            return savedImages; // 빈 리스트 반환
+        }
+
         try {
             for (MultipartFile file : files) {
-                FileUploadResult uploadResult = fileStorageHandler.handleFileUpload(
-                        FileUploadRequest.builder()
-                                .folderPath(folderPath)
-                                .file(file)
-                                .build()
-                );
+                // 파일이 null이 아니고 유효한 경우에만 업로드 진행
+                if (file != null && !file.isEmpty()) {
+                    FileUploadResult uploadResult = fileStorageHandler.handleFileUpload(
+                            FileUploadRequest.builder()
+                                    .folderPath(folderPath)
+                                    .file(file)
+                                    .build()
+                    );
 
-                if (uploadResult != null) {
-                    String fileName = uploadResult.getFileName();
-                    uploadedPaths.add(fileName);
+                    if (uploadResult != null) {
+                        String fileName = uploadResult.getFileName();
+                        uploadedPaths.add(fileName);
 
-                    String imageUrl = createImageUrl(folderPath, fileName);
-
-                    // 기존 코드: 이미지 등록만 함
-                    // Image image = registerImage(imageUrl, animalId, foundId, status, animalType);
-
-                    // 수정된 코드: 이미지 등록 후 Kafka 이벤트 발송까지 함께 처리
-                    registerImageAndSendEvent(imageUrl, animalId, foundId, status, animalType);
-
-                    // 현재 이미지 정보를 가져와서 리스트에 추가
-                    Image image = imageRepository.findByPath(imageUrl);
-                    savedImages.add(image);
+                        String imageUrl = createImageUrl(folderPath, fileName);
+                        Image image = registerImage(imageUrl, animalId, foundId, status, animalType);
+                        savedImages.add(image);
+                    }
                 }
             }
             return savedImages;
@@ -117,9 +117,12 @@ public class ImageHandlerServiceImpl implements ImageHandlerService {
             for (String path : uploadedPaths) {
                 ncpObjectStorageService.delete(path);
             }
+            // 오류를 던지기 전에 적절한 예외를 처리
             throw new CustomException(ErrorCode.DATABASE_ERROR);
         }
     }
+
+
 
 
     @Override
