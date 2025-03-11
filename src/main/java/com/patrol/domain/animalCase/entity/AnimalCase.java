@@ -2,6 +2,7 @@ package com.patrol.domain.animalCase.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.patrol.domain.Postable.Postable;
 import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.animalCase.enums.CaseStatus;
 import com.patrol.domain.facility.entity.Shelter;
@@ -24,7 +25,7 @@ import java.util.List;
 @Getter
 @Setter
 @Table(name = "animal_cases")
-public class AnimalCase extends BaseEntity {
+public class AnimalCase extends BaseEntity implements Postable {
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
