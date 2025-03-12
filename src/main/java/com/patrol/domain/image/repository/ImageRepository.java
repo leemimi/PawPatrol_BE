@@ -29,6 +29,8 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
 
     Image findByPath (String path);
 
+    Image findFirstByPath(String path);
+
     @Query("SELECT i FROM Image i WHERE i.embedding IS NOT NULL OR i.features IS NOT NULL")
     List<Image> findByEmbeddingIsNotNullOrFeaturesIsNotNull();
 
