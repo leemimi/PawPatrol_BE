@@ -411,5 +411,13 @@ public class ImageService {
       return imageRepository.findAllByAnimalId(animalId);
     }
 
-
+    @Transactional
+    public Image connectAnimal(String imageUrl, Long animalId) {
+        Image image = imageRepository.findByPath(imageUrl);
+        if (image == null) {
+            throw new CustomException(ErrorCode.ENTITY_NOT_FOUND);
+        }
+        image.setAnimalId(animalId);
+        return image;
+    }
 }
