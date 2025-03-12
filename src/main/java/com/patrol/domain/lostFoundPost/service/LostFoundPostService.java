@@ -18,7 +18,6 @@ import com.patrol.domain.image.repository.ImageRepository;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.global.error.ErrorCode;
 import com.patrol.global.exception.CustomException;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -26,8 +25,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -250,4 +247,9 @@ public class LostFoundPostService {
         return LostFoundPostResponseDto.from(lostFoundPost);
     }
 
+    @Transactional(readOnly = true)
+    public Page<LostFoundPostResponseDto> getRewardPosts(PostStatus postStatus, Pageable pageable) {
+        Page<LostFoundPost> posts = lostFoundPostRepository.findByStatusAndRewardNotNull(postStatus, pageable);
+        return posts.map(LostFoundPostResponseDto::from);
+    }
 }
