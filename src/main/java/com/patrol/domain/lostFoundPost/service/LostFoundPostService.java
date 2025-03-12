@@ -68,7 +68,7 @@ public class LostFoundPostService {
         lostFoundPostRepository.save(lostFoundPost);
 
         if (pet != null) {
-            Image petImage = imageRepository.findByPath(pet.getImageUrl());
+            Image petImage = imageRepository.findFirstByPath(pet.getImageUrl());
             if (petImage != null) {
                 petImage.setFoundId(lostFoundPost.getId());
                 petImage.setStatus(lostFoundPost.getStatus());
