@@ -93,7 +93,7 @@ public class LostFoundPost extends BaseEntity implements Postable {
         }
 
         this.animalType = requestDto.getAnimalType() != null ? AnimalType.valueOf(requestDto.getAnimalType()) : null;  // Set animalType
-
+        this.reward = requestDto.getReward();
     }
 
     public LostFoundPost (LostFoundPostRequestDto requestDto, Member author, Animal pet) {
