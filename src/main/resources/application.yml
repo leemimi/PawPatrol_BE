@@ -11,7 +11,7 @@ spring:
     virtual:
       enabled: true
   kafka:
-    bootstrap-servers: 43.201.55.18:19092
+    bootstrap-servers: localhost:19092
     consumer:
       group-id: image-embedding-processor
       auto-offset-reset: latest
@@ -106,7 +106,7 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
 ai:
-  service-url: http://223.130.161.144:8000
+  service-url: http://localhost:8000/
 
 app:
   upload:
