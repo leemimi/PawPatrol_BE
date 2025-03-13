@@ -68,6 +68,22 @@ public interface AnimalCaseRepository extends JpaRepository<AnimalCase, Long> {
   @Query(value = "SELECT ac FROM AnimalCase ac " +
       "LEFT JOIN FETCH ac.animal " +
       "LEFT JOIN FETCH ac.currentFoster " +
+      "WHERE ac.shelter.id = :shelterId " +
+      "AND ac.status IN :statuses " +
+      "AND ac.deletedAt IS NULL",
+      countQuery = "SELECT COUNT(ac) FROM AnimalCase ac " +
+          "WHERE ac.shelter.id = :shelterId " +
+          "AND ac.status IN :statuses " +
+          "AND ac.deletedAt IS NULL")
+  Page<AnimalCase> findAllByShelterIdAndStatuses(
+      @Param("shelterId") Long shelterId,
+      @Param("statuses") Collection<CaseStatus> statuses,
+      Pageable pageable
+  );
+
+  @Query(value = "SELECT ac FROM AnimalCase ac " +
+      "LEFT JOIN FETCH ac.animal " +
+      "LEFT JOIN FETCH ac.currentFoster " +
       "WHERE ac.currentFoster = :currentFoster AND ac.deletedAt IS NULL",
       countQuery = "SELECT COUNT(ac) FROM AnimalCase ac WHERE ac.currentFoster = :currentFoster AND ac.deletedAt IS NULL")
   Page<AnimalCase> findAllByCurrentFoster(
