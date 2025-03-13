@@ -82,7 +82,7 @@ public class AiImageService {
         );
 
         Comment comment = Comment.builder()
-                .lostFoundPost(targetPost)
+                .lostFoundPost(findWantPost)
                 .author(memberRepository.getMemberById(4L))
                 .content(commentContent)
                 .build();
