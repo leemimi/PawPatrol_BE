@@ -15,10 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
-import retrofit2.http.HEAD;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +27,6 @@ public class ImageHandlerServiceImpl implements ImageHandlerService {
     private final ImageRepository imageRepository;
     private final FileStorageHandler fileStorageHandler;
     private final NcpObjectStorageService ncpObjectStorageService;
-    private final ImageEventProducer imageEventProducer;
 
     @Value("${ncp.storage.endpoint}")
     private String endPoint;
@@ -62,21 +58,6 @@ public class ImageHandlerServiceImpl implements ImageHandlerService {
                 savedImage.getId(), savedImage.getAnimalId(), savedImage.getFoundId(), savedImage.getPath());
 
         return savedImage;
-    }
-
-    @Override
-    public void registerImageAndSendEvent(String path, Long animalId, Long foundId, PostStatus status, AnimalType animalType) {
-        // 먼저 이미지 등록
-        Image image = registerImage(path, animalId, foundId, status, animalType);
-
-        // 트랜잭션 완료 후 Kafka 이벤트 전송 보장
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-                imageEventProducer.sendImageEvent(image.getId(), image.getPath());
-                log.info("✅ Kafka 이벤트 전송 요청 완료: imageId={}, path={}", image.getId(), image.getPath());
-            }
-        });
     }
 
     @Transactional
@@ -121,8 +102,6 @@ public class ImageHandlerServiceImpl implements ImageHandlerService {
             throw new CustomException(ErrorCode.DATABASE_ERROR);
         }
     }
-
-
 
 
     @Override

@@ -3,8 +3,6 @@ package com.patrol.domain.lostFoundPost.service;
 import com.patrol.api.lostFoundPost.dto.LostFoundPostRequestDto;
 import com.patrol.api.lostFoundPost.dto.LostFoundPostResponseDto;
 import com.patrol.api.member.auth.dto.MyPostsResponse;
-import com.patrol.domain.ai.AiImage;
-import com.patrol.domain.ai.AiImageRepository;
 import com.patrol.domain.ai.AiImageService;
 import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.animal.enums.AnimalType;
@@ -26,10 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,10 +36,7 @@ public class LostFoundPostService {
     private final ImageRepository imageRepository;
     private final ImageHandlerService imageHandlerService;
     private final AiImageService aiImageService;
-    private final ImageService imageService;
-
     private static final String FOLDER_PATH = "lostfoundpost/";
-    private final AnimalService animalService;
 
     @Transactional
     public LostFoundPostResponseDto createLostFoundPost(LostFoundPostRequestDto requestDto, Long petId, Member author, List<MultipartFile> images) {
@@ -66,13 +58,9 @@ public class LostFoundPostService {
         lostFoundPostRepository.save(lostFoundPost);
 
         if (pet != null) {
-            List<Image> petImages = imageRepository.findByPath(pet.getImageUrl());
-            if (!petImages.isEmpty()) {
-                for(Image petImage : petImages) {
-                    if (petImage.getStatus() != PostStatus.SIGHTED) { // SIGHTED 상태가 아닌 경우만 업데이트
-                        updateImageWithLostFoundPost(petImage, lostFoundPost);
-                    }
-                }
+            Image petImage = imageRepository.findByPath(pet.getImageUrl());
+            if (petImage.getStatus() != PostStatus.SIGHTED) {
+                updateImageWithLostFoundPost(petImage, lostFoundPost);
             }
         }
 

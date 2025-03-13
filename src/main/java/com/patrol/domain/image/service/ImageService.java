@@ -151,7 +151,7 @@ public class ImageService {
     @Transactional
     public void deleteImage(String imageUrl, Long loginUserId) {
         log.error(imageUrl);
-        Image image = (Image) imageRepository.findByPath(imageUrl);
+        Image image = imageRepository.findByPath(imageUrl);
         if (image == null) {
             throw new CustomException(ErrorCode.ENTITY_NOT_FOUND);
         }
@@ -213,7 +213,7 @@ public class ImageService {
 
     @Transactional
     public Image connectAnimal(String imageUrl, Long animalId) {
-        Image image = (Image) imageRepository.findByPath(imageUrl);
+        Image image = imageRepository.findByPath(imageUrl);
         if (image == null) {
             throw new CustomException(ErrorCode.ENTITY_NOT_FOUND);
         }
