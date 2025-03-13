@@ -5,7 +5,7 @@ import com.patrol.api.lostFoundPost.dto.LostFoundPostDetailResponseDto;
 import com.patrol.api.lostFoundPost.dto.LostFoundPostRequestDto;
 import com.patrol.api.lostFoundPost.dto.LostFoundPostResponseDto;
 import com.patrol.api.member.auth.dto.MyPostsResponse;
-import com.patrol.domain.ai.AiImageService;
+import com.patrol.domain.ai.service.AiImageService;
 import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.animal.enums.AnimalType;
 import com.patrol.domain.animal.repository.AnimalRepository;
