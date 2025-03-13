@@ -11,16 +11,17 @@ spring:
     virtual:
       enabled: true
   kafka:
-    bootstrap-servers: ${KAFKA_BROKER:43.201.55.18:19092}
+    bootstrap-servers: localhost:19092
     consumer:
-      group-id: image-processor-group
-      auto-offset-reset: latest
-    producer:
-      retries: 3
+      enable-auto-commit: false
+      auto-offset-reset: earliest
     listener:
       concurrency: 3
-
-
+    groups:
+      ai-group-id: ai-image-processor    # ✅ AI 이미지 전용 Consumer
+      notification-group-id: push-notification-group  # ✅ 알림 전용 Consumer
+      chat-notification-group-id: chat-notification-group  # ✅ 채팅 알림 전용 Consumer
+      chat-message-group-id: chat-message-group  # ✅ 실시간 채팅 메시지 전용 Consumer
   profiles:
     active: dev
     include: secret
