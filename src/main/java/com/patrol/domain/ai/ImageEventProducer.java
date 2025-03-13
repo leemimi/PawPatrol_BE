@@ -1,4 +1,4 @@
-package com.patrol.domain.image.service;
+package com.patrol.domain.ai;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -26,13 +26,13 @@ public class ImageEventProducer {
 
     public void sendImageEvent(Long imageId, String imageUrl) {
         try {
+            log.info("🔍🔍🔍🔍🔍 Producer에 도착!!!!!!!!!!!!!!!!!!!!!!!!!");
             Map<String, String> event = new HashMap<>();
             event.put("imageId", imageId.toString());
             event.put("imageUrl", imageUrl);
 
             String eventJson = objectMapper.writeValueAsString(event);
 
-            // Kafka 비동기 전송 (재귀적 재시도 로직 포함)
             sendWithRetry(imageId.toString(), eventJson, 0);
 
         } catch (Exception e) {

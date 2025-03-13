@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface LostFoundPostRepository extends JpaRepository<LostFoundPost, Long> {
@@ -63,4 +64,6 @@ public interface LostFoundPostRepository extends JpaRepository<LostFoundPost, Lo
 
     @Query("SELECT p FROM LostFoundPost p WHERE p.status = :status AND p.reward IS NOT NULL AND p.reward > 0 ORDER BY p.reward DESC")
     Page<LostFoundPost> findByStatusAndRewardNotNull(@Param("status") PostStatus status, Pageable pageable);
+    Optional<LostFoundPost> findById (Long foundId);
+
 }
