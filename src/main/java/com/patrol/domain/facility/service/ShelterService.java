@@ -9,6 +9,8 @@ import com.patrol.domain.facility.entity.OperatingHours;
 import com.patrol.domain.facility.entity.QShelter;
 import com.patrol.domain.facility.entity.Shelter;
 import com.patrol.domain.facility.repository.ShelterRepository;
+import com.patrol.global.error.ErrorCode;
+import com.patrol.global.exception.CustomException;
 import com.querydsl.core.BooleanBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -158,5 +160,10 @@ public class ShelterService implements FacilityService {
                     .tel(shelter.getTel())
                     .build())
             .collect(Collectors.toList());
+  }
+
+  public Shelter findById(Long shelterId) {
+    return shelterRepository.findById(shelterId)
+        .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
   }
 }

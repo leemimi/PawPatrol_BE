@@ -169,4 +169,17 @@ public class ApiV1ProtectionController {
     protectionService.rejectProtection(protectionId, loginUser.getId(), request.rejectReason());
     return new RsData<>("200", "임시보호/입양 신청 거절 완료");
   }
+
+
+  @GetMapping("/shelter-cases/{shelterId}")
+  @Operation(summary = "보호소의 보호 동물 목록")
+  public RsData<ShelterCasesResponse> getShelterAnimalCases(
+      @PathVariable Long shelterId,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size
+  ) {
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+    ShelterCasesResponse response = protectionService.findShelterAnimalCases(shelterId, pageable);
+    return new RsData<>("200", "보호 희망 동물의 목록 조회 성공", response);
+  }
 }
