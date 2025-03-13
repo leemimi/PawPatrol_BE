@@ -73,12 +73,12 @@ public class AiImageService {
         LostFoundPost findWantPost = lostFoundPostRepository.findById(newImage.getLostFoundPost().getId())
                 .orElseThrow(() -> new IllegalArgumentException("🚨 해당 이미지 ID에 대한 게시글을 찾을 수 없음: " + newImage.getId()));
 
-        String imageUrl = findWantPost.getImages().isEmpty() ? "이미지 없음" : findWantPost.getImages().get(0).getPath();
-        String postUrl = domain + "/PetPostDetail/" + findWantPost.getId();
+        String imageUrl = targetPost.getImages().isEmpty() ? "이미지 없음" : targetPost.getImages().get(0).getPath();
+        String postUrl = domain + "/PetPostDetail/" + targetPost.getId();
 
         String commentContent = String.format(
                 "🔍 유사한 목격 제보가 있습니다!\n\n내용: %s\n🖼️ 이미지: %s\n🔗 [게시글 보기](%s)\n📝 유사도: %.2f",
-                findWantPost.getContent(), imageUrl, postUrl, similarity
+                targetPost.getContent(), imageUrl, postUrl, similarity
         );
 
         Comment comment = Comment.builder()
