@@ -14,6 +14,7 @@ public record ShelterCasesResponse(
     String shelterTel,
     Double latitude,
     Double longitude,
+    Long shelterMemberId,
     OperatingHours operatingHours,
     Page<AnimalCaseListResponse> animalCases
 ) {
@@ -27,6 +28,7 @@ public record ShelterCasesResponse(
         .shelterTel(shelter.getTel())
         .latitude(shelter.getLatitude())
         .longitude(shelter.getLongitude())
+        .shelterMemberId(shelter.getShelterMember().getId())
         .operatingHours(shelter.getOperatingHours())
         .animalCases(animalCases)
         .build();
