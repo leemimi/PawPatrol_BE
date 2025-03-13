@@ -12,18 +12,20 @@ spring:
       enabled: true
   kafka:
     bootstrap-servers: localhost:19092
+#    bootstrap-servers: 43.201.55.18:19092,10.0.1.162:19092
     consumer:
-      group-id: image-embedding-processor
-      auto-offset-reset: latest
-    producer:
-      retries: 3
+      enable-auto-commit: false
+      auto-offset-reset: earliest
     listener:
       concurrency: 3
-
-
+    groups:
+      ai-group-id: ai-image-processor
+      notification-group-id: push-notification-group
+      chat-notification-group-id: chat-notification-group
   profiles:
     active: dev
     include: secret
+
 
   autoconfigure:
     exclude:
@@ -96,9 +98,13 @@ spring:
 logging:
   level:
     com.patrol: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.apache.kafka.clients: ERROR
-    kafka: ERROR
+    org.hibernate.SQL: ERROR  # SQL 로그는 너무 많으므로 ERROR 유지
+    org.apache.kafka.clients: ERROR  # Kafka 전체를 INFO로 조절
+    org.apache.kafka.clients.consumer: ERROR  # 필요한 경우만 DEBUG 유지
+    org.apache.kafka.clients.producer: ERROR
+    springframework:
+      kafka: ERROR  # Spring Kafka 로그도 INFO로 조절
+
 
 springdoc:
   api-docs:
@@ -106,7 +112,8 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
 ai:
-  service-url: http://localhost:8000/
+  service-url: http://localhost:8000
+#  service-url: http://223.130.161.144:8000
 
 app:
   upload:
