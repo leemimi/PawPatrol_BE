@@ -8,6 +8,8 @@ import com.patrol.domain.animal.enums.AnimalType;
 import com.patrol.domain.animalCase.entity.AnimalCase;
 import com.patrol.domain.animalCase.enums.CaseStatus;
 import com.patrol.domain.animalCase.repository.AnimalCaseRepository;
+import com.patrol.domain.facility.entity.Shelter;
+import com.patrol.domain.facility.service.ShelterService;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.global.error.ErrorCode;
 import com.patrol.global.exception.CustomException;
@@ -112,5 +114,13 @@ public class AnimalCaseService {
     return animalCaseRepository.countByCurrentFosterAndStatus(
         currentFoster, caseStatus
     );
+  }
+
+  public Page<AnimalCaseListResponse> findAllByShelterIdAndStatuses(
+      Long shelterId, List<CaseStatus> caseStatuses, Pageable pageable
+  ) {
+    return animalCaseRepository.findAllByShelterIdAndStatuses(
+        shelterId, caseStatuses, pageable
+    ).map(AnimalCaseListResponse::of);
   }
 }

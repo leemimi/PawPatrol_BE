@@ -51,8 +51,6 @@ public class lostFoundPostController {
         }
     }
 
-
-
     @PutMapping("/{postId}")
     @Operation(summary = "제보 게시글 수정")
     public RsData<LostFoundPostResponseDto> updateStandaloneFindPost(
@@ -103,7 +101,6 @@ public class lostFoundPostController {
         LostFoundPostDetailResponseDto responseDto = lostFoundPostService.getLostFoundPostById(postId);
         return new RsData<>("200", "제보 게시글을 성공적으로 조회했습니다.", responseDto);
     }
-
 
     @GetMapping("/finding")
     @Operation(summary = "실종 게시글 목록 조회")

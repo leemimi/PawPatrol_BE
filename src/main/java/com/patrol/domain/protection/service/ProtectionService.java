@@ -11,6 +11,8 @@ import com.patrol.domain.animalCase.entity.AnimalCase;
 import com.patrol.domain.animalCase.enums.CaseStatus;
 import com.patrol.domain.animalCase.service.AnimalCaseEventPublisher;
 import com.patrol.domain.animalCase.service.AnimalCaseService;
+import com.patrol.domain.facility.entity.Shelter;
+import com.patrol.domain.facility.service.ShelterService;
 import com.patrol.domain.image.entity.Image;
 import com.patrol.domain.image.service.ImageService;
 import com.patrol.domain.member.member.entity.Member;
@@ -21,8 +23,6 @@ import com.patrol.domain.protection.enums.ProtectionType;
 import com.patrol.domain.protection.repository.ProtectionRepository;
 import com.patrol.global.error.ErrorCode;
 import com.patrol.global.exception.CustomException;
-import com.patrol.global.storage.FileUploadRequest;
-import com.patrol.global.storage.FileUploadResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -46,6 +46,7 @@ public class ProtectionService {
   private final AnimalCaseEventPublisher animalCaseEventPublisher;
   private final AnimalRepository animalRepository;
   private final ImageService imageService;
+  private final ShelterService shelterService;
   private final ProtectionEventPublisher protectionEventPublisher;
 
 
@@ -87,6 +88,23 @@ public class ProtectionService {
         animalType, location, pageable
     );
   }
+
+
+  public ShelterCasesResponse findShelterAnimalCases(Long shelterId, Pageable pageable) {
+    Shelter shelter = shelterService.findById(shelterId);
+
+    Page<AnimalCaseListResponse> animalCases = animalCaseService.findAllByShelterIdAndStatuses(
+        shelter.getId(),
+        List.of(
+            CaseStatus.PROTECT_WAITING,
+            CaseStatus.TEMP_PROTECTING,
+            CaseStatus.SHELTER_PROTECTING
+        ),
+        pageable
+    );
+    return ShelterCasesResponse.of(shelter, animalCases);
+  }
+
 
   public Page<ProtectionResponse> findMyProtections(Long memberId, Pageable pageable) {
     return protectionRepository.findAllByApplicantIdAndDeletedAtIsNull(memberId, pageable)
@@ -147,7 +165,6 @@ public class ProtectionService {
       throw new CustomException(ErrorCode.ALREADY_FOSTER);
     }
 
-    // 기존에 수락 대기 신청이 있는지 확인
     boolean hasPendingApplication = protectionRepository
         .existsByApplicantIdAndAnimalCaseIdAndProtectionStatusAndDeletedAtIsNull(
             memberId, caseId, ProtectionStatus.PENDING);
@@ -199,7 +216,7 @@ public class ProtectionService {
       throw new CustomException(ErrorCode.INVALID_STATUS_CHANGE);
     }
 
-    if (!protection.getAnimalCase().getCurrentFoster().getId().equals(memberId)) { // 권한 검사
+    if (!protection.getAnimalCase().getCurrentFoster().getId().equals(memberId)) {
       throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
     }
 
@@ -226,11 +243,11 @@ public class ProtectionService {
       throw new CustomException(ErrorCode.INVALID_STATUS_CHANGE);
     }
 
-    if (protection.getAnimalCase().getStatus() != CaseStatus.PROTECT_WAITING) {  // 케이스 상태 검증
+    if (protection.getAnimalCase().getStatus() != CaseStatus.PROTECT_WAITING) {
       throw new CustomException(ErrorCode.INVALID_STATUS_CHANGE);
     }
 
-    if (!protection.getAnimalCase().getCurrentFoster().getId().equals(memberId)) { // 권한 검사
+    if (!protection.getAnimalCase().getCurrentFoster().getId().equals(memberId)) {
       throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
     }
 
@@ -307,4 +324,6 @@ public class ProtectionService {
     }
     animalCaseService.softDeleteAnimalCase(animalCase, memberId);
   }
+
+
 }
