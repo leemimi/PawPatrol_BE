@@ -120,7 +120,6 @@ public class LostFoundPostService {
     }
 
 
-
     @Transactional(readOnly = true)
     public Page<LostFoundPostResponseDto> getAllLostFoundPosts(Pageable pageable) {
         Page<LostFoundPost> findPosts = lostFoundPostRepository.findAll(pageable);
