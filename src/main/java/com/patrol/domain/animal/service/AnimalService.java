@@ -3,7 +3,6 @@ package com.patrol.domain.animal.service;
 import com.patrol.api.ai.AiClient;
 import com.patrol.api.animal.dto.MyPetListResponse;
 import com.patrol.api.animal.dto.PetResponseDto;
-import com.patrol.api.animal.dto.request.DeleteMyPetInfoRequest;
 import com.patrol.api.animal.dto.request.ModiPetInfoRequest;
 import com.patrol.api.member.member.dto.request.PetRegisterRequest;
 import com.patrol.domain.animal.entity.Animal;
