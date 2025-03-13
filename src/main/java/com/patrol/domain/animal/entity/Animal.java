@@ -10,6 +10,7 @@ import com.patrol.global.jpa.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,7 @@ import java.util.List;
 @Setter
 @Table(name = "animals")
 @SuperBuilder
+@EntityListeners(AuditingEntityListener.class)
 public class Animal extends BaseEntity {
     private String breed;   // 품종
 
@@ -56,7 +58,13 @@ public class Animal extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private AnimalType animalType;  // 고양이, 강아지 구분
 
+    private boolean isLost = false; // 실종여부
+
     @JsonIgnore
     @OneToMany(mappedBy = "animal", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AnimalCase> animalCases = new ArrayList<>();
+
+    public void markAsLost() {
+        this.isLost = true;
+    }
 }

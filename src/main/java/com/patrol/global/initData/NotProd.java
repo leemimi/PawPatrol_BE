@@ -7,6 +7,7 @@ import com.patrol.domain.animal.entity.Animal;
 import com.patrol.domain.animal.repository.AnimalRepository;
 import com.patrol.domain.animal.service.AnimalService;
 import com.patrol.domain.animalCase.service.AnimalCaseEventPublisher;
+import com.patrol.domain.image.service.ImageHandlerService;
 import com.patrol.domain.member.auth.service.AuthService;
 import com.patrol.domain.member.auth.service.V2AuthService;
 import com.patrol.domain.member.member.entity.Member;
@@ -34,7 +35,8 @@ public class NotProd {
       AnimalService animalService,
       AnimalCaseEventPublisher animalCaseEventPublisher,
       AnimalRepository animalRepository,
-      V2MemberRepository memberRepository
+      V2MemberRepository memberRepository,
+      ImageHandlerService imageHandlerService
 
   ) {
     return new ApplicationRunner() {
@@ -81,6 +83,7 @@ public class NotProd {
 
           Animal animal = animalService.registerWithImageUrl(animalRequest, imageUrl);
           animal.setName(name);
+          animal.setLost(false);
           animalList.add(animal);
 
           System.out.println("샘플 데이터 생성: " + animal.getName() +
@@ -131,8 +134,8 @@ public class NotProd {
 
 // 각 회원별로 2마리씩 반려동물 등록
         for (int i = 0; i < myPets.size(); i++) {
-          // 회원 할당 (0,1번 동물은 member1, 2,3번 동물은 member2, 4,5번 동물은 member3)
-          Member owner = (i < 2) ? member1 : (i < 4) ? member2 : member3;
+          // 회원 할당 (0,1,2번 동물은 member1, 3,4,5번 동물은 member2)
+          Member owner = (i < 3) ? member1 : (i < 6) ? member2 : member3;
 
           // Animal 객체 생성
           Animal pet = Animal.builder()
@@ -149,11 +152,10 @@ public class NotProd {
                   .feature(myPets.get(i).feature())
                   .build();
 
-          // Animal 객체 저장
           animalRepository.save(pet);
 
-          System.out.println("반려동물 등록: " + owner.getNickname() + "의 " +
-                  pet.getName() + " - " + pet.getBreed() + " (" + pet.getImageUrl() + ")");
+          imageHandlerService.registerImage(myPetImageUrls.get(i), pet.getId(), null, null, pet.getAnimalType());
+          // Animal 객체 저장
         }
       }
     };

@@ -23,7 +23,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CustomOAuth2AuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 
-  private final Logger logger = LoggerFactory.getLogger(CustomOAuth2AuthenticationSuccessHandler.class.getName());
   private final MemberService memberService;
   private final Rq rq;
 
@@ -39,7 +38,6 @@ public class CustomOAuth2AuthenticationSuccessHandler extends SavedRequestAwareA
 
     String redirectUrl = request.getParameter("state");
     if (redirectUrl != null && !redirectUrl.isEmpty()) {
-      logger.info("Redirecting to: " + redirectUrl);
     } else {
       throw new ServiceException(ErrorCodes.REDIRECT_URL_NOT_FOUND);
     }

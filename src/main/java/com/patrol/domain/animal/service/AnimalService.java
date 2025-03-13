@@ -2,7 +2,6 @@ package com.patrol.domain.animal.service;
 
 import com.patrol.api.animal.dto.MyPetListResponse;
 import com.patrol.api.animal.dto.PetResponseDto;
-import com.patrol.api.animal.dto.request.DeleteMyPetInfoRequest;
 import com.patrol.api.animal.dto.request.ModiPetInfoRequest;
 import com.patrol.api.member.member.dto.request.PetRegisterRequest;
 import com.patrol.domain.animal.entity.Animal;
@@ -64,8 +63,6 @@ public class AnimalService {
     @Transactional
     public void myPetRegister(Member member, PetRegisterRequest petRegisterRequest) {
         String folderPath = MEMBER_FOLDER_PATH_PREFIX + member.getId() + "/";
-
-        // 이미지 업로드
         List<Image> savedImages = imageHandlerService.uploadAndRegisterImages(
                 List.of(petRegisterRequest.imageFile()),
                 folderPath,
@@ -85,6 +82,8 @@ public class AnimalService {
             image.setAnimalId(savedAnimal.getId());
 
             animalCaseEventPublisher.createMyPet(member, animal);  // AnimalCase(상세화면) 생성
+
+            imageHandlerService.registerImage(imageUrl, savedAnimal.getId(), null, null, savedAnimal.getAnimalType());
         } else {
             throw new CustomException(ErrorCode.FILE_UPLOAD_ERROR);
         }
@@ -203,5 +202,4 @@ public class AnimalService {
                 .map(PetResponseDto::new)  // Convert Animal to PetResponseDto using the constructor
                 .collect(Collectors.toList());  // Collect them into a List
     }
-
 }
