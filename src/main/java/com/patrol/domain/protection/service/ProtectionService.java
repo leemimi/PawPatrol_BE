@@ -23,8 +23,6 @@ import com.patrol.domain.protection.enums.ProtectionType;
 import com.patrol.domain.protection.repository.ProtectionRepository;
 import com.patrol.global.error.ErrorCode;
 import com.patrol.global.exception.CustomException;
-import com.patrol.global.storage.FileUploadRequest;
-import com.patrol.global.storage.FileUploadResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -167,7 +165,6 @@ public class ProtectionService {
       throw new CustomException(ErrorCode.ALREADY_FOSTER);
     }
 
-    // 기존에 수락 대기 신청이 있는지 확인
     boolean hasPendingApplication = protectionRepository
         .existsByApplicantIdAndAnimalCaseIdAndProtectionStatusAndDeletedAtIsNull(
             memberId, caseId, ProtectionStatus.PENDING);
@@ -219,7 +216,7 @@ public class ProtectionService {
       throw new CustomException(ErrorCode.INVALID_STATUS_CHANGE);
     }
 
-    if (!protection.getAnimalCase().getCurrentFoster().getId().equals(memberId)) { // 권한 검사
+    if (!protection.getAnimalCase().getCurrentFoster().getId().equals(memberId)) {
       throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
     }
 
@@ -246,11 +243,11 @@ public class ProtectionService {
       throw new CustomException(ErrorCode.INVALID_STATUS_CHANGE);
     }
 
-    if (protection.getAnimalCase().getStatus() != CaseStatus.PROTECT_WAITING) {  // 케이스 상태 검증
+    if (protection.getAnimalCase().getStatus() != CaseStatus.PROTECT_WAITING) {
       throw new CustomException(ErrorCode.INVALID_STATUS_CHANGE);
     }
 
-    if (!protection.getAnimalCase().getCurrentFoster().getId().equals(memberId)) { // 권한 검사
+    if (!protection.getAnimalCase().getCurrentFoster().getId().equals(memberId)) {
       throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
     }
 

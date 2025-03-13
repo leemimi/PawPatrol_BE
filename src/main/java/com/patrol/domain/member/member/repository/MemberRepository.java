@@ -1,7 +1,5 @@
 package com.patrol.domain.member.member.repository;
 
-
-
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.enums.MemberStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,4 +23,6 @@ public interface MemberRepository extends JpaRepository<Member, Long>  {
 
     @Query("SELECT m FROM Member m JOIN m.oAuthProvider o WHERE o.naver.providerId = :providerId")
     Optional<Member> findByNaverProviderId(@Param("providerId") String providerId);
+
+    Member getMemberById (long id);
 }
