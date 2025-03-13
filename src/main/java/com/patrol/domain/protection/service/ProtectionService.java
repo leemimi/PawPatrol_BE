@@ -11,6 +11,8 @@ import com.patrol.domain.animalCase.entity.AnimalCase;
 import com.patrol.domain.animalCase.enums.CaseStatus;
 import com.patrol.domain.animalCase.service.AnimalCaseEventPublisher;
 import com.patrol.domain.animalCase.service.AnimalCaseService;
+import com.patrol.domain.facility.entity.Shelter;
+import com.patrol.domain.facility.service.ShelterService;
 import com.patrol.domain.image.entity.Image;
 import com.patrol.domain.image.service.ImageService;
 import com.patrol.domain.member.member.entity.Member;
@@ -44,6 +46,7 @@ public class ProtectionService {
   private final AnimalCaseEventPublisher animalCaseEventPublisher;
   private final AnimalRepository animalRepository;
   private final ImageService imageService;
+  private final ShelterService shelterService;
   private final ProtectionEventPublisher protectionEventPublisher;
 
 
@@ -85,6 +88,23 @@ public class ProtectionService {
         animalType, location, pageable
     );
   }
+
+
+  public ShelterCasesResponse findShelterAnimalCases(Long shelterId, Pageable pageable) {
+    Shelter shelter = shelterService.findById(shelterId);
+
+    Page<AnimalCaseListResponse> animalCases = animalCaseService.findAllByShelterIdAndStatuses(
+        shelter.getId(),
+        List.of(
+            CaseStatus.PROTECT_WAITING,
+            CaseStatus.TEMP_PROTECTING,
+            CaseStatus.SHELTER_PROTECTING
+        ),
+        pageable
+    );
+    return ShelterCasesResponse.of(shelter, animalCases);
+  }
+
 
   public Page<ProtectionResponse> findMyProtections(Long memberId, Pageable pageable) {
     return protectionRepository.findAllByApplicantIdAndDeletedAtIsNull(memberId, pageable)
@@ -304,4 +324,6 @@ public class ProtectionService {
     }
     animalCaseService.softDeleteAnimalCase(animalCase, memberId);
   }
+
+
 }
