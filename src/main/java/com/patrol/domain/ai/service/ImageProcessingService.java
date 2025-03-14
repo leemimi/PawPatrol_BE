@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @Slf4j
@@ -22,6 +24,7 @@ public class ImageProcessingService {
     private final PythonMLService pythonMLService;
     private final ObjectMapper objectMapper;
     private final AiImageService aiImageService;
+    private final AiClient aiClient;
 
     @Async
     public void asyncProcessImageFind(Long imageId) {
@@ -38,13 +41,25 @@ public class ImageProcessingService {
         try {
             log.info("📩 Kafka 메시지 수신 (유사도 분석 - {} 기준): imageId={}", targetStatus, imageId);
 
-            // 1️⃣ 분석할 새 이미지 조회
             AiImage newImage = aiImageRepository.findById(imageId)
                     .orElseThrow(() -> new RuntimeException("🚨 이미지 ID " + imageId + "를 찾을 수 없음"));
 
             if (newImage.getEmbedding() == null) {
-                log.warn("🚨 임베딩이 존재하지 않는 이미지입니다: imageId={}", imageId);
-                return; // 임베딩이 없는 경우 비교하지 않음
+                log.info("🚀 AI 분석 요청 (비동기) 시작: imageId={}", imageId);
+
+                CompletableFuture<Map<String, String>> embeddingFuture = aiClient.extractEmbeddingAsync(newImage.getPath());
+
+                embeddingFuture.thenAccept(embeddingData -> {
+                    if (embeddingData.containsKey("embedding")) {
+                        newImage.setEmbedding(embeddingData.get("embedding"));
+                        newImage.setFeatures(embeddingData.get("features"));
+                        aiImageRepository.save(newImage);
+                        log.info("✅ 임베딩 데이터 저장 완료 (비동기): imageId={}", imageId);
+                    } else {
+                        log.error("🚨 임베딩 추출 실패: imageId={}", imageId);
+                    }
+                });
+                return;
             }
 
             PostStatus oppositeStatus = (targetStatus == PostStatus.FINDING) ? PostStatus.SIGHTED : PostStatus.FINDING;
@@ -52,13 +67,11 @@ public class ImageProcessingService {
             List<AiImage> nearbyTargetImages = aiImageRepository.findNearbyAiImages(
                             newImage.getLostFoundPost().getLatitude(),
                             newImage.getLostFoundPost().getLongitude(),
-                            10.0 // 반경 10km 제한
+                            10.0
                     ).stream()
-                    .filter(img -> img.getStatus() == oppositeStatus)  // 반대되는 상태 필터링
+                    .filter(img -> img.getStatus() == oppositeStatus)
                     .toList();
 
-
-            // ✅ 임베딩이 완료된 이미지만 필터링
             nearbyTargetImages = nearbyTargetImages.stream()
                     .filter(img -> img.getEmbedding() != null)
                     .toList();

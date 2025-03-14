@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -18,6 +19,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -33,23 +37,33 @@ public class AiClient {
     private static final int MAX_RETRY = 3;
     private static final long RETRY_DELAY_MS = 2000;
 
+
+    private final Executor asyncExecutor = Executors.newVirtualThreadPerTaskExecutor();
+
+    public CompletableFuture<Map<String, String>> extractEmbeddingAsync(String imageUrl) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return extractEmbeddingAndFeaturesFromUrl(imageUrl);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }, asyncExecutor);
+    }
+
     public Map<String, String> extractEmbeddingAndFeaturesFromUrl(String imageUrl) throws IOException {
         log.info("🔍 AI 서비스 임베딩 추출 시작: {}", imageUrl);
 
-        // 이미지 URL 유효성 검증
         if (!isValidImageUrl(imageUrl)) {
             log.error("❌ 유효하지 않은 이미지 URL: {}", imageUrl);
             return Map.of("embedding", "[]", "features", "[]");
         }
 
-        // 이미지 전처리 - 이미지를 다운로드하고 새 임시 URL 생성
         String processedUrl = preprocessAndCreateTempUrl(imageUrl);
         if (processedUrl != null) {
             log.info("🔄 전처리된 이미지 URL 사용: {}", processedUrl);
-            imageUrl = processedUrl; // 전처리된 URL로 교체
+            imageUrl = processedUrl;
         }
 
-        // 재시도 로직으로 임베딩 추출 요청
         return sendUrlRequestWithRetry(imageUrl, 0);
     }
 
@@ -96,18 +110,9 @@ public class AiClient {
                     originalImage.getWidth(), originalImage.getHeight(),
                     originalImage.getType());
 
-            // 2. 이미지 전처리 - RGB 형식으로 변환
             BufferedImage processedImage = convertToRGB(originalImage);
 
-            // 3. 전처리된 이미지 활용 방법 결정
-            // 옵션 1: 임시 URL 생성 (S3, 네이버 클라우드 등 외부 스토리지 필요)
-            // 여기서는 구현하지 않고 원본 URL 사용
-
-            // 옵션 2: Base64 인코딩 이미지 URL 생성 (일부 서비스만 지원)
-            // String base64Url = createBase64ImageUrl(processedImage);
-            // return base64Url;
-
-            return null; // 실제 구현에서는 임시 스토리지에 업로드된 URL 반환
+            return null;
         } catch (Exception e) {
             log.error("❌ 이미지 전처리 실패: {}", e.getMessage(), e);
             return null;
@@ -115,12 +120,10 @@ public class AiClient {
     }
 
     private BufferedImage convertToRGB(BufferedImage original) {
-        // 이미지가 이미 RGB 형식이면 그대로 반환
         if (original.getType() == BufferedImage.TYPE_3BYTE_BGR) {
             return original;
         }
 
-        // RGB 형식으로 변환
         BufferedImage convertedImage = new BufferedImage(
                 original.getWidth(),
                 original.getHeight(),
@@ -134,7 +137,6 @@ public class AiClient {
         return convertedImage;
     }
 
-    // 재시도 로직이 포함된 URL 요청 메서드
     private Map<String, String> sendUrlRequestWithRetry(String imageUrl, int attempt) {
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -167,7 +169,6 @@ public class AiClient {
             } else {
                 log.error("❌ AI 서비스 응답 오류: {}", response.getStatusCode());
 
-                // 재시도
                 if (attempt < MAX_RETRY - 1) {
                     log.info("⏱️ 재시도 대기 중... ({}/{})", attempt + 1, MAX_RETRY);
                     TimeUnit.MILLISECONDS.sleep(RETRY_DELAY_MS);
@@ -179,7 +180,6 @@ public class AiClient {
         } catch (RestClientException e) {
             log.error("❌ AI 서비스 통신 오류: {}", e.getMessage());
 
-            // 재시도
             if (attempt < MAX_RETRY - 1) {
                 try {
                     log.info("⏱️ 통신 오류로 인한 재시도 대기 중... ({}/{})", attempt + 1, MAX_RETRY);
@@ -194,7 +194,6 @@ public class AiClient {
         } catch (Exception e) {
             log.error("❌ 예상치 못한 오류 발생: {}", e.getMessage(), e);
 
-            // 재시도
             if (attempt < MAX_RETRY - 1) {
                 try {
                     log.info("⏱️ 오류로 인한 재시도 대기 중... ({}/{})", attempt + 1, MAX_RETRY);
@@ -209,11 +208,9 @@ public class AiClient {
         }
     }
 
-    // 기존의 calculateSimilarity 메서드는 그대로 유지
     public double calculateSimilarity(
             List<Double> findingEmbedding, List<Double> findingFeatures,
             List<Double> sightedEmbedding, List<Double> sightedFeatures) {
-        // 입력 유효성 검사 추가
         if (findingEmbedding == null || findingEmbedding.isEmpty() ||
                 sightedEmbedding == null || sightedEmbedding.isEmpty()) {
             log.warn("⚠️ 빈 임베딩으로 유사도 계산 불가");

@@ -35,7 +35,6 @@ public class AiImageService {
     @Value("${app.domain}")
     private String domain;
 
-
     @Transactional
     public void saveAiImages (List<MultipartFile> images, Long foundId, LostFoundPost lostFoundPost) {
         Image firstImage = null;

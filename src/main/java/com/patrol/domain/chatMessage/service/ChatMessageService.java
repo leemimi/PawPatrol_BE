@@ -32,7 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -60,7 +59,6 @@ public class ChatMessageService {
     @Transactional
     public RsData<Object> writeMessage(Long postId, RequestMessage requestMessage, ChatRoomType type) {
         try {
-            // 입력값 유효성 검사
             if (requestMessage.getContent() == null || requestMessage.getContent().trim().isEmpty()) {
                 return new RsData<>("400", "채팅 메시지는 비어 있을 수 없습니다.");
             }
