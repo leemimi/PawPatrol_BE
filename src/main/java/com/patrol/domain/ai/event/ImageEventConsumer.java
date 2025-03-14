@@ -33,7 +33,8 @@ public class ImageEventConsumer {
 
     @KafkaListener(
             topics = "image-events",
-            groupId = "${spring.kafka.groups.ai-group-id}"
+            groupId = "${spring.kafka.groups.ai-group-id}",
+            concurrency = "3"
     )
     public void processImageEvent(@Payload String message) throws IOException {
         totalMessageSize += message.getBytes().length;
