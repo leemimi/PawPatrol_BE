@@ -20,6 +20,8 @@ import java.net.URL;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -36,17 +38,17 @@ public class AiClient {
     private static final long RETRY_DELAY_MS = 2000;
 
 
-    @Async
+    private final Executor asyncExecutor = Executors.newVirtualThreadPerTaskExecutor();
+
     public CompletableFuture<Map<String, String>> extractEmbeddingAsync(String imageUrl) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return extractEmbeddingAndFeaturesFromUrl(imageUrl);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-        });
+        }, asyncExecutor);
     }
-
 
     public Map<String, String> extractEmbeddingAndFeaturesFromUrl(String imageUrl) throws IOException {
         log.info("🔍 AI 서비스 임베딩 추출 시작: {}", imageUrl);

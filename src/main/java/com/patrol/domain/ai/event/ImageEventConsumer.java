@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,10 +32,12 @@ public class ImageEventConsumer {
     private static final AtomicLong totalProcessingTime = new AtomicLong(0);
     private static final AtomicLong messageCount = new AtomicLong(0);
 
+    @Async
     @KafkaListener(
             topics = "image-events",
             groupId = "${spring.kafka.groups.ai-group-id}",
-            concurrency = "3"
+            concurrency = "3",
+            containerFactory = "batchFactory"
     )
     public void processImageEvent(@Payload String message) throws IOException {
         totalMessageSize += message.getBytes().length;
