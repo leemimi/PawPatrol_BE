@@ -133,35 +133,35 @@ public class NotProd {
 //        }
 
 // ==================== 내 반려동물 데이터 추가 ====================
-// 반려동물 샘플 데이터 가져오기
-        List<PetRegisterRequest> myPets = SampleMyPetData.getSamplePets();
-        List<String> myPetImageUrls = SampleMyPetData.getSampleImageUrls();
-
-// 각 회원별로 2마리씩 반려동물 등록
-        for (int i = 0; i < myPets.size(); i++) {
-          // 회원 할당 (0,1,2번 동물은 member2, 3,4,5번 동물은 member3)
-          Member owner = (i < 3) ? member2 : (i < 6) ? member3 : member1;
-
-          // Animal 객체 생성
-          Animal pet = Animal.builder()
-                  .owner(owner)
-                  .name(myPets.get(i).name())
-                  .registrationNo(myPets.get(i).registrationNo())
-                  .animalType(myPets.get(i).animalType())
-                  .breed(myPets.get(i).breed())
-                  .gender(myPets.get(i).gender())
-                  .size(myPets.get(i).size())
-                  .imageUrl(myPetImageUrls.get(i))
-                  .estimatedAge(myPets.get(i).estimatedAge())
-                  .healthCondition(myPets.get(i).healthCondition())
-                  .feature(myPets.get(i).feature())
-                  .build();
-
-          animalRepository.save(pet);
-
-          imageHandlerService.registerImage(myPetImageUrls.get(i), pet.getId(), null, null, pet.getAnimalType());
-          // Animal 객체 저장
-        }
+//// 반려동물 샘플 데이터 가져오기
+//        List<PetRegisterRequest> myPets = SampleMyPetData.getSamplePets();
+//        List<String> myPetImageUrls = SampleMyPetData.getSampleImageUrls();
+//
+//// 각 회원별로 2마리씩 반려동물 등록
+//        for (int i = 0; i < myPets.size(); i++) {
+//          // 회원 할당 (0,1,2번 동물은 member2, 3,4,5번 동물은 member3)
+//          Member owner = (i < 3) ? member2 : (i < 6) ? member3 : member1;
+//
+//          // Animal 객체 생성
+//          Animal pet = Animal.builder()
+//                  .owner(owner)
+//                  .name(myPets.get(i).name())
+//                  .registrationNo(myPets.get(i).registrationNo())
+//                  .animalType(myPets.get(i).animalType())
+//                  .breed(myPets.get(i).breed())
+//                  .gender(myPets.get(i).gender())
+//                  .size(myPets.get(i).size())
+//                  .imageUrl(myPetImageUrls.get(i))
+//                  .estimatedAge(myPets.get(i).estimatedAge())
+//                  .healthCondition(myPets.get(i).healthCondition())
+//                  .feature(myPets.get(i).feature())
+//                  .build();
+//
+//          animalRepository.save(pet);
+//
+//          imageHandlerService.registerImage(myPetImageUrls.get(i), pet.getId(), null, null, pet.getAnimalType());
+//          // Animal 객체 저장
+//        }
       }
     };
   }
