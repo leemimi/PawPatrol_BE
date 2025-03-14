@@ -19,6 +19,7 @@ spring:
     consumer:
       group-id: image-processor-group
       auto-offset-reset: latest
+      max-poll-records: 10
     producer:
       retries: 3
     listener:
