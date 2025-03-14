@@ -53,7 +53,6 @@ public class KakaoApiService {
   // 도로명 주소로 좌표 검색
   public KakaoCoordinateResponse getCoordsFromAddress(String address) {
     if (address == null || address.trim().isEmpty()) {
-      System.out.println("주소가 비어있습니다.");
       return null;
     }
 
@@ -67,8 +66,6 @@ public class KakaoApiService {
             .encode(StandardCharsets.UTF_8) // 명시적 인코딩 추가
             .toUri();
 
-    System.out.println("Kakao API 요청 URL: " + uri);
-
     HttpEntity<?> entity = new HttpEntity<>(headers);
 
     try {
@@ -80,7 +77,6 @@ public class KakaoApiService {
       );
       return response.getBody();
     } catch (HttpClientErrorException e) {
-      System.out.println("Kakao API 호출 오류: " + e.getStatusCode() + " " + e.getResponseBodyAsString()); // ✅ 에러 본문 출력
       return null;
     }
   }

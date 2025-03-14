@@ -299,8 +299,6 @@ public class V2AuthService {
 
         Member savedMember = v2MemberRepository.save(member);
 
-        System.out.println("==========================" + request.address());
-
         // 주소로 좌표 정보 가져오기
         KakaoCoordinateResponse coordResponse = kakaoApiService.getCoordsFromAddress(request.address());
         Double longitude = null;
@@ -347,7 +345,6 @@ public class V2AuthService {
                     savedMember.setShelter(isShelter);
                     isShelter.setShelterMember(savedMember);
                 } else {
-                    logger.error("존재하지 않는 보호소 ID: {}", request.shelterId());
                     throw new CustomException(ErrorCode.SHELTER_NOT_FOUND);
                 }
             }
@@ -356,7 +353,6 @@ public class V2AuthService {
             throw e;
         }
 
-        logger.info("보호소 회원가입 완료: {}", savedMember.getEmail());
         return savedMember;
     }
 
