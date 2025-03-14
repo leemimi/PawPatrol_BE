@@ -2,6 +2,7 @@ package com.patrol.domain.ai.config;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
@@ -14,12 +15,13 @@ import java.util.Map;
 
 @Configuration
 public class KafkaConsumerConfig {
-
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String kafkaServer;
     @Bean
     public ConsumerFactory<String, String> consumerFactory() {
         Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092"); // Kafka 서버 주소
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "image-embedding-processor"); // Consumer 그룹 ID
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServer ); // Kafka 서버 주소
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "ai-group-id"); // Consumer 그룹 ID
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class); // ✅ 올바른 클래스 사용
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class); // ✅ 올바른 클래스 사용
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false); // 수동 커밋 활성화
