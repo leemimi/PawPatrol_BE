@@ -6,10 +6,7 @@ import com.patrol.domain.animalCase.entity.CaseHistory;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.global.jpa.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
@@ -22,6 +19,7 @@ import static jakarta.persistence.CascadeType.ALL;
 @NoArgsConstructor
 @SuperBuilder
 @Getter
+@Setter
 public abstract class Facility extends BaseEntity {
 
   private String name;

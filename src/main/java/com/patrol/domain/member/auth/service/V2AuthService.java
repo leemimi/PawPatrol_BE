@@ -1,10 +1,12 @@
 package com.patrol.domain.member.auth.service;
 
+import com.patrol.api.kakao.dto.KakaoCoordinateResponse;
 import com.patrol.api.member.auth.dto.SocialTokenInfo;
 import com.patrol.api.member.auth.dto.request.SignupRequest;
 import com.patrol.api.member.auth.dto.requestV2.*;
 import com.patrol.domain.facility.entity.Shelter;
 import com.patrol.domain.facility.repository.ShelterRepository;
+import com.patrol.domain.kakao.service.KakaoApiService;
 import com.patrol.domain.member.member.entity.Member;
 import com.patrol.domain.member.member.enums.MemberRole;
 import com.patrol.domain.member.member.enums.MemberStatus;
@@ -57,6 +59,7 @@ public class V2AuthService {
     private final RestTemplate restTemplate;
     private final Rq rq;
     private final ShelterRepository shelterRepository;
+    private final KakaoApiService kakaoApiService;
 
     private static final String KEY_PREFIX = "find:verification:";
 
@@ -286,7 +289,7 @@ public class V2AuthService {
                 .email(request.email())
                 .password(encodedPassword)
                 .nickname(request.nickname()) // 여기서 닉네임은 사업장명임
-                .address(request.address())
+                .address(request.address() + " " + request.detailAddress())
                 .status(MemberStatus.ACTIVE)
                 .role(MemberRole.ROLE_SHELTER) // 보호소 역할 부여
                 .loginType(ProviderType.SELF)
@@ -296,6 +299,20 @@ public class V2AuthService {
 
         Member savedMember = v2MemberRepository.save(member);
 
+        System.out.println("==========================" + request.address());
+
+        // 주소로 좌표 정보 가져오기
+        KakaoCoordinateResponse coordResponse = kakaoApiService.getCoordsFromAddress(request.address());
+        Double longitude = null;
+        Double latitude = null;
+
+        // 좌표 정보 추출
+        if (coordResponse != null && coordResponse.getDocuments() != null && !coordResponse.getDocuments().isEmpty()) {
+            KakaoCoordinateResponse.Document document = coordResponse.getDocuments().get(0);
+            longitude = Double.parseDouble(document.getX());  // 경도
+            latitude = Double.parseDouble(document.getY());   // 위도
+        }
+
         try {
             if (request.shelterId() == null) {
                 Shelter shelter = Shelter.builder()
@@ -303,6 +320,8 @@ public class V2AuthService {
                         .name(request.nickname()) // 기본 사업장명 설정
                         .owner(request.owner())
                         .address(request.address())
+                        .longitude(longitude)  // 경도 저장
+                        .latitude(latitude)    // 위도 저장
                         .businessRegistrationNumber(request.businessRegistrationNumber())
                         .build();
 
@@ -317,6 +336,12 @@ public class V2AuthService {
 
                     if (isShelter.getShelterMember() != null) {
                         throw new CustomException(ErrorCode.DUPLICATE_SHELTER_MEMBER);
+                    }
+
+                    // 좌표 정보 업데이트
+                    if (longitude != null && latitude != null) {
+                        isShelter.setLongitude(longitude);
+                        isShelter.setLatitude(latitude);
                     }
 
                     savedMember.setShelter(isShelter);
@@ -334,5 +359,6 @@ public class V2AuthService {
         logger.info("보호소 회원가입 완료: {}", savedMember.getEmail());
         return savedMember;
     }
+
 
 }

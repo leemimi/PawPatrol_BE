@@ -17,6 +17,7 @@ public record ShelterSignupRequest(
         String owner,
         String nickname,    // 회사명 들어감
         String address,
+        String detailAddress,
         String startDate,
         String businessRegistrationNumber,
         Long shelterId,
