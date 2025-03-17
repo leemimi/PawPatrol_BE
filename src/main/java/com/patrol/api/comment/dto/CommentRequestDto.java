@@ -10,4 +10,3 @@ public class CommentRequestDto {
 
     private Long lostFoundPostId;
 }
-//수정
