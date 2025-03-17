@@ -33,11 +33,8 @@ public class AiClient {
 
     @Value("${ai.service-url}")
     private String aiServiceUrl;
-
     private static final int MAX_RETRY = 3;
     private static final long RETRY_DELAY_MS = 2000;
-
-
     private final Executor asyncExecutor = Executors.newVirtualThreadPerTaskExecutor();
 
     public CompletableFuture<Map<String, String>> extractEmbeddingAsync(String imageUrl) {

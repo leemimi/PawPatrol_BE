@@ -35,10 +35,10 @@ import java.util.List;
 @SuperBuilder
 @EntityListeners(AuditingEntityListener.class)
 public class Animal extends BaseEntity {
-    private String breed;   // 품종
+    private String breed;
 
     @Enumerated(EnumType.STRING)
-    private AnimalGender gender;    // 성별
+    private AnimalGender gender;
 
     @Enumerated(EnumType.STRING)
     private AnimalSize size;

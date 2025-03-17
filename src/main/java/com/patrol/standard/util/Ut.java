@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.SneakyThrows;
-
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.Map;
@@ -54,7 +53,6 @@ public class Ut {
 
 
   public static class jwt {
-    // 엑세스 토큰 용도
     public static String toString(String secret, long expireSeconds, Map<String, Object> body) {
       Date issuedAt = new Date(); // 토큰 발행 시간
       Date expiration = new Date(issuedAt.getTime() + 1000L * expireSeconds); // 토큰 만료 시간
@@ -68,7 +66,6 @@ public class Ut {
       return jwt;
     }
 
-    // 소셜 로그인 연동 용도
     public static String toSocialString(String secret, long expireSeconds, String providerId, String loginType, String email) {
       Date issuedAt = new Date();
       Date expiration = new Date(issuedAt.getTime() + 1000L * expireSeconds);
