@@ -44,9 +44,6 @@ public class ImageEventConsumer {
         long startTime = System.currentTimeMillis();
         try {
             log.info("🔍 Consumer received message: {}", message);
-            log.info("🔍🔍🔍🔍🔍 Counsumer에 도착!!!!!!!!!!!!!!!!!!!!!!!!!");
-            log.error("🚨🚨🚨 KAFKA LISTENER ACTIVATED 🚨🚨🚨");
-            log.error("🚨 Received message: {}", message);
             Map<String, String> event = objectMapper.readValue(message, new TypeReference<>() {});
             Long imageId = Long.parseLong(event.get("imageId"));
             String imageUrl = event.get("imageUrl");
@@ -72,8 +69,8 @@ public class ImageEventConsumer {
         } catch (Exception e) {
             log.error("🚨 Kafka 메시지 처리 중 오류 발생: {}", e.getMessage(), e);
         }finally {
-            long endTime = System.currentTimeMillis();  // 종료 시간 측정
-            long processingTime = endTime - startTime; // 메시지 처리 시간 계산
+            long endTime = System.currentTimeMillis();
+            long processingTime = endTime - startTime;
 
             totalProcessingTime.addAndGet(processingTime);
             messageCount.incrementAndGet();
@@ -100,7 +97,6 @@ public class ImageEventConsumer {
             long avgProcessingTime = totalProcessingTime.get() / processedMessages;
             log.info("📊 평균 Kafka 메시지 처리 속도: {}ms", avgProcessingTime);
 
-            // 값 초기화
             totalProcessingTime.set(0);
             messageCount.set(0);
         } else {
