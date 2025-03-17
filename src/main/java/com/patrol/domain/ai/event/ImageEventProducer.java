@@ -20,13 +20,12 @@ public class ImageEventProducer {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
-    private static final String TOPIC = "image-events"; // Kafka 토픽 이름
-    private static final int MAX_RETRY_ATTEMPTS = 3;  // 최대 재시도 횟수
-    private static final long RETRY_DELAY_MS = 5000;  // 재시도 간격 5초
+    private static final String TOPIC = "image-events";
+    private static final int MAX_RETRY_ATTEMPTS = 3;
+    private static final long RETRY_DELAY_MS = 5000;
 
     public void sendImageEvent(Long imageId, String imageUrl) {
         try {
-            log.info("🔍🔍🔍🔍🔍 Producer에 도착!!!!!!!!!!!!!!!!!!!!!!!!!");
             Map<String, String> event = new HashMap<>();
             event.put("imageId", imageId.toString());
             event.put("imageUrl", imageUrl);
@@ -47,7 +46,6 @@ public class ImageEventProducer {
             if (ex != null) {
                 log.error("🚨 Kafka 이벤트 전송 실패 ({}차 시도): {}, 오류: {}", attempt + 1, message, ex.getMessage(), ex);
 
-                // 최대 재시도 횟수 이하인 경우, 일정 시간 후 재시도
                 if (attempt < MAX_RETRY_ATTEMPTS) {
                     try {
                         TimeUnit.MILLISECONDS.sleep(RETRY_DELAY_MS);
