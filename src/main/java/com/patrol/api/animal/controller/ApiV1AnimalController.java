@@ -41,23 +41,18 @@ public class ApiV1AnimalController {
     }
     @GetMapping("/list")
     public GlobalResponse<List<PetResponseDto>> getAllAnimals(@LoginUser Member member) {
-        // 로그인한 회원의 ID를 가져옵니다.
         Long loggedInUserId = member.getId();
 
-        // 로그인한 사용자가 등록한 동물 목록을 가져옵니다.
         List<PetResponseDto> allAnimals = animalService.getAllAnimals().stream()
                 .filter(animal -> animal.ownerId() != null && animal.ownerId().equals(loggedInUserId)) // null 체크 후 비교
                 .collect(Collectors.toList());
 
-        // 이미 LostFoundPost에 등록된 petId들을 조회합니다.
         List<Long> registeredPetIds = lostFoundPostRepository.findAllRegisteredPetIds();
 
-        // 등록된 petId를 제외한 동물만 필터링합니다.
         List<PetResponseDto> filteredAnimals = allAnimals.stream()
                 .filter(animal -> !registeredPetIds.contains(animal.id())) // 등록된 petId는 제외
                 .collect(Collectors.toList());
 
-        // 필터링된 동물 목록을 반환합니다.
         return GlobalResponse.success(filteredAnimals);
     }
 }
