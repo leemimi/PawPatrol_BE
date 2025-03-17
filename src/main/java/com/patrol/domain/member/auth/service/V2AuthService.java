@@ -49,7 +49,6 @@ public class V2AuthService {
     @Value("${custom.shelter.serviceKey}")
     private String serviceKey;
 
-    private final Logger logger = LoggerFactory.getLogger(V2AuthService.class.getName());
     private final V2MemberRepository v2MemberRepository;
     private final V2MemberService v2MemberService;
     private final OAuthService oAuthService;
@@ -65,7 +64,6 @@ public class V2AuthService {
 
     @Transactional
     public Member signUp(SignupRequest request) {
-        logger.info("회원가입 : signUp");
 
         if (v2MemberRepository.existsByEmail(request.email())) {
             throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
@@ -104,7 +102,6 @@ public class V2AuthService {
                                         String email,
                                         ProviderType loginType, String providerId
     ) {
-        logger.info("소셜 로그인 시, 사이트 자체 계정의 유무에 따른 처리_handleSocialLogin");
         Member connectedMember = oAuthService.findByProviderId(loginType, providerId);
         if (connectedMember != null) {
             connectedMember.setLoginType(loginType);
@@ -121,7 +118,6 @@ public class V2AuthService {
     @Transactional
     public void socialConnect(@Valid SocialConnectRequest socialConnectRequest,
                               String accessToken) {
-        logger.info("소셜 계정 연동_socialConnect");
         Map<String, Object> loginUser = authTokenService.payload(accessToken);
         SocialTokenInfo socialTokenInfo = authTokenService.parseSocialToken(socialConnectRequest.tempToken());
 
@@ -139,7 +135,6 @@ public class V2AuthService {
 
     // 엑세스 토큰 발행
     public String genAccessToken(Member member) {
-        logger.info("엑세스 토큰 발행_genAccessToken");
         return authTokenService.genAccessToken(member);
     }
 
@@ -155,7 +150,6 @@ public class V2AuthService {
     public void connectOAuthProvider(
             Member loginUser, ProviderType loginType, String providerId, String providerEmail
     ) {
-        logger.info("기존 계정에 소셜 계정 정보 연동 : connectOAuthProvider");
         Member connectedMember = oAuthService.findByProviderId(loginType, providerId);
         if (connectedMember != null) {
             throw new ServiceException(ErrorCodes.SOCIAL_ACCOUNT_ALREADY_IN_USE);
@@ -172,7 +166,6 @@ public class V2AuthService {
     // 비밀번호 재설정 과정에서 보안 토큰을 발행하여 권한이 없는 사용자가 우회하여 접근하지 못하게 막는 로직
     @Transactional
     public Map<String, String> resetToken(String email) {
-        logger.info("비밀번호 찾기, 토큰 발행 (aka. 비찾토발) : resetToken");
         String continuationToken = UUID.randomUUID().toString();
 
         _saveContinuationToken(email, continuationToken);
@@ -185,7 +178,6 @@ public class V2AuthService {
 
     @Transactional
     public void _saveContinuationToken(String email, String token) {
-        logger.info("인증 토큰 저장 (Redis : 10분 유효, (aka. 비찾토발)) : _saveContinuationToken");
         String key = KEY_PREFIX + email;
 
         redisTemplate.opsForValue()
@@ -222,7 +214,6 @@ public class V2AuthService {
     public void resetPassword(NewPasswordRequest request) {
         if (request.newPassword() != null
                 && request.confirmPassword() != null) {
-            logger.info("비밀번호찾기 - 비밀번호 재설정");
 
             Member member = v2MemberRepository.findByEmail(request.email()).orElseThrow();
 
@@ -267,13 +258,11 @@ public class V2AuthService {
                 throw new RuntimeException("API call failed with status: " + response.getStatusCodeValue());
             }
         } catch (HttpClientErrorException | HttpServerErrorException e) {
-            logger.error("API call failed. Status code: {}, Response body: {}", e.getRawStatusCode(), e.getResponseBodyAsString());
             throw new RuntimeException("API call failed", e);
         }
     }
 
     public Member shelterSignUp(ShelterSignupRequest request) {
-        logger.info("보호소 회원가입 : shelterSignUp");
 
         if (v2MemberRepository.existsByEmail(request.email())) {
             throw new CustomException(ErrorCode.DUPLICATE_EMAIL);

@@ -24,7 +24,6 @@ public class AdminService {
 
     @Transactional
     public Page<GetAllMembersResponse> getAllMembers(Pageable pageable) {
-        logger.info("모든 회원 정보 가져오기 : getAllMembers");
         Page<Member> members = v2MemberRepository.findByRoleNot(MemberRole.ROLE_ADMIN, pageable);
 
         return members.map(member -> GetAllMembersResponse.builder()
@@ -38,7 +37,6 @@ public class AdminService {
     }
 
     public void changeMemberStatus(ChangeMemberStatusRequest changeMemberStatusRequest) {
-        logger.info("회원 상태 변경 : changeMemberStatus");
         Member member = v2MemberRepository.findById(changeMemberStatusRequest.userId())
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
