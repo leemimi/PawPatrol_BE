@@ -56,7 +56,6 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
   private void _refreshAccessToken(Member member) {
     String newAccessToken = authService.genAccessToken(member);
     // 클라이언트에서 Header에 담에 서버로 보냄, 서버에서는 getHeader만 필요 setHeaderX
-//    rq.setHeader("Authorization", "Bearer " + member.getApiKey() + " " + newAccessToken);
     rq.setCookie("accessToken", newAccessToken);
   }
 

@@ -46,7 +46,6 @@ public class ApiSecurityConfig {
 
   @Bean
   public UrlBasedCorsConfigurationSource corsConfigurationSource() {
-    // 위에서 설정한 CORS 설정 코드와 동일
     CorsConfiguration corsConfig = new CorsConfiguration();
 
     corsConfig.addAllowedOrigin(AppConfig.getSiteFrontUrl());
@@ -67,7 +66,6 @@ public class ApiSecurityConfig {
     return source;
   }
 
-  // "/api/v1/auth/verification/email/send", "/api/v1/auth/verification/email/verify"
   @Bean
   SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
     http
