@@ -56,7 +56,6 @@ public class AdoptionAnimalService {
         .weekdayTime("09:00 - 18:00")
         .build();
 
-    // 마포센터
     if (shelterRepository.findByName("서울동물복지지원센터 - 마포센터").isEmpty()) {
       Shelter mapoCenter = Shelter.builder()
           .name("서울동물복지지원센터 - 마포센터")
@@ -82,7 +81,6 @@ public class AdoptionAnimalService {
       mapoCenter.setShelterMember(mapoMember);
     }
 
-    // 구로센터
     if (shelterRepository.findByName("서울동물복지지원센터 - 구로센터").isEmpty()) {
       Shelter guroCenter = Shelter.builder()
           .name("서울동물복지지원센터 - 구로센터")
@@ -108,14 +106,13 @@ public class AdoptionAnimalService {
       guroCenter.setShelterMember(guroMember);
     }
 
-    // 동대문센터
     if (shelterRepository.findByName("서울동물복지지원센터 - 동대문센터").isEmpty()) {
       Shelter dongdaemunCenter = Shelter.builder()
           .name("서울동물복지지원센터 - 동대문센터")
           .address("서울시 동대문구 무학로 201")
           .tel("02-921-2415")
-          .latitude(37.5751234567890)  // 실제 좌표로 수정 필요
-          .longitude(127.0301234567890)  // 실제 좌표로 수정 필요
+          .latitude(37.5751234567890)
+          .longitude(127.0301234567890)
           .operatingHours(operatingHours)
           .build();
       shelterRepository.save(dongdaemunCenter);
@@ -216,7 +213,6 @@ public class AdoptionAnimalService {
         for (AdoptionAnimalApiResponse.Row row : response.getTbAdpWaitAnimalView().getRow()) {
           log.info("동물 정보: ANIMAL_NO={}, NM={}", row.getAnimalNo(), row.getName());
 
-          // 1. 기존 동물 확인 (동물번호로 검색)
           if (row.getAnimalNo() == null || row.getAnimalNo().isEmpty()) {
             log.warn("동물번호(ANIMAL_NO)가 null이거나 비어있습니다. 해당 데이터는 건너뜁니다.");
             continue;
@@ -240,13 +236,10 @@ public class AdoptionAnimalService {
             animal.setImageUrl(representativeImage.getPath());
           }
 
-
-          // 2. Shelter 지정하기
           String centerName = getCenterNameFromAnimalName(row.getName());
           Shelter shelter = shelterRepository.findByName(centerName)
               .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
 
-          // 3. AnimalCase 생성 또는 업데이트
           AnimalCase existingAnimalCase = animalCaseService.findByAnimal(animal);
           if (existingAnimalCase != null) {
             updateAnimalCaseFromRow(existingAnimalCase, row);

@@ -53,7 +53,6 @@ public class AnimalCaseService {
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
   }
 
-  // 관리자용
   public AnimalCaseDetailDto findByIdWithHistories(Long caseId) {
     AnimalCase animalCase = animalCaseRepository.findByIdWithHistories(caseId)
         .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND));
@@ -74,7 +73,6 @@ public class AnimalCaseService {
     ).map(AnimalCaseListResponse::of);
   }
 
-  // 관리자용
   public Page<AnimalCaseListResponse> findAll(Pageable pageable) {
     return animalCaseRepository.findAll(pageable)
         .map(AnimalCaseListResponse::of);
