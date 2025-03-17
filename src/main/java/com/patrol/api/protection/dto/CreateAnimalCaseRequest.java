@@ -8,19 +8,19 @@ import com.patrol.domain.animal.enums.AnimalType;
 import java.util.List;
 
 public record CreateAnimalCaseRequest(
-    String title,             // 게시글 제목
-    String description,       // 게시글 상세 설명
-    String location,          // 지역
-    String breed,              // 품종
-    AnimalGender gender,       // 성별
-    AnimalSize size,          // 크기
-    String feature,           // 특징
-    String healthCondition,   // 건강상태
-    String name,              // 이름
-    String estimatedAge,      // 추정 나이
-    String registrationNo,    // 동물등록번호
-    AnimalType animalType,     // 동물 종류 (강아지/고양이)
-    List<String> animalImageUrls     // 제보 게시글 이미지 URL
+    String title,
+    String description,
+    String location,
+    String breed,
+    AnimalGender gender,
+    AnimalSize size,
+    String feature,
+    String healthCondition,
+    String name,
+    String estimatedAge,
+    String registrationNo,
+    AnimalType animalType,
+    List<String> animalImageUrls
 ) {
   public Animal toAnimal() {
     return Animal.builder()

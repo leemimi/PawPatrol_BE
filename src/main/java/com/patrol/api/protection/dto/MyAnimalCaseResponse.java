@@ -16,7 +16,7 @@ public record MyAnimalCaseResponse(
     CaseStatus caseStatus,
     LocalDateTime createdAt,
     List<PendingProtectionResponse> pendingProtections,
-    int pendingApplicationsCount  // 대기 중인 신청 수
+    int pendingApplicationsCount
 ) {
 
   public static MyAnimalCaseResponse of(
