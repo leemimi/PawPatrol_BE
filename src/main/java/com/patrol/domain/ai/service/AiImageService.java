@@ -40,9 +40,9 @@ public class AiImageService {
         Image firstImage = null;
 
         if (images != null && images.size() == 1) {
-            firstImage = imageRepository.findByFoundId(foundId); // 단일 이미지 조회
+            firstImage = imageRepository.findByFoundId(foundId);
         } else {
-            firstImage = imageRepository.findFirstByFoundIdOrderByCreatedAtAsc(foundId).orElse(null); // 가장 오래된 이미지 조회
+            firstImage = imageRepository.findFirstByFoundIdOrderByCreatedAtAsc(foundId).orElse(null);
         }
 
         AiImage aiImage = null;

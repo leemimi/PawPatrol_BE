@@ -66,14 +66,14 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
       default -> throw new ServiceException(ErrorCodes.INVALID_LOGIN_TYPE);
     }
 
-    String providerId = loginType + "__" + oauthId;   // ex) KAKAO__1234567890, 서비스 구분자와 oauthId를 합쳐서 고유한 ID값 생성
+    String providerId = loginType + "__" + oauthId;
 
     Long originMemberId = socialConnectService.getOrigin();
 
     // 사이트 자체 계정이 존재할 경우 isConnection = true
     boolean isConnection = originMemberId != null;
 
-    if (isConnection) { // 사이트 자체 계정이 존재
+    if (isConnection) {
       Member loginUser = memberService.findById(originMemberId)
           .orElseThrow(() -> new ServiceException(ErrorCodes.MEMBER_NOT_FOUND));
 
@@ -90,7 +90,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
           loginUser.getAuthorities()
       );
 
-    } else {  // 사이트 자체 계정이 존재 X
+    } else {
         Member member = v2AuthService.handleSocialLogin(
                 email, loginType, providerId
         );

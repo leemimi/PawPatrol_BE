@@ -46,7 +46,6 @@ import java.util.Map;
 @RequestMapping("/api/v2/auth")
 @RequiredArgsConstructor
 public class ApiV2AuthController {
-    private final Logger logger = LoggerFactory.getLogger(ApiV2AuthController.class.getName());
     private final V2AuthService v2AuthService;
     private final V2MemberService v2MemberService;
     private final EmailService emailService;
@@ -73,7 +72,6 @@ public class ApiV2AuthController {
     @PostMapping("/email/verification-code")
     public GlobalResponse<Void> sendVerificationEmail(@Valid @RequestBody EmailRequest request) {
 
-        // 이미 가입된 회원이 없을 때 가입 가능
         if (!v2MemberService.validateNewEmail(request.email())) {
             emailService.sendVerificationEmail(request.email());
             return GlobalResponse.success();
@@ -90,24 +88,20 @@ public class ApiV2AuthController {
         return GlobalResponse.success();
     }
 
-    // 로그인
     @PostMapping("/login")
     public GlobalResponse<String> login(@Valid @RequestBody LoginRequest loginRequest) {
-        logger.info("로그인");
         fcmService.saveToken(loginRequest);
         return GlobalResponse.success(v2AuthService.login(loginRequest));
     }
 
-    // 로그아웃
     @PostMapping("/logout")
     public GlobalResponse<String> logout() {
         rq.deleteCookie("accessToken");
         rq.deleteCookie("apiKey");
-        logger.info("로그아웃");
         return GlobalResponse.success();
     }
 
-    // 현재 로그인 사용자 정보 조회, 로그인 상태로 바꾸는데 씀
+    // 현재 로그인 사용자 정보 조회
     @GetMapping("/me")
     public GlobalResponse<LoginUserInfoResponse> loginUserInfo(@LoginUser Member member) {
 
@@ -125,17 +119,15 @@ public class ApiV2AuthController {
     @PostMapping("/connect-social")
     public GlobalResponse<Void> socialConnect(
             @Valid @RequestBody SocialConnectRequest socialConnectRequest) {
-            // 로그인 시도
+
             Member member = v2MemberService.getMember(socialConnectRequest.email());
 
-            // 비밀번호 검증 로직
             if (!passwordEncoder.matches(socialConnectRequest.password(), member.getPassword())) {
                 throw new ServiceException(ErrorCodes.INVALID_PASSWORD);
             }
 
             String accessToken = rq.makeAuthCookies(member);
 
-            // 로그인 성공 시 소셜 계정 연동
             if (accessToken != null) {
                 v2AuthService.socialConnect(socialConnectRequest, accessToken);
                 return GlobalResponse.success();
@@ -147,11 +139,10 @@ public class ApiV2AuthController {
     // 비밀번호 찾기 1단계 > 이메일 인증
     @PostMapping("/password/reset")
     public GlobalResponse<Map<String, String>> resetPassword(@Valid @RequestBody EmailRequest request) {
-        // 이미 가입된 회원이 있을 때 이메일 인증
         if (v2MemberService.validateNewEmail(request.email())) {
             emailService.sendVerificationEmail(request.email());
 
-            // 토큰 생성, 저장, 반환 (Redis에 저장하여 나중에 검증)\
+            // 토큰 생성, 저장, 반환 (Redis에 저장하여 나중에 검증)
             Map<String, String> response = v2AuthService.resetToken(request.email());
 
             return GlobalResponse.success(response);
@@ -166,7 +157,6 @@ public class ApiV2AuthController {
     public GlobalResponse<Map<String, String>> verifyResetCode(
             @Valid @RequestBody VerifyResetCodeRequest request) {
 
-        // 토큰 유효성 검증
         boolean isValidToken = v2AuthService._validateContinuationToken(
                 request.email(),
                 request.continuationToken()
@@ -176,7 +166,6 @@ public class ApiV2AuthController {
             return GlobalResponse.error(ErrorCode.VERIFICATION_NOT_FOUND);
         }
 
-        // 인증 코드 검증
         boolean isValidCode = emailService.verifyCode(
                 request.email(),
                 request.verificationCode()
@@ -186,7 +175,7 @@ public class ApiV2AuthController {
             return GlobalResponse.error(ErrorCode.VERIFICATION_NOT_FOUND);
         }
 
-        // 토큰 생성, 저장, 반환 (Redis에 저장하여 나중에 검증)\
+        // 토큰 생성, 저장, 반환 (Redis에 저장하여 나중에 검증)
         Map<String, String> response = v2AuthService.resetToken(request.email());
 
         return GlobalResponse.success(response);
@@ -197,7 +186,6 @@ public class ApiV2AuthController {
     public GlobalResponse<Void> setNewPassword(
             @Valid @RequestBody NewPasswordRequest request) {
 
-        // 토큰 유효성 검증
         boolean isValidToken = v2AuthService._validateContinuationToken(
                 request.email(),
                 request.continuationToken()
@@ -207,10 +195,8 @@ public class ApiV2AuthController {
             return GlobalResponse.error(ErrorCode.VERIFICATION_NOT_FOUND);
         }
 
-        // 비밀번호 변경 처리
         v2AuthService.resetPassword(request);
 
-        // 사용한 토큰 삭제
         v2AuthService.deleteToken(request.email());
 
         return GlobalResponse.success();

@@ -103,7 +103,6 @@ public class AnimalCaseEventManager {
   }
 
 
-  // AnimalCaseCreated 이벤트 처리
   @Transactional
   public void handleAnimalCaseCreated(AnimalCaseCreatedEvent event) {
     CaseStatus toStatus = event.getToStatus();
